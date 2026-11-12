@@ -1,0 +1,116 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'data/food_repository.dart';
+import 'l10n/copy_service.dart';
+import 'theme/icon_service.dart';
+import 'notifications/notification_service.dart';
+import 'providers/app_navigation.dart';
+import 'providers/detail_layout_controller.dart';
+import 'providers/home_controller.dart';
+import 'providers/library_controller.dart';
+import 'providers/notification_controller.dart';
+import 'providers/settings_controller.dart';
+import 'screens/root_shell.dart';
+import 'theme/app_backdrop.dart';
+import 'theme/app_theme.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Preferenze e database vengono caricati prima del primo frame (lo
+  // splash nativo resta visibile intanto): così ogni schermata, comprese
+  // quelle aperte con Navigator.push, trova i dati già pronti.
+  final results = await Future.wait([
+    SharedPreferences.getInstance(),
+    FoodRepository.load(),
+    NotificationService.instance.init(),
+    CopyService.load(),
+    IconService.load(),
+  ]);
+  final launch = await NotificationService.instance.launchResponse();
+  runApp(PeakSeasonApp(
+    prefs: results[0] as SharedPreferences,
+    database: results[1] as FoodDatabase,
+    launchPayload: launch?.payload,
+  ));
+}
+
+class PeakSeasonApp extends StatelessWidget {
+  const PeakSeasonApp({
+    super.key,
+    required this.prefs,
+    required this.database,
+    this.now,
+    this.launchPayload,
+  });
+
+  final SharedPreferences prefs;
+  final FoodDatabase database;
+
+  /// Data "oggi" iniettabile per test e anteprime.
+  final DateTime? now;
+
+  /// Payload della notifica che ha aperto l'app, se c'è.
+  final String? launchPayload;
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        Provider<FoodDatabase>.value(value: database),
+        ChangeNotifierProvider(create: (_) => AppNavigation()),
+        ChangeNotifierProvider(create: (_) => SettingsController(prefs)),
+        ChangeNotifierProvider(create: (_) => LibraryController(prefs)),
+        ChangeNotifierProvider(create: (_) => HomeController(prefs, now: now)),
+        ChangeNotifierProvider(create: (_) => DetailLayoutController(prefs)),
+        ChangeNotifierProvider(
+          lazy: false,
+          create: (ctx) {
+            final c = NotificationController(
+              prefs: prefs,
+              db: database,
+              settings: ctx.read<SettingsController>(),
+              library: ctx.read<LibraryController>(),
+              navigation: ctx.read<AppNavigation>(),
+              clock: now == null ? null : () => now!,
+            );
+            if (launchPayload != null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) => c.openPayload(launchPayload));
+            }
+            return c;
+          },
+        ),
+      ],
+      child: Consumer<SettingsController>(
+        builder: (context, settings, _) => MaterialApp(
+          title: 'Peak Season',
+          debugShowCheckedModeBanner: false,
+          navigatorKey: context.read<AppNavigation>().navigatorKey,
+          theme: AppTheme.light(frost: settings.frost),
+          darkTheme: AppTheme.dark(frost: settings.frost),
+          themeMode: settings.themeMode,
+          locale: settings.locale,
+          supportedLocales: const [Locale('it'), Locale('en')],
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          // Su tablet e schermi larghi il contenuto resta una colonna centrata
+          // e proporzionata invece di allargarsi a tutto schermo.
+          builder: (context, child) => AppBackdrop(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 640),
+                child: child,
+              ),
+            ),
+          ),
+          home: const AppBackdrop(child: RootShell()),
+        ),
+      ),
+    );
+  }
+}
