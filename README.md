@@ -1,156 +1,156 @@
-# Peak Season – App della frutta e verdura di stagione
+# Peak Season – Seasonal Fruit & Vegetable App
 
-**Peak Season** ti dice cosa è di stagione **nella tua zona, questo mese**, quando un prodotto è al **picco**, come sceglierlo, come conservarlo e quanto pesa sull'ambiente. L'app funziona **interamente offline**, in **italiano o inglese**, ed è costruita sul database *Peak Season – Database della frutta e verdura di stagione* ([peak-season-database](https://github.com/NunzioLangiulli/peak-season-database)): 153 prodotti, 46 fonti ufficiali e nessun dato inventato.
+**Peak Season** tells you what is in season **in your area, this month**, when a product is at its **peak**, how to choose it, how to store it and what its environmental footprint is. The app works **fully offline**, in **English or Italian**, and is built on the *Peak Season – Seasonal Fruit & Vegetable Database* ([peak-season-database](https://github.com/NunzioLangiulli/peak-season-database)): 153 products, 46 official sources, no invented data.
 
-App Flutter per Android (iOS previsto in seguito). **Versione attuale: 1.0.0 beta.**
+Flutter app for Android (iOS planned). **Current version: 1.0.0 beta.**
 
 ---
 
-## Funzionalità
+## Features
 
-### Home: cosa è di stagione adesso
+### Home: what is in season right now
 
-- **Selettore del mese**, che parte da oggi, e un riepilogo veloce ("12 al picco della stagione · 38 di stagione").
-- **Tre viste:**
-  - **Griglia** con foto e stato stagionale;
-  - **Lista** compatta, con badge di climaterico/non climaterico e impronta di carbonio e idrica;
-  - **Calendario 12 Mesi**: tutti i prodotti a colpo d'occhio, con il mese scelto al centro.
-- **Ricerca** per nome (italiano, inglese, sinonimi).
-- **Categorie** a selezione multipla: Tutti, Frutta, Verdura, Altro (erbe e spezie, funghi, cereali).
-- **Filtri avanzati:** stato stagionale nel mese scelto, solo DOP/IGP, solo preferiti, solo lista della spesa, prodotti nascosti.
-- **Ordinamento per stagionalità**: prima ciò che è al picco, poi di stagione, primizie, fine stagione.
+- **Month selector**, starting from today, with a quick summary ("12 at peak season · 38 in season").
+- **Three views:**
+  - **Grid** with photos and seasonal state;
+  - compact **List**, with climacteric/non-climacteric badges and carbon and water footprint;
+  - **12-Month Calendar**: every product at a glance, with the selected month in the middle.
+- **Search** by name (Italian, English, synonyms).
+- Multi-select **categories**: All, Fruit, Vegetables, Other (herbs and spices, mushrooms, cereals).
+- **Advanced filters:** seasonal state in the selected month, PDO/PGI only, favourites only, shopping list only, hidden products.
+- **Sorted by seasonality**: peak first, then in season, early season, end of season.
 
-### Sette stati stagionali, con icone di crescita
+### Seven seasonal states, with growth icons
 
-| Stato | Significato |
+| State | Meaning |
 |---|---|
-| **Primizia** | inizio stagione, prime raccolte |
-| **In Stagione** | disponibilità regolare |
-| **Picco** | i mesi centrali su cui tutte le fonti concordano |
-| **Fine Stagione** | ultime raccolte o prodotto da conservazione |
-| **Fuori Stagione** | serra riscaldata o importazione |
-| **Non Coltivato Qui** | frutti esotici senza produzione nella zona |
-| **Dati Non Disponibili** (grigio, "?") | nessuna fonte per la tua zona: **non** vuol dire fuori stagione |
+| **Early Season** | start of the season, first harvests |
+| **In Season** | regular availability |
+| **Peak Season** | the central months on which all sources agree |
+| **End of Season** | last harvests or naturally stored produce |
+| **Out of Season** | heated greenhouse or long-distance import |
+| **Not Grown Here** | exotic fruit with no production in the area |
+| **No Data Available** (grey, "?") | no source covers your area: it does **not** mean out of season |
 
-Quando manca il dato della tua zona, l'app può mostrare la **stima dalla zona climatica vicina**, marcata con **≈**. La stima viene dal database, non è calcolata dall'app, e si può disattivare nelle Impostazioni.
+When your area has no data, the app can show the **estimate from the neighbouring climate zone**, marked with **≈**. The estimate comes from the database, not from the app, and can be turned off in Settings.
 
-### La tua zona
+### Your area
 
-- **Area italiana (Km 0):** Nord, Centro (con l'Abruzzo), Sud e Isole, oppure la zona Mediterranea generica.
-- **Zona climatica europea (EUFIC):** Mediterranea, Continentale, Atlantica, Boreale, Alpina, Pannonica, con la **mappa delle regioni biogeografiche** EEA e l'elenco dei Paesi di ogni zona.
-- Se scegli una zona senza calendario proprio, l'app dice quale **calendario di riferimento** sta usando.
+- **Italian area (local, "Km 0"):** North, Centre (including Abruzzo), South and Islands, or the generic Mediterranean zone.
+- **European climate zone (EUFIC):** Mediterranean, Continental, Atlantic, Boreal, Alpine, Pannonian, with the EEA **biogeographical regions map** and the list of countries in each zone.
+- If you pick a zone with no calendar of its own, the app tells you which **reference calendar** it is using.
 
-### Scheda prodotto
+### Product page
 
-Una scheda completa, divisa in blocchi che puoi **riordinare, chiudere o nascondere** dalle Impostazioni:
+A complete product page, split into blocks that you can **reorder, collapse or hide** from Settings:
 
-- **Galleria** con più tipi di foto (principale, pianta in campo, tavola botanica, sezione), anche a schermo intero, con autore e licenza.
-- **Calendario stagionale** dell'anno per la tua zona, con legenda e la spiegazione di *come è stata calcolata la stagionalità* per quel prodotto.
-- **Varietà e territori:** varietà note, **DOP/IGP** verificate sul registro UE, Prodotti Agroalimentari Tradizionali per regione, Presìdi Slow Food.
-- **Acquisto, maturazione e conservazione:**
-  - come sceglierlo;
-  - **climaterico / non climaterico**, cioè se continua a maturare dopo la raccolta;
-  - come farlo maturare e come rallentare il deperimento;
-  - **dove conservarlo** (frigo, ambiente, dispensa…) e **quanto dura** in casa, in frigo e in freezer;
-  - **deperibilità** su 6 livelli;
-  - **cosa tenergli lontano** (prodotti che emettono etilene).
-- **Valori nutrizionali** per 100 g, **vitamine e minerali in % VNR**, **indicazioni nutrizionali UE** raggruppate e colorate secondo il Reg. CE 1924/2006, allergeni e porzioni.
-- **Sostenibilità:** impronta di carbonio e idrica, confronto con la carne bovina.
-- **Calendario dell'orto:** semina, trapianto e raccolta per Nord, Centro e Sud.
-- **Informazioni aggiuntive:** benefici, curiosità, consigli antispreco.
-- **Fonti e link utili:** ogni fonte con sigla o logo e link diretto alla pagina usata.
-- **Famiglia botanica:** gli altri prodotti della stessa famiglia, ordinati per stagionalità.
-- Pulsanti **"?"** con glossario e spiegazioni dei termini tecnici.
+- **Gallery** with several photo types (main photo, plant in the field, botanical plate, cross-section), including full screen, with author and licence.
+- **Seasonal calendar** of the year for your area, with a legend and an explanation of *how seasonality was computed* for that product.
+- **Varieties and territories:** notable varieties, **PDO/PGI** verified against the EU register, Traditional Agri-food Products by region, Slow Food Presidia.
+- **Buying, ripening and storage:**
+  - how to choose it;
+  - **climacteric / non-climacteric**, i.e. whether it keeps ripening after harvest;
+  - how to ripen it and how to slow down spoilage;
+  - **where to store it** (fridge, room temperature, pantry…) and **how long it lasts** at room temperature, in the fridge and in the freezer;
+  - **perishability** on 6 levels;
+  - **what to keep it away from** (ethylene-producing products).
+- **Nutrition facts** per 100 g, **vitamins and minerals as % NRV**, **EU nutrition claims** grouped and colour-coded according to Regulation (EC) 1924/2006, allergens and portions.
+- **Sustainability:** carbon and water footprint, compared with beef.
+- **Garden calendar:** sowing, transplanting and harvest for Northern, Central and Southern Italy.
+- **More information:** benefits, curiosities, anti-waste tips.
+- **Sources and useful links:** every source with its acronym or logo and a direct link to the page used.
+- **Botanical family:** other products of the same family, sorted by seasonality.
+- **"?"** buttons with a glossary and explanations of technical terms.
 
-### Le tue liste
+### Your lists
 
-- **❤️ Preferiti**, **🚫 Non lo mangio** (nascosto dalla Home, ma recuperabile) e **📋 Lista della spesa**.
-- La **Lista Spesa** mostra per ogni prodotto se è di stagione nel mese corrente.
+- **❤️ Favourites**, **🚫 I Don't Eat It** (hidden from Home, but recoverable) and **📋 Shopping list**.
+- The **Shopping list** shows whether each product is in season this month.
 
-### Notifiche (Android)
+### Notifications (Android)
 
-- **Modalità spesa:** una notifica fissa, visibile anche dalla schermata di blocco, con ciò che è di stagione. Se hai una lista, la notifica evidenzia i tuoi prodotti oppure mostra solo quelli.
-- **Consigli dopo la spesa:** quando chiudi la modalità spesa arriva una notifica, subito o dopo un ritardo da 0 a 60 minuti, che apre i **consigli di conservazione** dei prodotti comprati.
-- **Avvisi "Picco di Stagione":** il primo di ogni mese alle 9, cosa entra nel picco. Puoi scegliere tra nessuna notifica, solo i preferiti, oppure tutti tranne quelli che non mangi.
+- **Shopping mode:** a persistent notification, visible on the lock screen too, with what is in season. If you have a shopping list, the notification highlights your items or shows only those.
+- **After-shopping tips:** when you close shopping mode, a notification arrives, immediately or after a 0–60 minute delay, and opens **storage tips** for what you bought.
+- **"Peak Season" alerts:** on the first of every month at 9 a.m., what is entering its peak. Choose between no alerts, favourites only, or everything except what you don't eat.
 
 ### More Sustainable Diet
 
-Una pagina che spiega, con i punti chiave di EUFIC, perché mangiare di stagione conta e quando non basta, per esempio con le serre riscaldate, il trasporto aereo o la lunga conservazione in cella.
+A page explaining, with EUFIC's key points, why eating seasonally matters and when it is not enough, for example with heated greenhouses, air freight or long cold storage.
 
-### Personalizzazione
+### Personalisation
 
-- **Lingua:** italiano o inglese. Tutta l'app, dati compresi, passa nella lingua scelta.
-- **Tema:** chiaro, scuro (nero AMOLED) o di sistema.
-- **Effetto vetro satinato** regolabile e **sfumature dello sfondo** (Verde, Verde e Acqua, Verde e Ambra, Nessuna).
-- **Ordine e visibilità** dei blocchi della scheda prodotto (tieni premuto e trascina).
-
----
-
-## Installazione su Android
-
-1. Scarica il file `.apk` dall'ultima versione nella sezione **Releases** di questo repository.
-2. Aprilo sul telefono. Se Android lo chiede, consenti l'installazione da questa fonte.
-3. Nelle Impostazioni scegli lingua e zona (all'inizio è impostato il Nord Italia).
-
-L'app non ha bisogno di internet. Serve solo per aprire i link alle fonti.
+- **Language:** English or Italian. The whole app, data included, switches to the chosen language.
+- **Theme:** light, dark (AMOLED black) or system.
+- Adjustable **frosted-glass effect** and **background tints** (Green, Green & Teal, Green & Amber, None).
+- **Order and visibility** of the product page blocks (long-press and drag).
 
 ---
 
-## Per sviluppatori
+## Installing on Android
 
-### Requisiti
+1. Download the `.apk` file from the latest version in the **Releases** section of this repository.
+2. Open it on your phone. If Android asks, allow installs from this source.
+3. In Settings, choose your language and area (Northern Italy is the default).
 
-- Flutter 3.47 (Dart 3.13), Android SDK con le licenze accettate (`flutter doctor --android-licenses`)
+The app does not need an internet connection, except to open the source links.
 
-### Comandi
+---
+
+## For developers
+
+### Requirements
+
+- Flutter 3.47 (Dart 3.13), Android SDK with licences accepted (`flutter doctor --android-licenses`)
+
+### Commands
 
 ```bash
 flutter pub get
 flutter analyze
-flutter test              # test sul database reale, resolver, filtri, testi e icone
-flutter run               # telefono o emulatore collegato
-flutter run -d chrome     # anteprima veloce nel browser (senza notifiche)
+flutter test              # tests on the real database, resolver, filters, texts and icons
+flutter run               # connected phone or emulator
+flutter run -d chrome     # quick browser preview (no notifications)
 flutter build apk --release
 ```
 
-### Architettura
+### Architecture
 
 ```
 lib/
-  main.dart                avvio, provider, tema
-  models/                  FoodItem (lettura null-safe del JSON), SeasonState, enum di zone e aree, claim, glossario
-  data/                    FoodRepository (carica il database in un isolate e risolve il corpus condiviso),
-                           SeasonalityResolver (dato esatto → stima ≈ se attiva → non coltivato → non noto)
-  providers/               impostazioni, preferiti/liste, Home, layout della scheda, notifiche, navigazione
-  screens/                 Home, scheda prodotto, famiglia, lista spesa, consigli di conservazione,
-                           More Sustainable Diet, impostazioni
-  widgets/                 card, calendari, mappa delle zone, filtri, galleria, badge delle fonti…
-  notifications/           contenuto e programmazione delle notifiche
-  l10n/                    CopyService + facciata S: tutti i testi vengono da assets/data/ui_copy.json
-  theme/                   tema Material 3, palette degli stati, IconService (icone da ui_config.json)
+  main.dart                startup, providers, theme
+  models/                  FoodItem (null-safe JSON parsing), SeasonState, zone and area enums, claims, glossary
+  data/                    FoodRepository (loads the database in an isolate and resolves the shared corpus),
+                           SeasonalityResolver (exact data → ≈ estimate if enabled → not grown → unknown)
+  providers/               settings, favourites/lists, Home, product page layout, notifications, navigation
+  screens/                 Home, product page, family, shopping list, storage tips,
+                           More Sustainable Diet, settings
+  widgets/                 cards, calendars, zone map, filters, gallery, source badges…
+  notifications/           notification content and scheduling
+  l10n/                    CopyService + S facade: every text comes from assets/data/ui_copy.json
+  theme/                   Material 3 theme, state palette, IconService (icons from ui_config.json)
 assets/
-  data/                    database.json (minificato), ui_copy.json, ui_config.json
-  images/thumb, full       foto in WebP (600 px per le card, 1080 px per la galleria)
-  icons/, maps/, sources/  icone degli stati, mappe, loghi delle fonti
+  data/                    database.json (minified), ui_copy.json, ui_config.json
+  images/thumb, full       WebP photos (600 px for cards, 1080 px for the gallery)
+  icons/, maps/, sources/  state icons, maps, source logos
 ```
 
-**Principi:**
+**Principles:**
 
-- **L'app non inventa dati.** Ogni regola di visualizzazione (colori, soglie, ordine dei calendari, regole dei claim, ordine della conservazione) viene da `metadata` del database.
-- **Nessun testo scritto nel codice.** Tutti i testi stanno in `assets/data/ui_copy.json` (IT/EN) e tutte le icone in `assets/data/ui_config.json`. Si modificano senza programmare con l'Admin Studio del repository del database; i test controllano che le chiavi coincidano.
-- **Gli asset si generano dal database.** Dopo ogni modifica del database o delle foto si rilancia `scripts/build_app_assets.py` nel repository del database, che aggiorna `assets/data/` e le immagini WebP.
+- **The app does not invent data.** Every display rule (colours, thresholds, calendar order, claim rules, storage order) comes from the database `metadata`.
+- **No hard-coded text.** All texts live in `assets/data/ui_copy.json` (IT/EN) and all icons in `assets/data/ui_config.json`. They can be edited without coding through the Admin Studio in the database repository; tests check that the keys match.
+- **Assets are generated from the database.** After every change to the database or photos, run `scripts/build_app_assets.py` in the database repository, which updates `assets/data/` and the WebP images.
 
-### Crediti
+### Credits
 
-- Dati: vedi le fonti elencate nel database (CREA, BDA-IEO, EUFIC, UC Davis, USDA, SU-EATABLE LIFE e altre).
-- Foto: Wikimedia Commons, USDA ARS, Unsplash, Pixabay, iNaturalist. Autore e licenza di ogni foto sono indicati nell'app.
-- Mappa delle zone: EEA Biogeographical Regions 2016 (CC BY 4.0) e Natural Earth.
+- Data: see the sources listed in the database (CREA, BDA-IEO, EUFIC, UC Davis, USDA, SU-EATABLE LIFE and others).
+- Photos: Wikimedia Commons, USDA ARS, Unsplash, Pixabay, iNaturalist. Author and licence of every photo are shown in the app.
+- Zone map: EEA Biogeographical Regions 2016 (CC BY 4.0) and Natural Earth.
 
-### Licenza (open source)
+### Licence (open source)
 
-- **Codice dell'app:** licenza [MIT](LICENSE).
-- **Dati** (`assets/data/database.json`): CC BY 4.0, come nel repository del database, con i termini delle singole fonti per i valori di terzi.
-- **Foto** (`assets/images/`): ogni foto ha la licenza del suo autore (pubblico dominio, CC0, CC BY, CC BY-SA, Unsplash, Pixabay), indicata nell'app e nel repository del database.
-- **Loghi delle fonti** (`assets/sources/`): appartengono ai rispettivi enti e sono usati solo per indicare la fonte.
+- **App code:** [MIT](LICENSE).
+- **Data** (`assets/data/database.json`): CC BY 4.0, as in the database repository, with each source's own terms for third-party values.
+- **Photos** (`assets/images/`): each photo carries its author's licence (public domain, CC0, CC BY, CC BY-SA, Unsplash, Pixabay), shown in the app and in the database repository.
+- **Source logos** (`assets/sources/`): owned by the respective organisations and used only to identify the source.
 
-Progetto senza scopo commerciale. Le informazioni hanno scopo divulgativo e non sostituiscono il parere di un medico o di un nutrizionista.
+Non-commercial project. This information is for general educational purposes and is not a substitute for advice from a doctor or nutritionist.
