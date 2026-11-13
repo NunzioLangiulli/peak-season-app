@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:peak_season/theme/icon_service.dart';
 import 'package:peak_season/theme/material_icon_names.dart';
 
-/// Mappa delle icone (data/ui_config.json, Admin Studio → scheda Icone).
+/// Icon map (data/ui_config.json, Admin Studio → Icons tab).
 void main() {
   final raw = File('assets/data/ui_config.json').readAsStringSync();
 
@@ -20,6 +20,10 @@ void main() {
     expect(names.toSet().length, names.length, reason: 'slot duplicati');
     expect(names.toSet(), IconService.defaults.keys.toSet());
     for (final e in slots) {
+      // The Admin Studio is in English: group and description also need an EN version
+      for (final f in const ['group', 'group_en', 'description', 'description_en']) {
+        expect('${e[f] ?? ''}'.isNotEmpty, isTrue, reason: '${e['slot']}: missing $f');
+      }
       final ref = '${e['icon']}';
       if (ref.startsWith('material:')) {
         expect(materialIconNames.containsKey(ref.substring(9)), isTrue, reason: '${e['slot']}: $ref');
@@ -36,7 +40,7 @@ void main() {
       if (!f.path.endsWith('.dart') || f.path.endsWith('icon_service.dart')) continue;
       final src = f.readAsStringSync();
       used.addAll(RegExp(r"SlotIcon\(\s*'([\w.]+)'").allMatches(src).map((m) => m[1]!));
-      // slot passati come stringa (azioni, barra di navigazione, viste, sezioni)
+      // slots passed as strings (actions, navigation bar, views, sections)
       used.addAll(RegExp(r"'((?:action|nav|home\.view|detail\.section)\.[\w.]+)'").allMatches(src).map((m) => m[1]!));
     }
     expect(used.difference(IconService.defaults.keys.toSet()), isEmpty);
