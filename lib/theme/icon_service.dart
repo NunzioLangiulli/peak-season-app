@@ -29,7 +29,7 @@ class IconService {
     try {
       loadFromString(await (bundle ?? rootBundle).loadString(asset));
     } catch (e) {
-      if (kDebugMode) debugPrint('IconService: $e (uso le icone predefinite)');
+      if (kDebugMode) debugPrint('IconService: $e (using the default icons)');
     }
   }
 
@@ -192,7 +192,7 @@ class RefIcon extends StatelessWidget {
     if (ref.startsWith('material:')) {
       final data = materialIconNames[ref.substring(9)];
       if (data == null) {
-        if (kDebugMode) debugPrint('IconService: icona Material sconosciuta "$ref"');
+        if (kDebugMode) debugPrint('IconService: unknown Material icon "$ref"');
         return _fallback(size, c);
       }
       return Icon(data, size: size, color: c);

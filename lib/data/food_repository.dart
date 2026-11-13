@@ -146,7 +146,7 @@ class FoodRepository {
       final key = '${ref['corpus_ref']}';
       final base = corpus[key];
       if (base is! Map) {
-        if (kDebugMode) debugPrint('corpus_ref sconosciuto: $key');
+        if (kDebugMode) debugPrint('unknown corpus_ref: $key');
       }
       final add = ref['specific_addition'];
       String join(String l) {

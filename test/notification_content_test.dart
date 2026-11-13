@@ -25,14 +25,14 @@ void main() {
         disliked: disliked,
       );
 
-  test('modalità spesa senza lista: alimenti di stagione, apre la Home', () {
+  test('shopping mode without a list: in-season products, opens Home', () {
     final c = builder().shopping(month: 10, shoppingIds: const [], listMode: ShoppingNotifListMode.highlight);
     expect(c.title, isNull); // you already know the month
     expect(c.payload, NotificationPayload.openSeason);
     expect(c.lines.first, startsWith('<b>Picco di Stagione:</b>'));
   });
 
-  test('lista evidenziata: niente riga separata, alimenti in lista in grassetto, apre la lista', () {
+  test('highlighted list: no separate line, list products in bold, opens the list', () {
     final c = builder().shopping(
       month: 10,
       shoppingIds: const ['mela_apple', 'zucca_pumpkin'],
@@ -43,7 +43,7 @@ void main() {
     expect(c.lines.join(), contains('<b>Mela</b>'));
   });
 
-  test('solo lista: una riga per alimento con lo stato', () {
+  test('list only: one line per product with its state', () {
     final c = builder().shopping(
       month: 10,
       shoppingIds: const ['mela_apple', 'pomodoro_tomato'],
@@ -56,13 +56,13 @@ void main() {
     expect(c.body, startsWith('La Tua Lista:'));
   });
 
-  test('"non lo mangio" escluso dalla notifica', () {
+  test('"I don\'t eat it" excluded from the notification', () {
     final b = builder(disliked: {'bietola_da_coste_swiss_chard'});
     final c = b.shopping(month: 10, shoppingIds: const [], listMode: ShoppingNotifListMode.highlight);
     expect(c.lines.join(), isNot(contains('Bietola')));
   });
 
-  test('avvisi picco: solo chi entra nel picco quel mese, filtrati per modalità', () {
+  test('peak alerts: only what enters peak that month, filtered by mode', () {
     final b = builder(disliked: {'pera_pear'});
     for (var m = 0; m < 12; m++) {
       for (final item in b.enteringPeak(m, mode: PeakNotifMode.allExceptDisliked, favorites: const {})) {

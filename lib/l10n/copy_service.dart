@@ -55,7 +55,7 @@ class CopyService {
     final l = (lang ?? language).name;
     var text = entry?[l];
     if (text == null || text.isEmpty) {
-      if (kDebugMode) debugPrint('CopyService: testo mancante "$key" ($l)');
+      if (kDebugMode) debugPrint('CopyService: missing text "$key" ($l)');
       return key;
     }
     if (params.isNotEmpty) {

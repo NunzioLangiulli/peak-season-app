@@ -13,13 +13,13 @@ void main() {
     db = FoodRepository.parseDatabase(File('assets/data/database.json').readAsStringSync());
   });
 
-  test('peso lordo da comprare: netto / resa, arrotondato per eccesso ai 10 g', () {
+  test('gross weight to buy: net / yield, rounded up to 10 g', () {
     expect(grossWeight(500, 100), 500);
     expect(grossWeight(500, 75), 670); // 666,7 → 670
     expect(grossWeight(0, 80), 0);
   });
 
-  test('etilene: mela (produce) e kiwi/lattuga (sensibili) in conflitto, aglio no', () {
+  test('ethylene: apple (producer) and kiwi/lettuce (sensitive) conflict, garlic does not', () {
     final items = [for (final id in ['mela_apple', 'pomodoro_tomato', 'aglio_garlic']) db.byId[id]!];
     final c = ethyleneConflicts(items);
     final apple = c.firstWhere((x) => x.producer.id == 'mela_apple');
@@ -28,7 +28,7 @@ void main() {
     expect(ethyleneConflicts([db.byId['aglio_garlic']!]), isEmpty);
   });
 
-  test('"nel carrello": salvato, tolto con "Togli Quelli nel Carrello"', () async {
+  test('"in the cart": saved, removed with "Remove Those in the Cart"', () async {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
     final lib = LibraryController(prefs)

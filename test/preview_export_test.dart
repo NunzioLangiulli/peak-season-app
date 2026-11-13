@@ -14,7 +14,7 @@ import 'package:peak_season/notifications/notification_content.dart';
 /// for the previews (scripts/preview_screens.py). Runs only with
 /// PREVIEW_EXPORT=1, so it does not slow down the normal suite.
 void main() {
-  test('esporta testi notifiche', () {
+  test('exports notification texts', () {
     CopyService.loadFromString(File('assets/data/ui_copy.json').readAsStringSync());
     final db = FoodRepository.parseDatabase(File('assets/data/database.json').readAsStringSync());
     final b = NotificationContentBuilder(

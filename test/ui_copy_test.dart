@@ -12,11 +12,11 @@ import 'package:peak_season/models/glossary.dart';
 void main() {
   final copyRaw = File('assets/data/ui_copy.json').readAsStringSync();
 
-  test('la copia in assets coincide con data/ui_copy.json', () {
+  test('the copy in assets matches data/ui_copy.json', () {
     expect(copyRaw, File('../data/ui_copy.json').readAsStringSync());
   });
 
-  test('ogni chiave usata in strings.dart esiste in IT e EN, chiavi uniche', () {
+  test('every key used in strings.dart exists in IT and EN, unique keys', () {
     CopyService.loadFromString(copyRaw);
     final entries = (jsonDecode(copyRaw)['strings'] as List).cast<Map>();
     final keys = entries.map((e) => e['key']).toList();
@@ -40,7 +40,7 @@ void main() {
     expect(it.country('Atlantis'), 'Atlantis');
   });
 
-  test('corpus_ref risolti ovunque, con aggiunta specifica', () {
+  test('corpus_ref resolved everywhere, with specific addition', () {
     final raw = File('assets/data/database.json').readAsStringSync();
     expect(raw.contains('"corpus_ref"'), isTrue);
     final json = jsonDecode(raw) as Map<String, dynamic>;

@@ -9,15 +9,15 @@ import 'package:peak_season/theme/material_icon_names.dart';
 void main() {
   final raw = File('assets/data/ui_config.json').readAsStringSync();
 
-  test('la copia in assets coincide con data/ui_config.json', () {
+  test('the copy in assets matches data/ui_config.json', () {
     expect(raw, File('../data/ui_config.json').readAsStringSync());
   });
 
-  test('slot del file = slot dell\'app, ogni icona esiste', () {
+  test('file slots = app slots, every icon exists', () {
     IconService.loadFromString(raw);
     final slots = (jsonDecode(raw)['icon_slots'] as List).cast<Map>();
     final names = slots.map((e) => e['slot']).toList();
-    expect(names.toSet().length, names.length, reason: 'slot duplicati');
+    expect(names.toSet().length, names.length, reason: 'duplicate slots');
     expect(names.toSet(), IconService.defaults.keys.toSet());
     for (final e in slots) {
       // The Admin Studio is in English: group and description also need an EN version
@@ -34,7 +34,7 @@ void main() {
     }
   });
 
-  test('ogni slot scritto nel codice è tra quelli definiti', () {
+  test('every slot written in the code is among the defined ones', () {
     final used = <String>{};
     for (final f in Directory('lib').listSync(recursive: true).whereType<File>()) {
       if (!f.path.endsWith('.dart') || f.path.endsWith('icon_service.dart')) continue;

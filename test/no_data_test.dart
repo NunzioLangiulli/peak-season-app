@@ -25,7 +25,7 @@ void main() {
     return (HomeController(prefs, now: DateTime(2026, 11, 6)), LibraryController(prefs));
   }
 
-  test('di default: sezione separata, nessun alimento senza dati nella lista principale', () async {
+  test('by default: separate section, no product without data in the main list', () async {
     final (home, lib) = await setup();
     final l = home.computeLists(db: db, library: lib, resolver: atlantic, language: AppLanguage.it);
     expect(l.main.every((e) => e.calendar.hasData), isTrue);
@@ -35,7 +35,7 @@ void main() {
     expect(l.main.length + l.noData.length, db.items.length); // nessuno sparisce
   });
 
-  test('"Includi Alimenti Senza Dati": tutti nella lista principale, sezione vuota, salvato', () async {
+  test('"Include Products Without Data": all in the main list, empty section, saved', () async {
     final (home, lib) = await setup();
     home.setIncludeNoData(true);
     final l = home.computeLists(db: db, library: lib, resolver: atlantic, language: AppLanguage.it);
@@ -48,37 +48,37 @@ void main() {
     expect(HomeController(prefs).includeNoData, isTrue);
   });
 
-  test('ricerca: l\'alimento senza dati resta trovabile (nella sezione)', () async {
+  test('search: the product without data stays findable (in the section)', () async {
     final (home, lib) = await setup();
     home.setQuery('cece');
     final l = home.computeLists(db: db, library: lib, resolver: atlantic, language: AppLanguage.it);
     expect(l.noData.map((e) => e.item.id), contains('cece_chickpea'));
   });
 
-  test('con un filtro per stato la sezione non compare', () async {
+  test('with a state filter the section does not appear', () async {
     final (home, lib) = await setup();
     home.toggleState(SeasonState.peakSeason);
     final l = home.computeLists(db: db, library: lib, resolver: atlantic, language: AppLanguage.it);
     expect(l.noData, isEmpty);
   });
 
-  group('calendario di riferimento', () {
-    test('priorità 1: serie nazionale italiana', () {
+  group('reference calendar', () {
+    test('priority 1: Italian national series', () {
       final ref = atlantic.reference(db.byId['cima_di_rapa_turnip_greens']!);
       expect(ref?.sourceKey, 'italy_national');
     });
 
-    test('priorità 2: prima zona EUFIC con dato vero', () {
+    test('priority 2: first EUFIC zone with real data', () {
       final ref = atlantic.reference(db.byId['cardo_cardoon']!);
       expect(ref?.sourceKey, 'mediterranean');
       expect(ref?.isApproximate, isFalse);
     });
 
-    test('nessun dato vero da nessuna parte: nessun riferimento (le stime non valgono)', () {
+    test('no real data anywhere: no reference (estimates do not count)', () {
       expect(atlantic.reference(db.byId['cece_chickpea']!), isNull);
     });
 
-    test('se la zona ha un dato o una stima attiva: nessun riferimento', () {
+    test('if the zone has data or an active estimate: no reference', () {
       const med = SeasonalityResolver(zone: ClimaticZone.mediterranean, area: ItalyMacroArea.nord);
       expect(med.reference(db.byId['aglio_garlic']!), isNull);
       const pan = SeasonalityResolver(zone: ClimaticZone.pannonian, area: ItalyMacroArea.nord);
