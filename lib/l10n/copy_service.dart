@@ -5,18 +5,18 @@ import 'package:flutter/services.dart';
 
 import '../models/app_enums.dart';
 
-/// Testi dell'interfaccia letti da `assets/data/ui_copy.json` (copia di
-/// `data/ui_copy.json`, che l'utente modifica con scripts/copy_editor.py).
+/// Interface texts read from `assets/data/ui_copy.json` (a copy of
+/// `data/ui_copy.json`, edited with the Admin Studio).
 ///
-/// Si carica una volta all'avvio ([load]); poi [t] è sincrono. Una chiave
-/// mancante restituisce la chiave stessa, così salta all'occhio nell'app.
-/// I segnaposto sono tra graffe: `{n} prodotti` + `{'n': 3}` → `3 prodotti`.
+/// Loaded once at startup ([load]); after that [t] is synchronous. A missing
+/// key returns the key itself, so it stands out in the app.
+/// Placeholders are in braces: `{n} prodotti` + `{'n': 3}` → `3 prodotti`.
 class CopyService {
   CopyService._();
 
   static const asset = 'assets/data/ui_copy.json';
 
-  /// Lingua usata da [t] quando non se ne passa una.
+  /// Language used by [t] when none is passed.
   static AppLanguage language = AppLanguage.it;
 
   static Map<String, Map<String, String>> _strings = const {};
@@ -28,7 +28,7 @@ class CopyService {
     loadFromString(raw);
   }
 
-  /// Usato dai test (legge il file dal disco) e da [load].
+  /// Used by the tests (reads the file from disk) and by [load].
   static void loadFromString(String raw) {
     final json = jsonDecode(raw) as Map<String, dynamic>;
     final out = <String, Map<String, String>>{};
@@ -45,7 +45,7 @@ class CopyService {
 
   static bool has(String key) => _strings.containsKey(key);
 
-  /// Tutte le chiavi (per i test).
+  /// All keys (for the tests).
   static Iterable<String> get keys => _strings.keys;
 
   static final _placeholder = RegExp(r'\{(\w+)\}');

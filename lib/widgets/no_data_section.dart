@@ -8,9 +8,9 @@ import 'calendar_view.dart';
 import 'food_cards.dart';
 import 'seasonality_three_dots.dart';
 
-/// Sezione chiusa in fondo alla lista del mese: "Senza Dati per Questa Zona (n)".
-/// Gli alimenti senza dati non vanno mescolati a quelli di stagione; qui
-/// restano comunque raggiungibili. Non compare se la lista è vuota.
+/// Collapsed section at the bottom of the month list: "No Data for This Zone (n)".
+/// Products without data must not be mixed with in-season ones; here
+/// they remain reachable anyway. It does not appear if the list is empty.
 class NoDataSection extends StatefulWidget {
   const NoDataSection({
     super.key,

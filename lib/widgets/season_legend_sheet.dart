@@ -8,7 +8,7 @@ import '../providers/settings_controller.dart';
 import 'help_button.dart';
 import 'seasonality_three_dots.dart';
 
-/// Legenda dei colori e delle micro-icone, con le descrizioni del database.
+/// Legend of colours and micro-icons, with the database descriptions.
 class SeasonLegendSheet extends StatelessWidget {
   const SeasonLegendSheet({super.key});
 
@@ -32,8 +32,8 @@ class SeasonLegendSheet extends StatelessWidget {
   );
 }
 
-/// Contenuto della legenda, usato dallo sheet e dentro le spiegazioni "?"
-/// del calendario.
+/// Legend content, used by the sheet and inside the calendar's "?"
+/// explanations.
 class SeasonLegendContent extends StatelessWidget {
   const SeasonLegendContent({super.key});
 

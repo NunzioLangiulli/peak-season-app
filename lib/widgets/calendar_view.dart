@@ -11,25 +11,25 @@ import '../theme/season_palette.dart';
 import 'food_actions.dart';
 import 'food_image.dart';
 
-/// Larghezza della colonna nome, condivisa da header e righe perché i 12
-/// quadratini restino allineati alle iniziali dei mesi.
+/// Width of the name column, shared by header and rows so that the 12
+/// squares stay aligned with the month initials.
 const double _nameColumnWidth = 118;
 const EdgeInsets _rowPadding = EdgeInsets.symmetric(horizontal: 16);
 
-/// MODALITÀ 3 — calendario annuale 12 mesi.
+/// MODE 3 — 12-month annual calendar.
 class CalendarView extends StatelessWidget {
   const CalendarView({super.key, required this.entries, required this.bottomPadding, this.footer});
 
   final List<FoodEntry> entries;
   final double bottomPadding;
 
-  /// Contenuto in fondo alle righe (sezione "Senza Dati per Questa Zona").
+  /// Content at the bottom of the rows ("No Data for This Zone" section).
   final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, box) {
-      // Colonna del mese selezionato: sempre al centro (i mesi ruotano).
+      // Column of the selected month: always in the middle (the months rotate).
       final col = (box.maxWidth - _rowPadding.horizontal - _nameColumnWidth - 4) / 12;
       final left = _rowPadding.left + _nameColumnWidth + 2 + col * centeredMonthIndex;
       return Stack(
@@ -68,18 +68,18 @@ class CalendarView extends StatelessWidget {
   }
 }
 
-/// Posizione (0-11) del mese selezionato nella vista 12 mesi: 5 mesi prima a
-/// sinistra, il mese selezionato al 6° posto, i 6 successivi a destra.
+/// Position (0-11) of the selected month in the 12-month view: 5 months before on
+/// the left, the selected month in 6th place, the next 6 on the right.
 const int centeredMonthIndex = 5;
 
-/// Ordine dei 12 mesi: da gennaio a dicembre, oppure ruotato in modo che
-/// [selected] sia in posizione [centeredMonthIndex].
+/// Order of the 12 months: January to December, or rotated so that
+/// [selected] is at position [centeredMonthIndex].
 List<int> monthOrder(int selected, {bool rotate = false}) => [
       for (var i = 0; i < 12; i++) rotate ? (selected - centeredMonthIndex + i + 12) % 12 : i,
     ];
 
-/// Fascia verde chiara, a bassa opacità e con un leggero alone, che
-/// evidenzia la colonna del mese selezionato (vista 12 mesi e scheda).
+/// Light green band, low opacity and with a slight glow, that
+/// highlights the selected month's column (12-month view and product page).
 class MonthHighlightPill extends StatelessWidget {
   const MonthHighlightPill({super.key});
 
@@ -102,15 +102,15 @@ class MonthHighlightPill extends StatelessWidget {
   }
 }
 
-/// Nome senza la parte tra parentesi ("Caco (Kaki)" → "Caco"), per la vista
-/// compatta a 12 mesi.
+/// Name without the part in brackets ("Caco (Kaki)" → "Caco"), for the view
+/// compact 12-month view.
 String compactName(String name) {
   final out = name.replaceAll(RegExp(r'\s*\([^)]*\)'), '').trim();
   return out.isEmpty ? name : out;
 }
 
-/// Header fisso: le 12 iniziali, ruotate in modo che il mese selezionato
-/// sia al centro, sopra la pillola verticale.
+/// Fixed header: the 12 initials, rotated so that the selected month
+/// is in the middle, above the vertical pill.
 class CalendarMonthHeader extends StatelessWidget {
   const CalendarMonthHeader({super.key});
 
@@ -235,11 +235,11 @@ class CalendarRow extends StatelessWidget {
   }
 }
 
-/// 12 cerchietti, uno per mese. Il mese selezionato (sopra la pillola
-/// verticale disegnata da chi contiene la riga) è più grande, a piena
-/// luminosità e con la micro-icona del set "Crescita" se è una fase di
-/// stagione; gli altri mesi sono pallini più piccoli e leggermente attenuati,
-/// senza icona. Con [rotate] il mese selezionato sta al centro.
+/// 12 circles, one per month. The selected month (above the vertical
+/// pill drawn by the row's container) is larger, at full
+/// brightness and with the "Growth" micro-icon if it is a season
+/// phase; the other months are smaller, slightly dimmed dots,
+/// without icon. With [rotate] the selected month is in the middle.
 class MonthSquares extends StatelessWidget {
   const MonthSquares({
     super.key,
@@ -252,8 +252,8 @@ class MonthSquares extends StatelessWidget {
   final SeasonCalendar calendar;
   final int selected;
 
-  /// Diametro massimo del cerchietto del mese selezionato (si riduce se la
-  /// colonna è stretta).
+  /// Maximum diameter of the selected month's circle (shrinks if the
+  /// column is narrow).
   final double height;
   final bool rotate;
 

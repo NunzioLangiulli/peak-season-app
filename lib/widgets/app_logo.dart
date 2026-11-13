@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/season_state.dart';
 import 'seasonality_three_dots.dart';
 
-/// Logo "o ⭐ o": la stagione che sale (primizia), il picco, la discesa.
+/// "o ⭐ o" logo: the season rising (early), the peak, the decline.
 class AppLogo extends StatelessWidget {
   const AppLogo({super.key, this.size = 26});
 

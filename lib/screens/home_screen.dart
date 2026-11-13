@@ -36,8 +36,8 @@ class HomeScreen extends StatelessWidget {
     );
     final entries = lists.main;
     final bottom = PillNavBar.overlap(context);
-    // Con una ricerca attiva la sezione "Senza Dati" si apre da sola, così
-    // l'alimento cercato si vede sempre.
+    // With an active search the "No Data" section opens by itself, so
+    // the searched product is always visible.
     final noData = NoDataSection(
       key: ValueKey('nodata-${home.viewMode.name}'),
       entries: lists.noData,
@@ -123,7 +123,7 @@ class _Header extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             GestureDetector(
-              // Toccare il titolo riporta al mese corrente.
+              // Tapping the title goes back to the current month.
               onTap: () => home.setMonth(home.currentMonth),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -145,9 +145,9 @@ class _Header extends StatelessWidget {
   }
 }
 
-/// Interruttore "Sono a fare la spesa": carrello con campanella + switch.
-/// Acceso = notifica fissa con i prodotti di stagione. Sta accanto al cuore
-/// nella Home e in alto nella Lista della Spesa.
+/// "I'm out shopping" toggle: cart with bell + switch.
+/// On = persistent notification with in-season products. It sits next to the heart
+/// on Home and at the top of the Shopping List.
 class ShoppingModeToggle extends StatelessWidget {
   const ShoppingModeToggle({super.key});
 
@@ -213,8 +213,8 @@ class ShoppingModeToggle extends StatelessWidget {
   }
 }
 
-/// "12 al picco della stagione · 40 di stagione" — riassunto del mese (il
-/// mese è già nello slider), apre la legenda.
+/// "12 at peak season · 40 in season" — month summary (the
+/// month is already in the slider), opens the legend.
 class _SeasonPulse extends StatelessWidget {
   const _SeasonPulse({required this.entries, required this.month});
 
@@ -252,8 +252,8 @@ class _SeasonPulse extends StatelessWidget {
   }
 }
 
-/// Chip rimovibili per i filtri avanzati attivi, così l'utente vede sempre
-/// perché mancano alcuni alimenti.
+/// Removable chips for the active advanced filters, so the user always sees
+/// why some products are missing.
 class _ActiveFilterChips extends StatelessWidget {
   const _ActiveFilterChips();
 
@@ -264,8 +264,8 @@ class _ActiveFilterChips extends StatelessWidget {
     final db = context.read<FoodDatabase>();
     final lang = context.watch<SettingsController>().language;
     final chips = <Widget>[];
-    // Frutta e Verdura si vedono già accese nella barra: niente tag. Delle
-    // sottocategorie di "Altro" si mostra quale è filtrata.
+    // Fruit and Vegetables already show as lit in the bar: no tag. For the
+    // sub-categories of "Other", the filtered one is shown.
     for (final c in home.otherCategoryTags) {
       chips.add(InputChip(label: Text(s.category(c)), onDeleted: () => home.toggleCategory(c)));
     }

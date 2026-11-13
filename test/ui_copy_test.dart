@@ -8,7 +8,7 @@ import 'package:peak_season/l10n/strings.dart';
 import 'package:peak_season/models/app_enums.dart';
 import 'package:peak_season/models/glossary.dart';
 
-/// Testi dell'app (data/ui_copy.json) e corpus condiviso del database.
+/// App texts (data/ui_copy.json) and the database's shared corpus.
 void main() {
   final copyRaw = File('assets/data/ui_copy.json').readAsStringSync();
 

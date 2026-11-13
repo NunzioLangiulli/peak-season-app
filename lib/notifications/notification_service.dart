@@ -14,12 +14,12 @@ import '../models/app_enums.dart';
 import '../models/notification_prefs.dart';
 import 'notification_content.dart';
 
-/// Notifiche locali (nessun server, funzionano offline):
-/// - modalità spesa: notifica fissa con gli alimenti di stagione;
-/// - dopo la chiusura, notifica con i consigli di conservazione;
-/// - avvisi "picco di stagione" programmati il 1° di ogni mese alle 9.
+/// Local notifications (no server, they work offline):
+/// - shopping mode: persistent notification with in-season products;
+/// - after closing it, a notification with storage tips;
+/// - "peak season" alerts scheduled on the 1st of every month at 9 a.m.
 ///
-/// Su web (anteprime) non fa nulla: [isSupported] è false.
+/// On the web (previews) it does nothing: [isSupported] is false.
 class NotificationService {
   NotificationService._();
   static final instance = NotificationService._();
@@ -37,8 +37,8 @@ class NotificationService {
   final _plugin = FlutterLocalNotificationsPlugin();
   bool _ready = false;
 
-  /// Chiamata quando l'utente tocca una notifica o un suo pulsante con
-  /// l'app aperta (o la apre). Impostata da `main.dart`.
+  /// Called when the user taps a notification or one of its buttons with
+  /// the app open (or opens it). Set by `main.dart`.
   void Function(NotificationResponse response)? onResponse;
 
   bool get isSupported =>
@@ -72,14 +72,14 @@ class NotificationService {
     ),
   );
 
-  /// Payload della notifica che ha aperto l'app (null se aperta normalmente).
+  /// Payload of the notification that opened the app (null if opened normally).
   Future<NotificationResponse?> launchResponse() async {
     if (!isSupported) return null;
     final d = await _plugin.getNotificationAppLaunchDetails();
     return (d?.didNotificationLaunchApp ?? false) ? d!.notificationResponse : null;
   }
 
-  /// Chiede il permesso (Android 13+, iOS). Restituisce false se negato.
+  /// Asks for permission (Android 13+, iOS). Returns false if denied.
   Future<bool> requestPermission() async {
     if (!isSupported) return false;
     if (defaultTargetPlatform == TargetPlatform.android) {
@@ -92,13 +92,13 @@ class NotificationService {
     return await ios?.requestPermissions(alert: true, badge: false, sound: true) ?? false;
   }
 
-  // --- Modalità spesa -----------------------------------------------------
+  // --- Shopping mode -------------------------------------------------------
 
-  /// Mostra o aggiorna la notifica fissa. Su Android è "ongoing": fino ad
-  /// Android 13 si toglie solo con "Chiudi", da Android 14 anche con uno swipe
-  /// (l'app se ne accorge con [isShoppingVisible]). iOS non ha notifiche
-  /// fisse: lì è una notifica normale (per una vera notifica persistente
-  /// servirebbe una Live Activity, da valutare).
+  /// Shows or updates the persistent notification. On Android it is "ongoing": up to
+  /// Android 13 it can be removed only with "Close", from Android 14 also with a swipe
+  /// (the app notices through [isShoppingVisible]). iOS has no persistent
+  /// notifications: there it is a normal notification (a truly persistent one
+  /// would need a Live Activity, to be evaluated).
   Future<void> showShopping(NotificationContent c, S s) async {
     if (!isSupported) return;
     await _plugin.show(
@@ -110,13 +110,13 @@ class NotificationService {
         android: AndroidNotificationDetails(
           _chShopping,
           s.notifChannelShopping,
-          importance: Importance.low, // niente suono a ogni aggiornamento
+          importance: Importance.low, // no sound on every update
           priority: Priority.low,
           ongoing: true,
           autoCancel: false,
           onlyAlertOnce: true,
           showWhen: false,
-          visibility: NotificationVisibility.public, // leggibile dalla schermata di blocco
+          visibility: NotificationVisibility.public, // readable from the lock screen
           category: AndroidNotificationCategory.reminder,
           color: const Color(0xFF2E7D32),
           styleInformation: InboxStyleInformation(
@@ -144,18 +144,18 @@ class NotificationService {
     await _plugin.cancel(id: shoppingId);
   }
 
-  /// Vero se la notifica fissa è ancora visibile (Android). Su iOS non
-  /// si può sapere: si usa lo stato salvato.
+  /// True if the persistent notification is still visible (Android). On iOS it
+  /// cannot be known: the saved state is used.
   Future<bool?> isShoppingVisible() async {
     if (!isSupported || defaultTargetPlatform != TargetPlatform.android) return null;
     final active = await _plugin.getActiveNotifications();
     return active.any((n) => n.id == shoppingId);
   }
 
-  // --- Avvisi picco di stagione ------------------------------------------
+  // --- Peak season alerts -------------------------------------------------
 
-  /// Cancella e riprogramma gli avvisi dei prossimi 12 mesi. Chiamata
-  /// quando cambiano zona, preferiti, "non lo mangio" o la modalità.
+  /// Cancels and reschedules the alerts for the next 12 months. Called
+  /// when the zone, favourites, "I don't eat it" or the mode change.
   Future<void> reschedulePeak({
     required NotificationContentBuilder builder,
     required PeakNotifMode mode,
@@ -197,9 +197,9 @@ class NotificationService {
   }
 }
 
-/// Testo e invio della notifica "consigli di conservazione", subito o dopo
-/// [delayMinutes] minuti. Funzione statica perché la usa anche l'isolate in
-/// background. Il ritardo è relativo, quindi basta l'ora UTC (niente fuso).
+/// Text and sending of the "storage tips" notification, immediately or after
+/// [delayMinutes] minutes. Static function because it is also used by the isolate in
+/// the background. The delay is relative, so UTC time is enough (no time zone).
 Future<void> showStorageTipsNotification(
   FlutterLocalNotificationsPlugin plugin,
   S s, {
@@ -232,14 +232,14 @@ Future<void> showStorageTipsNotification(
     body: s.notifStorageBody,
     payload: NotificationPayload.openStorage,
     notificationDetails: details,
-    // Allarme non esatto: niente permesso speciale, Android può spostarlo di
-    // qualche minuto per risparmiare batteria (spiegato nelle Impostazioni).
+    // Inexact alarm: no special permission needed, Android may shift it by
+    // a few minutes to save battery (explained in Settings).
     androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
   );
 }
 
-/// Pulsante "Chiudi" premuto con l'app chiusa o in background: gira in un
-/// isolate separato, quindi legge le preferenze da disco.
+/// "Close" button pressed with the app closed or in the background: runs in a
+/// separate isolate, so it reads the preferences from disk.
 @pragma('vm:entry-point')
 Future<void> notificationBackgroundHandler(NotificationResponse response) async {
   if (response.actionId != NotificationService.closeActionId) return;
@@ -260,5 +260,5 @@ Future<void> notificationBackgroundHandler(NotificationResponse response) async 
   }
 }
 
-/// Accesso al plugin per [showStorageTipsNotification] dall'app in primo piano.
+/// Plugin access for [showStorageTipsNotification] from the app in the foreground.
 FlutterLocalNotificationsPlugin notificationPlugin() => NotificationService.instance._plugin;

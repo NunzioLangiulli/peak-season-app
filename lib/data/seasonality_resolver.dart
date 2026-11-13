@@ -2,15 +2,15 @@ import '../models/app_enums.dart';
 import '../models/food_item.dart';
 import '../models/season_state.dart';
 
-/// Sceglie la serie di 12 mesi da mostrare per la zona dell'utente.
+/// Picks the 12-month series to show for the user's zone.
 ///
-/// Le stime NON sono calcolate dall'app: sono nel database
-/// (`seasonality.estimates`, metodo in `metadata.seasonality_estimates_method`,
-/// script `scripts/estimate_zone_gaps.py`). Ordine:
-/// 1. dato vero della zona (o della macro-area italiana);
-/// 2. stima del database, marcata ≈ (solo se `allowApproximate`);
-/// 3. per gli esotici, "non coltivato qui" (`estimates.not_grown`);
-/// 4. altrimenti stato [SeasonState.unknown].
+/// Estimates are NOT computed by the app: they are in the database
+/// (`seasonality.estimates`, method in `metadata.seasonality_estimates_method`,
+/// script `scripts/estimate_zone_gaps.py`). Order:
+/// 1. real data for the zone (or the Italian macro-area);
+/// 2. database estimate, marked ≈ (only if `allowApproximate`);
+/// 3. for exotic produce, "not grown here" (`estimates.not_grown`);
+/// 4. otherwise state [SeasonState.unknown].
 class SeasonalityResolver {
   const SeasonalityResolver({
     required this.zone,
@@ -42,7 +42,7 @@ class SeasonalityResolver {
       }
     }
 
-    // Esotici: il database dichiara le zone in cui non sono coltivati.
+    // Exotic produce: the database declares the zones where it is not grown.
     final zoneForNotGrown = zone.code;
     if (s.notGrownZones.contains(zoneForNotGrown)) {
       return SeasonCalendar(
@@ -53,16 +53,16 @@ class SeasonalityResolver {
     return SeasonCalendar.empty;
   }
 
-  /// Ordine di default per il calendario di riferimento; il database lo
-  /// riporta in `metadata.seasonality_reference_order` (ha la precedenza).
+  /// Default order for the reference calendar; the database
+  /// stores it in `metadata.seasonality_reference_order` (which takes precedence).
   static const defaultReferenceOrder = [
     'italy_national', 'mediterranean', 'continental', 'atlantic', 'mountain', 'pannonian', 'boreal',
   ];
 
-  /// Calendario "di riferimento" da mostrare nella scheda quando per la zona
-  /// scelta non c'è né un dato né una stima attiva. Solo dati veri (mai
-  /// stime), nell'ordine [order]. `null` se la zona ha dati o se non esiste
-  /// nessun riferimento. `sourceKey` = `italy_national` o il codice della zona.
+  /// "Reference" calendar shown on the product page when the chosen zone
+  /// has neither data nor an active estimate. Real data only (never
+  /// estimates), in the order [order]. `null` if the zone has data or no
+  /// reference exists. `sourceKey` = `italy_national` or the zone code.
   SeasonCalendar? reference(FoodItem item, {List<String>? order}) {
     if (resolve(item).hasData) return null;
     final s = item.seasonality;

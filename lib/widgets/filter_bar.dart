@@ -9,9 +9,9 @@ import 'advanced_filters_sheet.dart';
 import 'food_actions.dart';
 import '../theme/icon_service.dart';
 
-/// Barra comandi sotto lo slider dei mesi.
-/// Riga 1: ❤️ preferiti | filtri · vista · 🔍 (oppure il campo di ricerca).
-/// Riga 2: Tutti / Frutta / Verdura / Altro (si possono combinare).
+/// Command bar under the month slider.
+/// Row 1: ❤️ favourites | filters · view · 🔍 (or the search field).
+/// Row 2: All / Fruit / Vegetables / Other (they can be combined).
 class FilterBar extends StatelessWidget {
   const FilterBar({super.key});
 
@@ -221,7 +221,7 @@ class _CategoryToggle extends StatelessWidget {
           visualDensity: VisualDensity.compact,
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           padding: const EdgeInsets.symmetric(horizontal: 4),
-          // stessa misura per tutte le etichette (4 segmenti sugli schermi stretti)
+          // same size for all labels (4 segments on narrow screens)
           textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
           iconSize: 14,
         ),
@@ -247,7 +247,7 @@ class _CategoryToggle extends StatelessWidget {
           ),
         ],
         selected: selected,
-        // Un tocco cambia un solo pulsante: si applica quello.
+        // A tap changes a single button: that one is applied.
         onSelectionChanged: (sel) {
           final changed = sel.difference(selected).union(selected.difference(sel));
           if (changed.isNotEmpty) home.toggleQuickCategory(changed.first);
@@ -257,8 +257,8 @@ class _CategoryToggle extends StatelessWidget {
   }
 }
 
-/// Etichetta di un segmento: su una riga sola, si rimpicciolisce se lo
-/// spazio non basta (4 segmenti sugli schermi stretti).
+/// Label of a segment: on a single line, it shrinks if
+/// there is not enough space (4 segments on narrow screens).
 class _SegLabel extends StatelessWidget {
   const _SegLabel(this.text);
   final String text;

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../models/season_state.dart';
 import 'icon_service.dart';
 
-/// Colori e micro-icone degli stati stagionali, con varianti per tema chiaro
-/// e scuro. Il colore del simbolo (bianco o quasi nero) è scelto in base alla
-/// luminanza dello sfondo per avere sempre contrasto sufficiente.
+/// Colours and micro-icons of the seasonal states, with light and dark theme
+/// variants. The symbol colour (white or near-black) is chosen based on the
+/// background luminance, so there is always enough contrast.
 class SeasonPalette {
   const SeasonPalette._();
 
@@ -22,8 +22,8 @@ class SeasonPalette {
     };
   }
 
-  /// Bordo luminoso del Peak in tema scuro, perché il verde scuro su sfondo
-  /// scuro altrimenti si perde.
+  /// Bright border of Peak in the dark theme, because dark green on a background
+  /// theme would otherwise get lost.
   static Color? accentBorder(SeasonState s, Brightness b) {
     if (s == SeasonState.peakSeason && b == Brightness.dark) {
       return const Color(0xFFA5D6A7);
@@ -36,15 +36,15 @@ class SeasonPalette {
     return bg.computeLuminance() > 0.45 ? const Color(0xFF1B1F1B) : Colors.white;
   }
 
-  /// Slot di IconService dell'icona di uno stato (set A "Crescita" per le
-  /// fasi di stagione, scelto dall'utente il 2026-11-06).
+  /// IconService slot of a state's icon ("Growth" set A for the
+  /// season phases, chosen by the project owner on 2026-11-06).
   static String iconSlot(SeasonState s) => s == SeasonState.unknown
       ? 'seasonality.estimates.unknown'
       : 'seasonality.state.${s.code}';
 }
 
-/// Micro-icona di uno stato (slot `seasonality.state.*` di ui_config.json),
-/// già colorata.
+/// Micro-icon of a state (`seasonality.state.*` slot of ui_config.json),
+/// already coloured.
 class SeasonGlyph extends StatelessWidget {
   const SeasonGlyph({super.key, required this.state, required this.size, required this.color});
 

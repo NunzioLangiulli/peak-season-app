@@ -9,8 +9,8 @@ import 'package:peak_season/providers/home_controller.dart';
 import 'package:peak_season/providers/library_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Alimenti con "Dati Non Disponibili" per la zona scelta (regola approvata
-/// dall'utente il 2026-11-06): mai mescolati agli alimenti di stagione.
+/// Products with "No Data Available" for the chosen zone (rule approved
+/// by the project owner on 2026-11-06): never mixed with in-season products.
 void main() {
   late FoodDatabase db;
   const atlantic = SeasonalityResolver(zone: ClimaticZone.atlantic, area: ItalyMacroArea.nord);
@@ -41,7 +41,7 @@ void main() {
     final l = home.computeLists(db: db, library: lib, resolver: atlantic, language: AppLanguage.it);
     expect(l.noData, isEmpty);
     expect(l.main.map((e) => e.item.id), contains('cece_chickpea'));
-    // in fondo, dopo gli alimenti con dati
+    // at the bottom, after the products with data
     expect(l.main.last.calendar.hasData, isFalse);
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.getBool('includeFoodsWithoutData'), isTrue);

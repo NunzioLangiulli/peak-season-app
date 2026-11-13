@@ -7,8 +7,8 @@ import '../models/notification_prefs.dart';
 import '../models/season_state.dart';
 import '../providers/home_controller.dart';
 
-/// Testo di una notifica, indipendente dal plugin (così è testabile e
-/// riusabile per le anteprime).
+/// Text of a notification, independent of the plugin (so it is testable and
+/// reusable for previews).
 class NotificationContent {
   const NotificationContent({
     required this.title,
@@ -18,19 +18,19 @@ class NotificationContent {
     this.summary,
   });
 
-  /// Titolo (null = nessun titolo: Android mostra solo il nome dell'app).
+  /// Title (null = no title: Android shows only the app name).
   final String? title;
 
   /// Riga unica, mostrata a notifica chiusa.
   final String body;
 
-  /// Righe della notifica espansa (InboxStyle), con `<b>` per evidenziare.
+  /// Lines of the expanded notification (InboxStyle), with `<b>` for highlighting.
   final List<String> lines;
   final String payload;
   final String? summary;
 }
 
-/// Payload delle notifiche: dicono all'app cosa aprire quando le tocchi.
+/// Notification payloads: they tell the app what to open when tapped.
 class NotificationPayload {
   static const openSeason = 'open:season';
   static const openShopping = 'open:shopping';
@@ -56,14 +56,14 @@ class NotificationContentBuilder {
 
   String _name(FoodItem i) => i.name.of(language);
 
-  /// Notifica fissa "modalità spesa" per il mese [month] (0-11).
+  /// Persistent "shopping mode" notification for month [month] (0-11).
   ///
-  /// Niente titolo (il mese lo sai già) e niente riga separata per la lista:
-  /// una riga per fase di stagione con l'etichetta in grassetto.
-  /// - [ShoppingNotifListMode.highlight]: tutti gli alimenti di stagione, con
-  ///   quelli in lista in grassetto e per primi;
-  /// - [ShoppingNotifListMode.onlyList]: solo gli alimenti della lista,
-  ///   comprese le righe "fuori stagione"/"senza dati" se servono.
+  /// No title (you already know the month) and no separate line for the list:
+  /// one line per season phase, with the label in bold.
+  /// - [ShoppingNotifListMode.highlight]: every in-season product, with
+  ///   those on the list in bold and first;
+  /// - [ShoppingNotifListMode.onlyList]: only the products on the list,
+  ///   including the "out of season"/"no data" lines when needed.
   NotificationContent shopping({
     required int month,
     required List<String> shoppingIds,
@@ -100,8 +100,8 @@ class NotificationContentBuilder {
       if (st.isAvailable) available += items.length;
       if (st == SeasonState.peakSeason) peakNames.addAll(items.map(_name));
       if (items.isEmpty) continue;
-      // Gli alimenti in lista vanno per primi, così restano visibili
-      // (partizione e non sort: List.sort non è stabile).
+      // Products on the list go first, so they stay visible
+      // (partition, not sort: List.sort is not stable).
       final ordered = [
         ...items.where((i) => inList.contains(i.id)),
         ...items.where((i) => !inList.contains(i.id)),
@@ -124,8 +124,8 @@ class NotificationContentBuilder {
     );
   }
 
-  /// Alimenti che nel mese [month] entrano nel picco della stagione
-  /// (picco in [month] ma non nel mese precedente).
+  /// Products entering peak season in month [month]
+  /// (peak in [month] but not in the previous month).
   List<FoodItem> enteringPeak(int month, {required PeakNotifMode mode, required Set<String> favorites}) {
     if (mode == PeakNotifMode.off) return const [];
     final out = <FoodItem>[];

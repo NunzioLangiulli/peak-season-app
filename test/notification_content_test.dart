@@ -27,7 +27,7 @@ void main() {
 
   test('modalità spesa senza lista: alimenti di stagione, apre la Home', () {
     final c = builder().shopping(month: 10, shoppingIds: const [], listMode: ShoppingNotifListMode.highlight);
-    expect(c.title, isNull); // il mese lo sai già
+    expect(c.title, isNull); // you already know the month
     expect(c.payload, NotificationPayload.openSeason);
     expect(c.lines.first, startsWith('<b>Picco di Stagione:</b>'));
   });
@@ -51,8 +51,8 @@ void main() {
     );
     final all = c.lines.join(' ');
     expect(all, contains('Mela'));
-    expect(all, contains('Pomodoro')); // anche fuori stagione, nella sua riga
-    expect(all, isNot(contains('Bietola'))); // niente alimenti fuori lista
+    expect(all, contains('Pomodoro')); // out of season too, on its own line
+    expect(all, isNot(contains('Bietola'))); // no products outside the list
     expect(c.body, startsWith('La Tua Lista:'));
   });
 

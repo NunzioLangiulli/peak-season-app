@@ -10,9 +10,9 @@ import 'package:peak_season/models/app_enums.dart';
 import 'package:peak_season/models/notification_prefs.dart';
 import 'package:peak_season/notifications/notification_content.dart';
 
-/// Esporta i testi reali delle notifiche in build/notification_preview.json
-/// per le anteprime (scripts/preview_screens.py). Si attiva solo con
-/// PREVIEW_EXPORT=1, quindi non rallenta la suite normale.
+/// Exports the real notification texts to build/notification_preview.json
+/// for the previews (scripts/preview_screens.py). Runs only with
+/// PREVIEW_EXPORT=1, so it does not slow down the normal suite.
 void main() {
   test('esporta testi notifiche', () {
     CopyService.loadFromString(File('assets/data/ui_copy.json').readAsStringSync());

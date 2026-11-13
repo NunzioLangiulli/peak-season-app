@@ -25,9 +25,9 @@ import 'family_screen.dart';
 import '../theme/app_backdrop.dart';
 import '../theme/icon_service.dart';
 
-/// Scheda alimento, nell'ordine del wireframe: galleria, categoria, nome e
-/// azioni, stato, nome scientifico, calendario, poi le sezioni del database.
-/// Le ricette arrivano nella Fase 3.
+/// Product page, in wireframe order: gallery, category, name and
+/// actions, state, scientific name, calendar, then the database sections.
+/// Recipes come in Phase 3.
 class FoodDetailScreen extends StatefulWidget {
   const FoodDetailScreen({super.key, required this.itemId});
   final String itemId;
@@ -202,7 +202,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                               ),
                               if (item.family != null) ...[
                                 Text(' · ', style: theme.textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
-                                // La famiglia apre l'elenco degli alimenti della stessa famiglia
+                                // The family opens the list of products of the same family
                                 InkWell(
                                   borderRadius: BorderRadius.circular(8),
                                   onTap: () =>
@@ -275,7 +275,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Blocchi nell'ordine e con la modalità scelti in Impostazioni.
+                  // Blocks in the order and mode chosen in Settings.
                   for (final id in layout.visibleOrder)
                     switch (id) {
                       DetailSection.calendar => _Section(
@@ -298,8 +298,8 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                             ),
                             const SizedBox(height: 8),
                             _HighlightedCalendar(calendar: calendar, month: month, height: 22),
-                            // Prodotti a lunga conservazione: perché la stagione
-                            // dura più della raccolta (seasonality.availability_note).
+                            // Long-keeping products: why the season
+                            // lasts longer than the harvest (seasonality.availability_note).
                             if (item.raw.text('seasonality.availability_note').of(lang).isNotEmpty) ...[
                               const SizedBox(height: 10),
                               Row(
@@ -366,7 +366,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
   }
 }
 
-/// Calendario di un'altra zona con dati veri, quando la zona scelta non ne ha.
+/// Calendar of another zone with real data, when the chosen zone has none.
 Widget? _referenceCalendar(BuildContext context, SeasonCalendar? ref, int month) {
   if (ref == null) return null;
   final s = context.s;
@@ -397,8 +397,8 @@ Widget? _referenceCalendar(BuildContext context, SeasonCalendar? ref, int month)
 // Componenti comuni
 // =============================================================================
 
-/// Box di sezione richiudibile: titolo (tocca per aprire/chiudere), "?"
-/// opzionale e contenuto. Lo stato iniziale viene dalle Impostazioni.
+/// Collapsible section box: title (tap to open/close), optional "?"
+/// and content. The initial state comes from Settings.
 class _Section extends StatefulWidget {
   const _Section({
     required this.id,
@@ -409,7 +409,7 @@ class _Section extends StatefulWidget {
     this.helpLegend = false,
   });
 
-  /// Il "?" mostra anche la legenda dei colori (solo il calendario).
+  /// The "?" also shows the colour legend (calendar only).
   final bool helpLegend;
 
   final DetailSection id;
@@ -469,7 +469,7 @@ class _SectionState extends State<_Section> {
   }
 }
 
-/// Slot dell'icona nel titolo di una sezione della scheda.
+/// Icon slot in the title of a product page section.
 String _sectionSlot(DetailSection d) => switch (d) {
   DetailSection.calendar => 'detail.section.calendar',
   DetailSection.varieties => 'detail.section.varieties',
@@ -482,17 +482,17 @@ String _sectionSlot(DetailSection d) => switch (d) {
   DetailSection.links => 'detail.section.links',
 };
 
-/// Sottotitolo dentro una sezione, con "?" opzionale.
+/// Subtitle inside a section, with optional "?".
 class _Sub extends StatelessWidget {
   const _Sub(this.text, {required this.icon, this.field, this.trailing});
   final String text;
   final String? field;
 
-  /// Slot dell'icona davanti al sottotitolo: ogni titoletto ha la sua.
+  /// Icon slot in front of the subtitle: each subheading has its own.
   final String icon;
 
-  /// Tag accanto al titoletto ("Maturazione: Climaterico"); va a capo se
-  /// non c'è spazio.
+  /// Tag next to the subheading ("Ripening: Climacteric"); wraps if
+  /// there is no room.
   final Widget? trailing;
 
   @override
@@ -526,8 +526,8 @@ class _Sub extends StatelessWidget {
   }
 }
 
-/// "Nord Italia" con la sagoma dell'Italia e la macro-area piena
-/// (assets/icons/italy, da scripts/build_italy_area_icons.py).
+/// "Northern Italy" with the outline of Italy and the macro-area filled
+/// (assets/icons/italy, from scripts/build_italy_area_icons.py).
 class _AreaLabel extends StatelessWidget {
   const _AreaLabel({required this.text, this.area});
   final String text;
@@ -564,8 +564,8 @@ class _Para extends StatelessWidget {
       : Text(text, style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.4));
 }
 
-/// Iniziali dei mesi e pallini da gennaio a dicembre, con la pillola
-/// verticale dietro la colonna del mese selezionato (come nella vista 12 mesi).
+/// Month initials and dots from January to December, with the vertical
+/// pill behind the selected month's column (as in the 12-month view).
 class _HighlightedCalendar extends StatelessWidget {
   const _HighlightedCalendar({required this.calendar, required this.month, this.height = 22});
   final SeasonCalendar calendar;
@@ -654,7 +654,7 @@ class _ActionButton extends StatelessWidget {
     this.danger = false,
   });
 
-  /// Rosso del tasto "Non lo Mangio" attivo.
+  /// Red of the active "I Don't Eat It" button.
   static const dangerColor = Color(0xFFE53935);
 
   final String icon;
@@ -663,8 +663,8 @@ class _ActionButton extends StatelessWidget {
   final VoidCallback onTap;
   final Color? color;
 
-  /// Azione di esclusione: da attivo si colora di rosso invece che di verde
-  /// (stesso alone degli altri pulsanti, cambia solo la tinta).
+  /// Exclusion action: when active it turns red instead of green
+  /// (same glow as the other buttons, only the tint changes).
   final bool danger;
 
   @override
@@ -780,9 +780,9 @@ class _BuyStoreSection extends StatelessWidget {
     final speedUp = r.text('$base.ripening_management.speed_up').of(lang);
     final slowDown = r.text('$base.ripening_management.slow_down').of(lang);
     final perish = r.text('$base.perishability.label').of(lang);
-    // metadata.detail_display_rules.ripening.non_climacteric: un prodotto
-    // non climaterico non matura dopo la raccolta, quindi niente "Per Farlo
-    // Maturare"; il "Per Rallentare" diventa un consiglio di conservazione.
+    // metadata.detail_display_rules.ripening.non_climacteric: a
+    // non-climacteric produce does not ripen after harvest, so no "To Ripen
+    // It"; "To Slow Down" becomes a storage tip.
     final climacteric = item.ripeningType == 'climaterico';
 
     return _Section(
@@ -794,7 +794,7 @@ class _BuyStoreSection extends StatelessWidget {
           _Sub(s.whatToLookFor, icon: 'detail.how_to_choose'),
           _Para(r.text('buying_guide.detailed_selection').of(lang)),
           const Divider(height: 28),
-          // Il significato (es. "non matura dopo la raccolta") è nel "?" del tag.
+          // The meaning (e.g. "does not ripen after harvest") is in the tag's "?".
           _Sub(s.ripening, icon: 'detail.ripening', trailing: RipeningTypeLabel(item: item)),
           if (climacteric) ...[
             if (speedUp.isNotEmpty) ...[_Sub(s.ripeningSpeedUp, icon: 'detail.speed_up', field: '$base.ethylene_compatibility'), _Para(speedUp)],
@@ -822,7 +822,7 @@ class _NutritionSection extends StatelessWidget {
     return v.toStringAsFixed(1).replaceAll('.0', '');
   }
 
-  /// Verde chiaro dei riquadri "impronta bassa" della Sostenibilità.
+  /// Light green of the Sustainability "low footprint" boxes.
   static const _favorable = Color(0xFF2E7D32);
   static const _warning = Color(0xFFC62828);
 
@@ -838,15 +838,15 @@ class _NutritionSection extends StatelessWidget {
     final kcal = r.number('$base.kcal_per_100g');
     if (kcal == null) return const SizedBox.shrink();
 
-    // Indicazioni UE: testi del prodotto (IT e EN allineati) + regole del
-    // database (gruppo, nutriente, tono).
+    // EU claims: product texts (IT and EN aligned) + rules from the
+    // database (group, nutrient, tone).
     final claimsIt = r.list('$base.nutrition_claims_eu.it').map((e) => '$e').toList();
     final claimsLang = r.list('$base.nutrition_claims_eu.${lang.name}').map((e) => '$e').toList();
     final claims = [
       for (var i = 0; i < claimsIt.length; i++)
         (text: i < claimsLang.length ? claimsLang[i] : claimsIt[i], rule: db.claimRules.claims[claimsIt[i]]),
     ];
-    // nutriente -> tono più "forte" (un avviso vince su una nota favorevole)
+    // nutrient -> "strongest" tone (a warning beats a favourable note)
     final toneOf = <String, String>{};
     for (final c in claims) {
       final rule = c.rule;
@@ -861,8 +861,8 @@ class _NutritionSection extends StatelessWidget {
             .toList()
           ..sort((a, b) => (b['percent_nrv'] as num).compareTo(a['percent_nrv'] as num));
 
-    // Riquadro di un valore per 100 g: grigio, verde se un'indicazione UE lo
-    // segnala in positivo, rosso se lo segnala come da tenere d'occhio.
+    // Box of a per-100 g value: grey, green if an EU claim flags it
+    // positively, red if it flags it as something to watch.
     Widget macro(String label, num? v, String unit, List<String> nutrients) {
       final tone = nutrients
           .map((n) => toneOf[n])
@@ -908,8 +908,8 @@ class _NutritionSection extends StatelessWidget {
       label: Text(text, style: theme.textTheme.labelSmall),
     );
 
-    // Raggruppamento per prefisso solo se il gruppo ha almeno 2 indicazioni
-    // e in tutto ce ne sono abbastanza; le altre restano chip singoli.
+    // Group by prefix only if the group has at least 2 claims
+    // and there are enough overall; the others stay single chips.
     final byGroup = <String, List<({String text, ClaimRule? rule})>>{};
     for (final c in claims) {
       if (c.rule != null) (byGroup[c.rule!.group] ??= []).add(c);
@@ -953,7 +953,7 @@ class _NutritionSection extends StatelessWidget {
             for (final g in grouped)
               Padding(
                 padding: const EdgeInsets.only(top: 10),
-                // "A Basso Contenuto di:  [Calorie] [Zuccheri]" sulla stessa riga
+                // "Low in:  [Calories] [Sugars]" on the same line
                 child: Wrap(
                   spacing: 6,
                   runSpacing: 6,
@@ -976,10 +976,10 @@ class _NutritionSection extends StatelessWidget {
             for (final m in micros.take(8))
               Builder(
                 builder: (context) {
-                  // Il nutriente citato da un'indicazione UE risalta (verde del Picco).
+                  // The nutrient cited by an EU claim stands out (Peak green).
                   final claimed = toneOf.containsKey(m['key']);
                   final key = m['key'] as String?;
-                  // nome breve uniforme dal database ("Vitamina A", non "Vitamina A (Retinolo…)")
+                  // uniform short name from the database ("Vitamin A", not "Vitamin A (Retinol…)")
                   final name = db.claimRules.nutrientNames[key]?.of(lang) ??
                       '${lang == AppLanguage.en ? (m['name_en'] ?? m['name']) : m['name']}'
                           .replaceAll(RegExp(r'\s*\([^)]*\)'), '');
@@ -1013,7 +1013,7 @@ class _NutritionSection extends StatelessWidget {
                           width: 104,
                           child: Text.rich(
                             TextSpan(children: [
-                              // quantità vera per 100 g, poi la % dei valori di riferimento
+                              // actual amount per 100 g, then the % of reference values
                               TextSpan(text: '${_n(m['amount'] as num?)} ${m['unit'] ?? ''} '),
                               TextSpan(
                                 text: '($pct%)',
@@ -1054,8 +1054,8 @@ class _SustainabilitySection extends StatelessWidget {
     final beefC = r.number('$base.sustainability_rating.times_lower_than_beef_carbon')?.toInt();
     final tips = r.text('$base.sustainability_rating.tips').of(lang);
 
-    // Stessa altezza per i due riquadri (IntrinsicHeight + stretch): il
-    // contenuto resta in alto, lo spazio in più va in fondo.
+    // Same height for both boxes (IntrinsicHeight + stretch): the
+    // content stays at the top, extra space goes to the bottom.
     Widget tile(String icon, String title, String value, String label, Color color) => Expanded(
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -1245,7 +1245,7 @@ class _LinksSection extends StatelessWidget {
     final lang = context.watch<SettingsController>().language;
     final theme = Theme.of(context);
     final links = item.raw.list('sources_by_topic.useful_links').whereType<Map>().toList();
-    // Provenienza tecnica della curva stagionale: solo qui, tra le fonti.
+    // Technical provenance of the seasonal curve: only here, among the sources.
     final curveBasis = item.raw.text('seasonality.curve_basis').of(lang);
     if (links.isEmpty && curveBasis.isEmpty) return const SizedBox.shrink();
     return _Section(
@@ -1271,8 +1271,8 @@ class _LinksSection extends StatelessWidget {
   }
 }
 
-/// Riga di un link utile ("Argomento - Fonte"): l'argomento in grassetto,
-/// la fonte sotto in grigio.
+/// Row of a useful link ("Topic - Source"): the topic in bold,
+/// the source underneath in grey.
 class _SourceTile extends StatelessWidget {
   const _SourceTile({required this.link, required this.lang});
   final Map link;

@@ -5,8 +5,8 @@ import '../models/app_enums.dart';
 import '../models/food_item.dart';
 import '../theme/icon_service.dart';
 
-/// Immagine dell'alimento da asset offline, con segnaposto per i 13 alimenti
-/// ancora senza foto (e per eventuali file mancanti).
+/// Product image from offline assets, with a placeholder for the 13 products
+/// still without a photo (and for any missing files).
 class FoodImage extends StatelessWidget {
   const FoodImage({
     super.key,
@@ -18,7 +18,7 @@ class FoodImage extends StatelessWidget {
 
   final FoodItem item;
 
-  /// File specifico della galleria; default = immagine principale.
+  /// Specific gallery file; default = main image.
   final String? file;
 
   /// true = versione 1080 px (galleria), false = miniatura 600 px.

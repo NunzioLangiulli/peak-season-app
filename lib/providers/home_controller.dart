@@ -8,14 +8,14 @@ import '../models/food_item.dart';
 import '../models/season_state.dart';
 import 'library_controller.dart';
 
-/// Alimento pronto per la UI: calendario già risolto per la zona dell'utente.
+/// Product ready for the UI: calendar already resolved for the user's zone.
 class FoodEntry {
   const FoodEntry(this.item, this.calendar);
   final FoodItem item;
   final SeasonCalendar calendar;
 }
 
-/// Stato della schermata Peak Season: mese, vista, filtri, ricerca.
+/// State of the Peak Season screen: month, view, filters, search.
 class HomeController extends ChangeNotifier {
   HomeController(this._prefs, {DateTime? now})
       : _month = (now ?? DateTime.now()).month - 1,
@@ -54,8 +54,8 @@ class HomeController extends ChangeNotifier {
   Set<FoodCategory> get categories => Set.unmodifiable(_categories);
   Set<SeasonState> get states => Set.unmodifiable(_states);
 
-  /// Filtri avanzati per codice del database: `ripening_type`,
-  /// `primary_location`, livello dell'impronta di carbonio e idrica.
+  /// Advanced filters by database code: `ripening_type`,
+  /// `primary_location`, carbon and water footprint level.
   Set<String> get ripening => Set.unmodifiable(_ripening);
   Set<String> get storage => Set.unmodifiable(_storage);
   Set<String> get carbon => Set.unmodifiable(_carbon);
@@ -63,19 +63,19 @@ class HomeController extends ChangeNotifier {
   bool get dopOnly => _dopOnly;
   bool get showHidden => _showHidden;
 
-  /// Se vero, gli alimenti senza dati per la zona stanno nella lista
-  /// principale (in fondo, con i pallini grigi); altrimenti in una sezione
-  /// separata e chiusa "Senza Dati per Questa Zona".
+  /// If true, products without data for the zone are in the main
+  /// list (at the bottom, with grey dots); otherwise in a separate,
+  /// collapsed "No Data for This Zone" section.
   bool get includeNoData => _includeNoData;
   String get query => _query;
   bool get searchOpen => _searchOpen;
 
-  /// Categorie raccolte sotto "Altro" nella barra rapida.
+  /// Categories grouped under "Other" in the quick bar.
   static const otherCategories = {FoodCategory.erbeSpezie, FoodCategory.funghi, FoodCategory.cereali};
 
-  /// Pulsanti accesi nella barra rapida, derivati dalle categorie scelte
-  /// (anche dai filtri avanzati): "Altro" si accende se c'è almeno una delle
-  /// sue sottocategorie.
+  /// Buttons lit in the quick bar, derived from the chosen categories
+  /// (also from the advanced filters): "Other" lights up if at least one of the
+  /// its sub-categories.
   Set<QuickCategory> get quickCategories {
     if (_categories.isEmpty) return {QuickCategory.all};
     return {
@@ -85,16 +85,16 @@ class HomeController extends ChangeNotifier {
     };
   }
 
-  /// Sottocategorie di "Altro" da mostrare come tag sotto la barra: solo se
-  /// non sono tutte e tre (con tutte e tre basta il pulsante acceso).
+  /// Sub-categories of "Other" to show as tags under the bar: only if
+  /// not all three are selected (with all three the lit button is enough).
   Set<FoodCategory> get otherCategoryTags {
     final sel = _categories.where(otherCategories.contains).toSet();
     return sel.length == otherCategories.length ? const {} : sel;
   }
 
-  /// Numero di filtri attivi (badge sull'icona dei filtri): ogni valore
-  /// scelto conta uno, comprese le categorie della barra rapida
-  /// (es. Frutta + Altro = 4).
+  /// Number of active filters (badge on the filter icon): each chosen
+  /// value counts as one, including the quick-bar categories
+  /// (e.g. Fruit + Other = 4).
   int get advancedFilterCount =>
       _categories.length +
       _states.length +
@@ -136,9 +136,9 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Tocco su un pulsante della barra rapida: Tutti azzera le categorie,
-  /// Frutta e Verdura si accendono e spengono, Altro seleziona (o toglie)
-  /// tutte e tre le sue sottocategorie.
+  /// Tap on a quick-bar button: All clears the categories,
+  /// Fruit and Vegetables toggle on and off, Other selects (or removes)
+  /// all three of its sub-categories.
   void toggleQuickCategory(QuickCategory c) {
     final next = {..._categories};
     switch (c) {
@@ -234,10 +234,10 @@ class HomeController extends ChangeNotifier {
     resetAdvanced();
   }
 
-  /// Lista principale del mese: filtri e ordinamento applicati.
-  /// Gli alimenti senza dati per la zona sono esclusi (vanno in
-  /// [noDataEntries]) a meno che [includeNoData] sia attivo: un alimento senza
-  /// dati non deve mai sembrare "di stagione" mescolato agli altri.
+  /// Main list for the month: filters and sorting applied.
+  /// Products without data for the zone are excluded (they go to
+  /// [noDataEntries]) unless [includeNoData] is on: a product without
+  /// data must never look "in season" mixed with the others.
   List<FoodEntry> visibleEntries({
     required FoodDatabase db,
     required LibraryController library,
@@ -246,8 +246,8 @@ class HomeController extends ChangeNotifier {
   }) =>
       computeLists(db: db, library: library, resolver: resolver, language: language).main;
 
-  /// Sezione separata "Senza Dati per Questa Zona" (vuota se [includeNoData]
-  /// è attivo o se è attivo un filtro per stato stagionale).
+  /// Separate "No Data for This Zone" section (empty if [includeNoData]
+  /// is on or if a seasonal-state filter is active).
   List<FoodEntry> noDataEntries({
     required FoodDatabase db,
     required LibraryController library,
@@ -256,7 +256,7 @@ class HomeController extends ChangeNotifier {
   }) =>
       computeLists(db: db, library: library, resolver: resolver, language: language).noData;
 
-  /// 153 alimenti: abbastanza veloce da rifarlo a ogni build.
+  /// 153 products: fast enough to redo on every build.
   ({List<FoodEntry> main, List<FoodEntry> noData}) computeLists({
     required FoodDatabase db,
     required LibraryController library,
@@ -290,8 +290,8 @@ class HomeController extends ChangeNotifier {
     return (main: main, noData: noData);
   }
 
-  /// peak → primizie → in season → fine → non coltivato → fuori → nessun dato,
-  /// poi alfabetico nella lingua attiva.
+  /// peak → early → in season → end → not grown → out → no data,
+  /// then alphabetical in the active language.
   static void sortBySeason(List<FoodEntry> list, int month, AppLanguage lang) {
     list.sort((a, b) {
       final r = a.calendar.at(month).sortRank.compareTo(b.calendar.at(month).sortRank);

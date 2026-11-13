@@ -1,37 +1,37 @@
-/// Per quali alimenti ricevere l'avviso "entra nel picco della stagione".
+/// Which products trigger the "entering peak season" alert.
 enum PeakNotifMode {
   /// Nessuna notifica.
   off,
 
-  /// Solo gli alimenti preferiti ❤️.
+  /// Favourite products ❤️ only.
   favorites,
 
-  /// Tutti tranne quelli segnati "Non lo mangio" 🚫.
+  /// All except those marked "I Don't Eat It" 🚫.
   allExceptDisliked;
 
   static PeakNotifMode fromName(String? n) =>
       values.firstWhere((v) => v.name == n, orElse: () => PeakNotifMode.off);
 }
 
-/// Come mostrare la lista della spesa nella notifica fissa "modalità spesa".
+/// How to show the shopping list in the persistent "shopping mode" notification.
 enum ShoppingNotifListMode {
-  /// Tutti gli alimenti di stagione, con quelli in lista evidenziati.
+  /// All in-season products, with those on the list highlighted.
   highlight,
 
-  /// Solo gli alimenti della lista, con il loro stato.
+  /// Only the products on the list, with their state.
   onlyList;
 
   static ShoppingNotifListMode fromName(String? n) =>
       values.firstWhere((v) => v.name == n, orElse: () => ShoppingNotifListMode.highlight);
 }
 
-/// Chiavi di shared_preferences lette anche dall'isolate in background che
-/// gestisce il pulsante "Chiudi" della notifica.
+/// shared_preferences keys also read by the background isolate that
+/// handles the notification's "Close" button.
 class PrefKeys {
   static const language = 'language';
   static const shoppingModeActive = 'shoppingModeActive';
   static const storageTipsAfterShopping = 'storageTipsAfterShopping';
 
-  /// Minuti di attesa prima della notifica di conservazione (0 = subito).
+  /// Minutes to wait before the storage notification (0 = immediately).
   static const storageTipsDelayMinutes = 'storageTipsDelayMinutes';
 }

@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/app_enums.dart';
 import '../providers/settings_controller.dart';
 
-/// Colori degli aloni dello sfondo per ogni scelta di Impostazioni → Aspetto.
+/// Background glow colours for each choice in Settings → Appearance.
 class BackdropColors {
   const BackdropColors(this.first, this.second);
   final Color first;
@@ -24,10 +24,10 @@ class BackdropColors {
       };
 }
 
-/// Sfondo di ogni pagina: tinta di base + due aloni morbidi (di default solo
-/// verdi), così le superfici semitrasparenti sopra (card, barre, pannelli)
-/// hanno l'effetto "vetro satinato". Nel tema scuro la base resta nera
-/// (AMOLED) e gli aloni sono appena accennati.
+/// Background of every page: base tint + two soft glows (green only by
+/// default), so the semi-transparent surfaces on top (cards, bars, panels)
+/// get the "frosted glass" effect. In the dark theme the base stays black
+/// (AMOLED) and the glows are barely visible.
 class AppBackdrop extends StatelessWidget {
   const AppBackdrop({super.key, required this.child});
   final Widget child;
@@ -64,8 +64,8 @@ class AppBackdrop extends StatelessWidget {
   }
 }
 
-/// Route delle pagine: ogni pagina porta il proprio sfondo opaco, così le
-/// pagine trasparenti non si sovrappongono durante le transizioni.
+/// Page route: every page carries its own opaque background, so
+/// transparent pages do not overlap during transitions.
 class AppPageRoute<T> extends MaterialPageRoute<T> {
   AppPageRoute({required WidgetBuilder builder, super.settings})
       : super(builder: (context) => AppBackdrop(child: builder(context)));

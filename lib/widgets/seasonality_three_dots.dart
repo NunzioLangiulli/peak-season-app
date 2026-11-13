@@ -4,8 +4,8 @@ import '../l10n/strings.dart';
 import '../models/season_state.dart';
 import '../theme/season_palette.dart';
 
-/// Indicatore "o O o": mese precedente, mese selezionato (più grande, con
-/// micro-icona) e mese successivo.
+/// "o O o" indicator: previous month, selected month (larger, with
+/// micro-icon) and next month.
 class SeasonalityThreeDots extends StatelessWidget {
   const SeasonalityThreeDots({
     super.key,
@@ -19,7 +19,7 @@ class SeasonalityThreeDots extends StatelessWidget {
   /// Mese selezionato, 0-11.
   final int month;
 
-  /// 1.0 = card; 1.3 circa per la scheda alimento.
+  /// 1.0 = card; about 1.3 for the product page.
   final double scale;
 
   @override
@@ -66,7 +66,7 @@ class SeasonalityThreeDots extends StatelessWidget {
   }
 }
 
-/// Pallino colorato di uno stato, con micro-icona opzionale.
+/// Coloured dot of a state, with optional micro-icon.
 class SeasonDot extends StatelessWidget {
   const SeasonDot({
     super.key,
@@ -80,7 +80,7 @@ class SeasonDot extends StatelessWidget {
   final double size;
   final bool showIcon;
 
-  /// Quadratino arrotondato (calendario) invece del cerchio.
+  /// Rounded square (calendar) instead of a circle.
   final bool square;
 
   @override

@@ -2,7 +2,7 @@ import 'app_enums.dart';
 import 'glossary.dart';
 import 'season_state.dart';
 
-/// Testo bilingue `{it, en}` del database.
+/// Bilingual `{it, en}` text from the database.
 class LocalizedText {
   const LocalizedText({this.it = '', this.en = ''});
 
@@ -11,7 +11,7 @@ class LocalizedText {
   final String it;
   final String en;
 
-  /// Accetta `{it, en}`, una stringa semplice o null.
+  /// Accepts `{it, en}`, a plain string or null.
   factory LocalizedText.fromJson(Object? json) {
     if (json is Map) {
       return LocalizedText(
@@ -23,7 +23,7 @@ class LocalizedText {
     return empty;
   }
 
-  /// Testo nella lingua richiesta; se manca usa l'altra.
+  /// Text in the requested language; if missing, uses the other one.
   String of(AppLanguage lang) {
     final v = lang == AppLanguage.en ? en : it;
     return v.isNotEmpty ? v : (lang == AppLanguage.en ? it : en);
@@ -32,7 +32,7 @@ class LocalizedText {
   bool get isEmpty => it.isEmpty && en.isEmpty;
 }
 
-/// Crediti di un'immagine (`images.image_details[]`).
+/// Credits of an image (`images.image_details[]`).
 class ImageCredit {
   const ImageCredit({required this.author, required this.license, this.sourceUrl});
 
@@ -47,16 +47,16 @@ class ImageCredit {
       );
 }
 
-/// Serie stimata (`seasonality.estimates.*.<zona>`): copia della zona vicina
-/// più simile, con la zona di origine in [from].
+/// Estimated series (`seasonality.estimates.*.<zone>`): copy of the most
+/// similar neighbouring zone, with the source zone in [from].
 class EstimatedSeries {
   const EstimatedSeries(this.months, this.from);
   final List<SeasonState> months;
   final String? from;
 }
 
-/// Serie stagionali dell'alimento come sono nel database; la scelta della
-/// serie per la zona dell'utente è in `SeasonalityResolver`.
+/// The product's seasonal series as stored in the database; choosing the
+/// series for the user's zone happens in `SeasonalityResolver`.
 class FoodSeasonality {
   const FoodSeasonality({
     required this.euficZones,
@@ -73,16 +73,16 @@ class FoodSeasonality {
   /// `nord` / `centro` / `sud_isole` -> 12 stati (dati veri).
   final Map<String, List<SeasonState>> italyMacroAreas;
 
-  /// Serie nazionale italiana (può mancare).
+  /// Italian national series (may be missing).
   final List<SeasonState>? italyNational;
 
-  /// Stime del database (`seasonality.estimates.eufic_climatic_zones`).
+  /// Database estimates (`seasonality.estimates.eufic_climatic_zones`).
   final Map<String, EstimatedSeries> estimatedZones;
 
-  /// Stime del database (`seasonality.estimates.italy_macro_areas`).
+  /// Database estimates (`seasonality.estimates.italy_macro_areas`).
   final Map<String, EstimatedSeries> estimatedAreas;
 
-  /// Zone in cui un frutto esotico non è coltivato (`estimates.not_grown`).
+  /// Zones where an exotic fruit is not grown (`estimates.not_grown`).
   final Set<String> notGrownZones;
 
   static List<SeasonState>? _parseMonths(Object? json) {
@@ -129,8 +129,8 @@ class FoodSeasonality {
   }
 }
 
-/// Alimento: solo i campi usati nella Fase 2 (card, filtri, scheda base).
-/// I campi scientifici completi verranno aggiunti nella Fase 3.
+/// Product: only the fields used in Phase 2 (cards, filters, basic page).
+/// The full scientific fields will be added in Phase 3.
 class FoodItem {
   FoodItem({
     required this.id,
@@ -163,13 +163,13 @@ class FoodItem {
   final String id;
   final LocalizedText name;
 
-  /// Sinonimi per lingua (`names.synonyms.it/en`).
+  /// Synonyms by language (`names.synonyms.it/en`).
   final Map<AppLanguage, List<String>> synonyms;
   final FoodCategory category;
   final String? scientificName;
   final String? family;
 
-  /// Nome file JPEG originale (es. `aglio_garlic_02.jpg`), null se assente.
+  /// Original JPEG file name (e.g. `aglio_garlic_02.jpg`), null if missing.
   final String? primaryImage;
   final List<String> gallery;
   final Map<String, ImageCredit> imageCredits;
@@ -189,15 +189,15 @@ class FoodItem {
   /// `climaterico` / `non_climaterico`.
   final String? ripeningType;
 
-  /// JSON completo dell'alimento, letto dalla scheda con `JsonPath`
-  /// (le sezioni di dettaglio non hanno ancora un modello tipizzato).
+  /// Full JSON of the product, read by the product page with `JsonPath`
+  /// (the detail sections do not have a typed model yet).
   final Map<String, dynamic> raw;
 
   final String _searchIndex;
 
   static const _rating = 'nutrition_and_sustainability.environmental_footprint.sustainability_rating';
 
-  /// Livello dell'impronta di carbonio / idrica: `low` / `medium` / `high`.
+  /// Carbon / water footprint level: `low` / `medium` / `high`.
   String? get carbonLevel => _str(raw.at('$_rating.carbon_level'));
   String? get waterLevel => _str(raw.at('$_rating.water_level'));
 
@@ -254,24 +254,24 @@ class FoodItem {
     );
   }
 
-  /// Ricerca per nome IT/EN, sinonimi, varietà, nome scientifico e famiglia.
-  /// Singolare e plurale sono equivalenti ("zucchine" trova "zucchina",
-  /// "tomatoes" trova "tomato"): ogni parola cercata vale anche come radice.
+  /// Search by IT/EN name, synonyms, varieties, scientific name and family.
+  /// Singular and plural are equivalent ("zucchine" finds "zucchina",
+  /// "tomatoes" finds "tomato"): every search word also works as a stem.
   bool matches(String normalizedQuery) {
     if (normalizedQuery.isEmpty || _searchIndex.contains(normalizedQuery)) return true;
     final words = normalizedQuery.split(RegExp(r'\s+')).where((w) => w.isNotEmpty);
     return words.isNotEmpty && words.every((w) => _searchIndex.contains(searchStem(w)));
   }
 
-  /// Radice di una parola per la ricerca: toglie la desinenza del plurale o
-  /// del singolare (it: -a/-e/-i/-o, -che/-ghi → -c/-g; en: -s, -es, -ies).
+  /// Word stem for search: strips the plural or singular ending
+  /// (it: -a/-e/-i/-o, -che/-ghi → -c/-g; en: -s, -es, -ies).
   static String searchStem(String w) {
     if (w.length < 4) return w;
     if (w.endsWith('ies') && w.length > 4) return w.substring(0, w.length - 3);
     if (w.endsWith('oes') || w.endsWith('ches') || w.endsWith('shes')) return w.substring(0, w.length - 2);
     var s = w;
     if ('aeios'.contains(s[s.length - 1])) s = s.substring(0, s.length - 1);
-    // pesche → pesc (come pesca), funghi → fung (come fungo)
+    // pesche → pesc (like pesca), funghi → fung (like fungo)
     if (s.length > 3 && (s.endsWith('ch') || s.endsWith('gh'))) s = s.substring(0, s.length - 1);
     return s;
   }
@@ -294,7 +294,7 @@ class FoodItem {
   }
 }
 
-/// Minuscolo e senza accenti, per una ricerca tollerante ("perche" = "perché").
+/// Lowercase and without accents, for tolerant search ("perche" = "perché").
 String normalizeForSearch(String input) {
   const from = 'àáâäãåèéêëìíîïòóôöõùúûüçñ';
   const to = 'aaaaaaeeeeiiiiooooouuuucn';

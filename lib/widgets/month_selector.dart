@@ -5,14 +5,14 @@ import 'package:provider/provider.dart';
 import '../l10n/strings.dart';
 import '../providers/home_controller.dart';
 
-/// Barra dei mesi a scorrimento circolare (dopo dicembre torna gennaio).
+/// Circular-scrolling month bar (after December comes January).
 ///
-/// - Il mese selezionato è sempre al centro, dentro la pillola.
-/// - Si vede un numero dispari di mesi interi (5 sul telefono, 7 sugli
-///   schermi larghi): lo scorrimento si ferma sempre su un mese, quindi i
-///   mesi agli estremi non risultano mai tagliati.
-/// - Scorrendo si cambia mese; toccando un mese laterale ci si sposta lì.
-/// - Il mese reale ha un puntino sotto.
+/// - The selected month is always in the middle, inside the pill.
+/// - An odd number of whole months is visible (5 on phones, 7 on
+///   wide screens): scrolling always stops on a month, so the
+///   months at the edges are never cut off.
+/// - Scrolling changes the month; tapping a side month moves there.
+/// - The current month has a dot underneath.
 class MonthSelector extends StatefulWidget {
   const MonthSelector({super.key});
 
@@ -21,7 +21,7 @@ class MonthSelector extends StatefulWidget {
 }
 
 class _MonthSelectorState extends State<MonthSelector> {
-  /// Pagina di partenza lontana dagli estremi: lo scorrimento è "infinito".
+  /// Starting page far from the ends: scrolling is "infinite".
   static const _loops = 1000;
   PageController? _controller;
   int _visible = 5;
@@ -80,7 +80,7 @@ class _MonthSelectorState extends State<MonthSelector> {
       child: LayoutBuilder(builder: (context, box) {
         final visible = box.maxWidth >= 560 ? 7 : 5;
         _ensureController(visible, home.month);
-        // Il mese può cambiare da fuori (titolo, calendario, notifica).
+        // The month can change from outside (title, calendar, notification).
         WidgetsBinding.instance.addPostFrameCallback((_) => _goTo(home.month));
         final itemWidth = box.maxWidth / visible;
 
@@ -95,7 +95,7 @@ class _MonthSelectorState extends State<MonthSelector> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Pillola fissa al centro: i mesi le scorrono sotto.
+                // Pill fixed in the middle: the months scroll underneath.
                 Container(
                   width: itemWidth - 6,
                   height: 36,

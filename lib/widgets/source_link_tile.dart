@@ -3,9 +3,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'source_badge.dart';
 
-/// Riga di un link a una fonte, uguale in tutta l'app: logo della fonte,
-/// titolo in grassetto, editore in grigio sotto, icona "apri" a destra.
-/// Usata in "Fonti e Link Utili" della scheda e nelle spiegazioni "?".
+/// Row of a link to a source, the same throughout the app: source logo,
+/// title in bold, publisher in grey underneath, "open" icon on the right.
+/// Used in the product page's "Sources and Useful Links" and in the "?" explanations.
 class SourceLinkTile extends StatelessWidget {
   const SourceLinkTile({
     super.key,
@@ -21,11 +21,11 @@ class SourceLinkTile extends StatelessWidget {
   final String subtitle;
   final String? url;
 
-  /// Chiave della fonte (`official_sources[].key`).
+  /// Source key (`official_sources[].key`).
   final String? sourceKey;
 
-  /// File del logo in `assets/sources/` indicato dal database (può essere
-  /// quello di un'altra fonte della stessa organizzazione).
+  /// Logo file in `assets/sources/` given by the database (it may be
+  /// that of another source from the same organisation).
   final String? favicon;
   final double badgeSize;
 

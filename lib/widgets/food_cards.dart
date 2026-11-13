@@ -13,7 +13,7 @@ import 'seasonality_three_dots.dart';
 import 'storage_summary.dart';
 import '../theme/icon_service.dart';
 
-/// Griglia a 2 colonne della Home (condivisa con la sezione "Senza Dati").
+/// 2-column Home grid (shared with the "No Data" section).
 const homeGridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
   maxCrossAxisExtent: 260,
   mainAxisSpacing: 12,
@@ -70,7 +70,7 @@ class _Badge extends StatelessWidget {
       );
 }
 
-/// MODALITÀ 1 — card della griglia a 2 colonne.
+/// MODE 1 — 2-column grid card.
 class FoodGridCard extends StatelessWidget {
   const FoodGridCard({super.key, required this.entry});
   final FoodEntry entry;
@@ -161,7 +161,7 @@ class _StorageLine extends StatelessWidget {
   }
 }
 
-/// MODALITÀ 2 — card orizzontale a tutta larghezza.
+/// MODE 2 — full-width horizontal card.
 class FoodListCard extends StatelessWidget {
   const FoodListCard({super.key, required this.entry});
   final FoodEntry entry;
@@ -232,7 +232,7 @@ class FoodListCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 6),
-                    // "Come Sceglierlo al Meglio": l'icona dice a cosa si riferisce il testo.
+                    // "How to Choose the Best": the icon says what the text refers to.
                     Text.rich(
                       TextSpan(children: [
                         WidgetSpan(
@@ -259,7 +259,7 @@ class FoodListCard extends StatelessWidget {
   }
 }
 
-/// 📋 e ❤️ come icone piccole senza sfondo (card lista e righe).
+/// 📋 and ❤️ as small icons without background (list cards and rows).
 class _CompactToggles extends StatelessWidget {
   const _CompactToggles({required this.item});
   final FoodItem item;

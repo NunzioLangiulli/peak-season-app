@@ -10,8 +10,8 @@ import '../providers/settings_controller.dart';
 import 'help_button.dart';
 import '../theme/icon_service.dart';
 
-/// Dove conservarlo, per quanto, cosa tenergli lontano: usato nella pagina
-/// "Come conservarli" e nella scheda alimento.
+/// Where to store it, for how long, what to keep away from it: used on the
+/// "How to store them" page and on the product page.
 class StorageSummary extends StatelessWidget {
   const StorageSummary({
     super.key,
@@ -24,11 +24,11 @@ class StorageSummary extends StatelessWidget {
   final FoodItem item;
   final bool showInstructions;
 
-  /// "Per Conservarlo più a Lungo": il "per rallentare" dei prodotti non
-  /// climaterici (metadata.detail_display_rules), vuoto se non serve.
+  /// "To Keep It Longer": the "to slow down" of non-climacteric
+  /// products (metadata.detail_display_rules), empty if not needed.
   final String keepLonger;
 
-  /// false nella guida dopo la spesa, dove il gruppo dice già dove metterlo.
+  /// false in the after-shopping guide, where the group already says where to put it.
   final bool showWhere;
 
   static String _range(Object? v) {
@@ -59,8 +59,8 @@ class StorageSummary extends StatelessWidget {
         if (db.byId[id] != null) db.byId[id]!.name.of(lang),
     ];
 
-    // Titoletto con icona; [trailing] (es. il tag del luogo) sta sulla stessa
-    // riga dopo i due punti se c'è spazio, altrimenti va a capo.
+    // Subheading with icon; [trailing] (e.g. the location tag) sits on the same
+    // line after the colon if there is room, otherwise it wraps.
     Widget label(String text, {String? field, required String icon, Widget? trailing}) => Wrap(
       spacing: 6,
       runSpacing: 6,
@@ -141,7 +141,7 @@ class StorageSummary extends StatelessWidget {
   }
 }
 
-/// Tag a callout (come "Quanto Dura in Casa"), per il luogo dove conservarlo.
+/// Callout tag (like "How Long It Keeps at Home"), for the storage location.
 class _Callout extends StatelessWidget {
   const _Callout({required this.icon, required this.text});
   final String icon;
@@ -204,7 +204,7 @@ class _ShelfChip extends StatelessWidget {
   }
 }
 
-/// Etichetta "Climaterico / Non climaterico" con il "?" del glossario.
+/// "Climacteric / Non-climacteric" label with the glossary "?".
 class RipeningTypeLabel extends StatelessWidget {
   const RipeningTypeLabel({super.key, required this.item, this.compact = false});
   final FoodItem item;

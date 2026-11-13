@@ -80,7 +80,7 @@ void main() {
     });
 
     test('nessun dato e nessuna stima: stato unknown', () {
-      final cece = db.byId['cece_chickpea']!; // atlantica: né dato né stima
+      final cece = db.byId['cece_chickpea']!; // Atlantic: neither data nor estimate
       const r = SeasonalityResolver(zone: ClimaticZone.atlantic, area: ItalyMacroArea.nord);
       final cal = r.resolve(cece);
       expect(cal.hasData, isFalse);
@@ -158,7 +158,7 @@ void main() {
     expect(home.quickCategories, {QuickCategory.fruit, QuickCategory.other});
     expect(home.otherCategoryTags, isEmpty);
     expect(ids().any((id) => db.byId[id]!.category == FoodCategory.funghi), isTrue);
-    // Togliendo i funghi dai filtri Altro resta acceso e compaiono i tag
+    // Removing mushrooms from the filters, Other stays lit and the tags appear
     home.toggleCategory(FoodCategory.funghi);
     expect(home.quickCategories, contains(QuickCategory.other));
     expect(home.otherCategoryTags, {FoodCategory.erbeSpezie, FoodCategory.cereali});
@@ -173,7 +173,7 @@ void main() {
     expect(ids().every((id) => db.byId[id]!.carbonLevel == 'low' && db.byId[id]!.waterLevel == 'high'), isTrue);
     home.resetAdvanced();
 
-    home.setQuery('Solanàcea'); // famiglia botanica, senza badare ad accenti/maiuscole
+    home.setQuery('Solanàcea'); // botanical family, ignoring accents/case
     expect(ids(), contains('pomodoro_tomato'));
     home.setQuery('tomato');
     expect(ids(), contains('pomodoro_tomato'));

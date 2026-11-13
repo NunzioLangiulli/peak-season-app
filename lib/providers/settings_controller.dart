@@ -5,8 +5,8 @@ import '../data/seasonality_resolver.dart';
 import '../models/app_enums.dart';
 import '../models/notification_prefs.dart';
 
-/// Preferenze globali: lingua, tema, zona climatica, notifiche.
-/// Ogni modifica viene salvata subito su `shared_preferences`.
+/// Global preferences: language, theme, climate zone, notifications.
+/// Every change is saved immediately to `shared_preferences`.
 class SettingsController extends ChangeNotifier {
   SettingsController(this._prefs) {
     _language = AppLanguage.fromCode(_prefs.getString(_kLanguage));
@@ -59,7 +59,7 @@ class SettingsController extends ChangeNotifier {
   bool get storageTipsAfterShopping => _storageTipsAfterShopping;
   int get storageTipsDelay => _storageTipsDelay;
 
-  /// Intensità dell'effetto vetro satinato, 0 (superfici piene) - 1 (molto trasparenti).
+  /// Frosted-glass intensity, 0 (solid surfaces) - 1 (very transparent).
   double get frost => _frost;
   BackdropPalette get palette => _palette;
 

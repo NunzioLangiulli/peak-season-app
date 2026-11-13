@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Link esterno: apre il browser del telefono (l'app resta offline, i link
-/// servono solo a chi vuole approfondire sulle fonti).
+/// External link: opens the phone's browser (the app stays offline, links
+/// are only for those who want to dig deeper into the sources).
 class LinkText extends StatelessWidget {
   const LinkText({super.key, required this.label, this.url, this.style});
 

@@ -18,9 +18,9 @@ import 'food_detail_screen.dart';
 import 'storage_tips_screen.dart';
 import '../theme/app_backdrop.dart';
 
-/// Contenitore delle 3 tab con la barra a pillola fluttuante.
-/// IndexedStack mantiene lo stato (scroll, filtri) passando da una tab all'altra.
-/// La tab attiva sta in [AppNavigation], così anche una notifica può cambiarla.
+/// Container of the 3 tabs with the floating pill bar.
+/// IndexedStack keeps the state (scroll, filters) when switching tabs.
+/// The active tab lives in [AppNavigation], so a notification can change it too.
 class RootShell extends StatefulWidget {
   const RootShell({super.key});
 
@@ -41,8 +41,8 @@ class _RootShellState extends State<RootShell> {
     });
   }
 
-  /// Solo nell'anteprima web: `?tab=1`, `?route=storage`, `?food=<id>`
-  /// aprono direttamente una pagina (usato da scripts/preview_screens.py).
+  /// Web preview only: `?tab=1`, `?route=storage`, `?food=<id>`
+  /// open a page directly (used by scripts/preview_screens.py).
   void _openPreviewTarget() {
     final q = Uri.base.queryParameters;
     final tab = int.tryParse(q['tab'] ?? '');

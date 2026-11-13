@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Tag personali dell'utente sugli alimenti: preferiti ❤️, "non lo mangio"
-/// 🚫 e lista della spesa 📋. Salvati come liste di id.
+/// The user's personal tags on products: favourites ❤️, "I don't eat it"
+/// 🚫 and shopping list 📋. Saved as lists of ids.
 class LibraryController extends ChangeNotifier {
   LibraryController(this._prefs)
       : _favorites = {...?_prefs.getStringList(_kFav)},
@@ -19,10 +19,10 @@ class LibraryController extends ChangeNotifier {
   final Set<String> _favorites;
   final Set<String> _disliked;
 
-  /// Lista ordinata per data di aggiunta (la più recente in fondo).
+  /// List sorted by date added (most recent at the bottom).
   final List<String> _shopping;
 
-  /// Alimenti della lista già "presi / nel carrello".
+  /// Products on the list already "picked / in the cart".
   final Set<String> _inCart;
 
   Set<String> get inCartIds => Set.unmodifiable(_inCart);
@@ -35,7 +35,7 @@ class LibraryController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Toglie dalla lista gli alimenti già nel carrello.
+  /// Removes the products already in the cart from the list.
   void clearCompleted() {
     _shopping.removeWhere(_inCart.contains);
     _inCart.clear();
@@ -55,7 +55,7 @@ class LibraryController extends ChangeNotifier {
   void toggleFavorite(String id) {
     if (!_favorites.remove(id)) {
       _favorites.add(id);
-      _disliked.remove(id); // un preferito non può essere "non mi piace"
+      _disliked.remove(id); // a favourite cannot be "I don't eat it"
       _save(_kDisliked, _disliked);
     }
     _save(_kFav, _favorites);

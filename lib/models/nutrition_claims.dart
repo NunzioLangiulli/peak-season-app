@@ -1,6 +1,6 @@
 import 'food_item.dart';
 
-/// Gruppo di indicazioni nutrizionali UE ("A Basso Contenuto di", "Fonte di"…).
+/// Group of EU nutrition claims ("Low in", "Source of"…).
 class ClaimGroup {
   const ClaimGroup({required this.code, required this.label, required this.order});
   final String code;
@@ -8,13 +8,13 @@ class ClaimGroup {
   final int order;
 }
 
-/// Regola di un'indicazione: gruppo, nutriente a cui si riferisce e tono.
+/// Rule of a claim: group, nutrient it refers to and tone.
 class ClaimRule {
   const ClaimRule({required this.group, required this.nutrient, required this.nutrientLabel, required this.tone});
   final String group;
 
-  /// Chiave del nutriente: `kcal`, `fats`, `sugars`, `salt`, `fiber`,
-  /// `proteins` oppure la `key` di una voce di vitamins/minerals.
+  /// Nutrient key: `kcal`, `fats`, `sugars`, `salt`, `fiber`,
+  /// `proteins` or the `key` of a vitamins/minerals entry.
   final String nutrient;
   final LocalizedText nutrientLabel;
 
@@ -23,8 +23,8 @@ class ClaimRule {
   bool get isWarning => tone == 'warning';
 }
 
-/// `metadata.nutrition_claims_eu_rules`: le indicazioni dei prodotti sono
-/// testi; le regole (chiave = testo italiano) dicono a cosa si riferiscono.
+/// `metadata.nutrition_claims_eu_rules`: product claims are
+/// texts; the rules (key = Italian text) say what they refer to.
 class NutritionClaimRules {
   const NutritionClaimRules({this.groups = const {}, this.claims = const {}, this.nutrientNames = const {}});
 
@@ -33,7 +33,7 @@ class NutritionClaimRules {
   final Map<String, ClaimGroup> groups;
   final Map<String, ClaimRule> claims;
 
-  /// Nome breve di ogni micronutriente (`nutrient_keys`): "Vitamina A", "Folati"…
+  /// Short name of each micronutrient (`nutrient_keys`): "Vitamin A", "Folate"…
   final Map<String, LocalizedText> nutrientNames;
 
   factory NutritionClaimRules.fromJson(Object? json) {

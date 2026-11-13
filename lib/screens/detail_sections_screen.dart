@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import '../l10n/strings.dart';
 import '../providers/detail_layout_controller.dart';
 
-/// Impostazioni → Sezioni della Scheda Alimento: ordine (trascinando) e
-/// modalità di ogni blocco (Aperta / Chiusa / Nascosta).
+/// Settings → Product Page Sections: order (by dragging) and
+/// mode of each block (Open / Collapsed / Hidden).
 class DetailSectionsScreen extends StatelessWidget {
   const DetailSectionsScreen({super.key});
 
@@ -35,7 +35,7 @@ class DetailSectionsScreen extends StatelessWidget {
         ),
         itemCount: layout.order.length,
         onReorderItem: layout.moveItem,
-        // la maniglia è già a sinistra di ogni riga
+        // the drag handle is already on the left of each row
         buildDefaultDragHandles: false,
         itemBuilder: (context, i) {
           final section = layout.order[i];

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Blocchi della scheda alimento, nell'ordine di default del wireframe.
+/// Blocks of the product page, in the wireframe's default order.
 enum DetailSection {
   calendar,
   varieties,
@@ -21,22 +21,22 @@ enum DetailSection {
   }
 }
 
-/// Come appare un blocco quando si apre la scheda.
+/// How a block appears when the product page opens.
 enum SectionMode {
-  /// Aperto (si può chiudere toccando il titolo).
+  /// Open (can be collapsed by tapping the title).
   open,
 
-  /// Chiuso: si vede solo il titolo, si apre quando serve.
+  /// Collapsed: only the title is visible, it opens when needed.
   collapsed,
 
-  /// Nascosto del tutto.
+  /// Completely hidden.
   hidden;
 
   static SectionMode fromName(String? n) =>
       values.firstWhere((v) => v.name == n, orElse: () => SectionMode.open);
 }
 
-/// Ordine e modalità dei blocchi della scheda alimento (Impostazioni).
+/// Order and mode of the product page blocks (Settings).
 class DetailLayoutController extends ChangeNotifier {
   DetailLayoutController(this._prefs) {
     final saved = _prefs.getStringList(_kOrder);
@@ -67,7 +67,7 @@ class DetailLayoutController extends ChangeNotifier {
       [for (final s in _order) if (modeOf(s) != SectionMode.hidden) s];
   SectionMode modeOf(DetailSection s) => _modes[s] ?? SectionMode.open;
 
-  /// Sposta un blocco (indici già corretti per l'elemento rimosso).
+  /// Moves a block (indices already adjusted for the removed element).
   void moveItem(int oldIndex, int newIndex) {
     final s = _order.removeAt(oldIndex);
     _order.insert(newIndex, s);

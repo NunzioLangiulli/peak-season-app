@@ -4,8 +4,8 @@ import '../l10n/strings.dart';
 import '../models/food_item.dart';
 import 'food_image.dart';
 
-/// Galleria a schermo intero della scheda prodotto: pinch-to-zoom su ogni
-/// foto e scorrimento circolare (dopo l'ultima torna la prima, e viceversa).
+/// Full-screen gallery of the product page: pinch-to-zoom on every
+/// photo and circular scrolling (after the last it goes back to the first, and vice versa).
 class FullscreenGallery extends StatefulWidget {
   const FullscreenGallery({super.key, required this.item, this.initialIndex = 0});
 
@@ -26,7 +26,7 @@ class FullscreenGallery extends StatefulWidget {
 }
 
 class _FullscreenGalleryState extends State<FullscreenGallery> {
-  /// Pagina di partenza lontana dagli estremi: lo scorrimento è "infinito".
+  /// Starting page far from the ends: scrolling is "infinite".
   static const _loops = 1000;
   late final int _n = widget.item.gallery.length;
   late final PageController _page = PageController(initialPage: _n * (_loops ~/ 2) + widget.initialIndex);
@@ -57,7 +57,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
         children: [
           PageView.builder(
             controller: _page,
-            // con la foto ingrandita il dito sposta la foto, non la pagina
+            // with the photo zoomed in, the finger moves the photo, not the page
             physics: _zoomed ? const NeverScrollableScrollPhysics() : const PageScrollPhysics(),
             itemCount: _n == 1 ? 1 : null,
             onPageChanged: (p) {
@@ -75,7 +75,7 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
                   if (z != _zoomed) setState(() => _zoomed = z);
                 },
                 child: GestureDetector(
-                  // doppio tocco: torna alla foto intera
+                  // double tap: back to the whole photo
                   onDoubleTap: _resetZoom,
                   child: Center(
                     child: FoodImage(item: widget.item, file: gallery[i], full: true, fit: BoxFit.contain),

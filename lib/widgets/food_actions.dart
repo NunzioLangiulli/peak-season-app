@@ -24,7 +24,7 @@ class OverlayActionButton extends StatelessWidget {
     this.size = 34,
   });
 
-  /// Slot di IconService.
+  /// IconService slot.
   final String icon;
   final String activeIcon;
   final bool active;
@@ -71,7 +71,7 @@ class OverlayActionButton extends StatelessWidget {
   }
 }
 
-/// Icone/colori condivisi delle tre azioni.
+/// Shared icons/colours of the three actions.
 class FoodActionStyle {
   static const shoppingIcon = 'action.shopping_list.add';
   static const shoppingActiveIcon = 'action.shopping_list.active';
@@ -83,7 +83,7 @@ class FoodActionStyle {
   static const shoppingColor = Color(0xFF2E7D32);
 }
 
-/// Coppia 📋 + ❤️ per card griglia e lista.
+/// 📋 + ❤️ pair for grid and list cards.
 class ShoppingFavoriteButtons extends StatelessWidget {
   const ShoppingFavoriteButtons({super.key, required this.item, this.size = 34});
 
@@ -131,8 +131,8 @@ class FoodNavigation {
     );
   }
 
-  /// Menu rapido con le tre azioni, incluso "Non lo mangio" che nella card
-  /// non ha un pulsante proprio per non affollarla.
+  /// Quick menu with the three actions, including "I don't eat it", which on the card
+  /// has no button of its own so as not to crowd it.
   static void showQuickActions(BuildContext context, FoodItem item) {
     HapticFeedback.mediumImpact();
     final lang = context.read<SettingsController>().language;

@@ -19,9 +19,9 @@ import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Preferenze e database vengono caricati prima del primo frame (lo
-  // splash nativo resta visibile intanto): così ogni schermata, comprese
-  // quelle aperte con Navigator.push, trova i dati già pronti.
+  // Preferences and database are loaded before the first frame (the
+  // native splash stays visible meanwhile): this way every screen, including
+  // those opened with Navigator.push, finds the data already loaded.
   final results = await Future.wait([
     SharedPreferences.getInstance(),
     FoodRepository.load(),
@@ -49,10 +49,10 @@ class PeakSeasonApp extends StatelessWidget {
   final SharedPreferences prefs;
   final FoodDatabase database;
 
-  /// Data "oggi" iniettabile per test e anteprime.
+  /// Injectable "today" date for tests and previews.
   final DateTime? now;
 
-  /// Payload della notifica che ha aperto l'app, se c'è.
+  /// Payload of the notification that opened the app, if any.
   final String? launchPayload;
 
   @override
@@ -98,8 +98,8 @@ class PeakSeasonApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          // Su tablet e schermi larghi il contenuto resta una colonna centrata
-          // e proporzionata invece di allargarsi a tutto schermo.
+          // On tablets and wide screens the content stays a centred,
+          // well-proportioned column instead of stretching to full width.
           builder: (context, child) => AppBackdrop(
             child: Center(
               child: ConstrainedBox(

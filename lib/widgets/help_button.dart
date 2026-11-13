@@ -9,11 +9,11 @@ import 'europe_zones_map.dart';
 import 'season_legend_sheet.dart';
 import 'source_link_tile.dart';
 
-/// Pulsantino grigio "?" che apre la spiegazione di un termine.
+/// Small grey "?" button that opens the explanation of a term.
 ///
-/// Si indica il campo del database ([field], cercato in
-/// `metadata.field_help`) oppure direttamente gli id del glossario ([ids]).
-/// Se il database non ha spiegazioni per quel campo il pulsante non appare.
+/// Pass the database field ([field], looked up in
+/// `metadata.field_help`) or the glossary ids directly ([ids]).
+/// If the database has no explanation for that field the button does not appear.
 class HelpButton extends StatelessWidget {
   const HelpButton({
     super.key,
@@ -27,13 +27,13 @@ class HelpButton extends StatelessWidget {
   final String? field;
   final List<String> ids;
 
-  /// Testo dell'app da mostrare prima delle voci del glossario (per concetti
-  /// che esistono solo nell'app, come lo stato "dati non disponibili").
+  /// App text to show before the glossary entries (for concepts
+  /// that exist only in the app, such as the "no data available" state).
   final HelpExtra? extra;
   final double size;
 
-  /// Mostra in cima la legenda dei colori della stagionalità (il calendario
-  /// ha un solo pulsante di aiuto, non uno a parte per la legenda).
+  /// Shows the seasonality colour legend at the top (the calendar
+  /// has a single help button, not a separate one for the legend).
   final bool showLegend;
 
   @override
@@ -84,7 +84,7 @@ class HelpExtra {
   final Widget? leading;
 }
 
-/// Sheet con una o più voci del glossario; "Vedi anche" apre le voci collegate.
+/// Sheet with one or more glossary entries; "See also" opens the linked entries.
 class HelpSheet extends StatelessWidget {
   const HelpSheet({super.key, required this.entries, this.extra, this.showLegend = false});
 
@@ -140,7 +140,7 @@ class HelpSheet extends StatelessWidget {
           for (final (i, e) in entries.indexed) ...[
             if (i > 0) const Divider(height: 32),
             Text(e.term.of(lang), style: theme.textTheme.titleLarge),
-            // per le zone climatiche il sottotitolo è sostituito dalla mappa
+            // for climate zones the subtitle is replaced by the map
             if (!e.short.isEmpty && e.id != 'eufic_zones') ...[
               const SizedBox(height: 4),
               Text(
@@ -149,7 +149,7 @@ class HelpSheet extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 8),
-            // Per le zone climatiche: mappa dell'Europa con i confini degli Stati
+            // For climate zones: map of Europe with country borders
             if (e.id == 'eufic_zones') ...[
               const EuropeZonesMap(),
               const SizedBox(height: 12),

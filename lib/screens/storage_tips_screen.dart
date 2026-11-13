@@ -13,11 +13,11 @@ import '../widgets/help_button.dart';
 import '../widgets/storage_summary.dart';
 import '../theme/icon_service.dart';
 
-/// Conflitti di etilene tra gli alimenti dati: per ogni alimento che fa
-/// danni (produttore), quelli della spesa da tenergli lontani. Regola del
-/// database (`metadata.ethylene_rules`): coppia A-B solo se B è in
-/// `keep_away_from` di A (produttori forti), non da `produces_ethylene` da solo.
-/// Ordinato per numero di alimenti coinvolti.
+/// Ethylene conflicts among the given products: for each harmful product
+/// (producer), the shopping items to keep away from it. Database rule
+/// (`metadata.ethylene_rules`): pair A-B only if B is in
+/// `keep_away_from` of A (strong producers), not from `produces_ethylene` alone.
+/// Sorted by number of products involved.
 List<({FoodItem producer, List<FoodItem> sensitive})> ethyleneConflicts(List<FoodItem> items) {
   const base = 'ripening_and_storage.ethylene_compatibility';
   final map = <String, Set<FoodItem>>{};
@@ -37,8 +37,8 @@ List<({FoodItem producer, List<FoodItem> sensitive})> ethyleneConflicts(List<Foo
   return out;
 }
 
-/// "Come Conservarli" — sono tornato a casa con le buste: dove metto ogni
-/// cosa? Si apre dalla Lista della Spesa o dalla notifica dopo la spesa.
+/// "How to Store Them" — I'm back home with the bags: where does each
+/// thing go? Opens from the Shopping List or from the after-shopping notification.
 class StorageTipsScreen extends StatefulWidget {
   const StorageTipsScreen({super.key});
 
@@ -77,19 +77,19 @@ class _StorageTipsScreenState extends State<StorageTipsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               child: Text(s.storageTipsEmptyList, textAlign: TextAlign.center, style: theme.textTheme.bodyMedium),
             ),
-          // --- 1. Incompatibilità di etilene nella spesa ---------------------
+          // --- 1. Ethylene incompatibilities in the shopping -----------------
           if (conflicts.isNotEmpty) ...[
             const SizedBox(height: 14),
             _EthyleneAlert(conflicts: conflicts),
           ],
-          // --- 2. Smistamento per luogo ----------------------------------------
+          // --- 2. Sorting by location -----------------------------------------
           for (final loc in _groups)
             if (listItems.any((i) => i.primaryLocation == loc)) ...[
               _GroupHeader(location: loc, count: listItems.where((i) => i.primaryLocation == loc).length),
               for (final item in listItems.where((i) => i.primaryLocation == loc))
                 _TipCard(item: item, initiallyExpanded: true),
             ],
-          // --- 3. Tutto il database ----------------------------------------------
+          // --- 3. The whole database ---------------------------------------------
           const SizedBox(height: 20),
           Text(s.storageSearchAll, style: theme.textTheme.titleMedium),
           const SizedBox(height: 4),

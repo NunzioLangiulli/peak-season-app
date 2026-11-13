@@ -1,4 +1,4 @@
-/// Lingue supportate: tutta l'app è in italiano o tutta in inglese.
+/// Supported languages: the whole app is either in Italian or in English.
 enum AppLanguage {
   it,
   en;
@@ -7,7 +7,7 @@ enum AppLanguage {
       code == 'en' ? AppLanguage.en : AppLanguage.it;
 }
 
-/// Categorie del database (`category`).
+/// Database categories (`category`).
 enum FoodCategory {
   verdura('verdura'),
   frutta('frutta'),
@@ -24,7 +24,7 @@ enum FoodCategory {
       );
 }
 
-/// Le 6 zone climatiche EUFIC (`seasonality.eufic_climatic_zones`).
+/// The 6 EUFIC climate zones (`seasonality.eufic_climatic_zones`).
 enum ClimaticZone {
   mediterranean('mediterranean'),
   continental('continental'),
@@ -42,8 +42,8 @@ enum ClimaticZone {
       );
 }
 
-/// Sotto-area per la zona mediterranea: macro-aree italiane (Km 0) oppure
-/// la serie EUFIC mediterranea generica.
+/// Sub-area for the Mediterranean zone: Italian macro-areas (local) or
+/// the generic EUFIC Mediterranean series.
 enum ItalyMacroArea {
   nord('italia_nord', 'nord'),
   centro('italia_centro', 'centro'),
@@ -77,16 +77,16 @@ enum HomeViewMode {
       );
 }
 
-/// Filtri rapidi esclusivi della barra comandi.
+/// Mutually exclusive quick filters of the command bar.
 enum QuickFilter { all, favorites }
 
 /// Barra rapida Tutti / Frutta / Verdura / Altro (Altro = erbe e spezie,
 /// funghi, cereali).
 enum QuickCategory { all, fruit, vegetables, other }
 
-/// Sfumature dello sfondo (aloni dietro le superfici satinate).
+/// Background tints (glows behind the frosted surfaces).
 enum BackdropPalette {
-  /// Solo verdi (default).
+  /// Greens only (default).
   green,
 
   /// Verde e verde acqua.

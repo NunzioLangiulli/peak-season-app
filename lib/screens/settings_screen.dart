@@ -306,7 +306,7 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-/// Ritardo libero della notifica di conservazione: − / + e cursore (1-120 min).
+/// Free delay of the storage notification: − / + and slider (1-120 min).
 class _DelayPicker extends StatelessWidget {
   const _DelayPicker({required this.minutes, required this.onChanged});
   final int minutes;
@@ -349,7 +349,7 @@ class _DelayPicker extends StatelessWidget {
   }
 }
 
-/// Pallino a due colori che mostra le sfumature di una palette.
+/// Two-colour dot showing the tints of a palette.
 class _PaletteSwatch extends StatelessWidget {
   const _PaletteSwatch({required this.palette});
   final BackdropPalette palette;

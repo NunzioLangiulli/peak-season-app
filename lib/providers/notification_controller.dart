@@ -13,8 +13,8 @@ import 'app_navigation.dart';
 import 'library_controller.dart';
 import 'settings_controller.dart';
 
-/// Collega lo stato dell'app alle notifiche: modalità spesa (on/off e
-/// aggiornamento del contenuto) e riprogrammazione degli avvisi di picco.
+/// Connects the app state to notifications: shopping mode (on/off and
+/// content updates) and rescheduling of the peak alerts.
 class NotificationController extends ChangeNotifier with WidgetsBindingObserver {
   NotificationController({
     required SharedPreferences prefs,
@@ -33,8 +33,8 @@ class NotificationController extends ChangeNotifier with WidgetsBindingObserver 
     library.addListener(_onDataChanged);
     WidgetsBinding.instance.addObserver(this);
     _schedulePeakSoon();
-    // All'avvio lo stato salvato può essere vecchio (notifica tolta con uno
-    // swipe, app chiusa forzatamente): si controlla la notifica reale.
+    // At startup the saved state may be stale (notification swiped
+    // away, app force-closed): the real notification is checked.
     syncShoppingWithSystem();
   }
 
@@ -61,15 +61,15 @@ class NotificationController extends ChangeNotifier with WidgetsBindingObserver 
         disliked: library.dislikedIds,
       );
 
-  /// Contenuto attuale della notifica della spesa (usato anche dalle anteprime).
+  /// Current content of the shopping notification (also used by previews).
   NotificationContent shoppingContent() => _builder.shopping(
         month: _clock().month - 1,
         shoppingIds: library.shoppingListIds,
         listMode: settings.shoppingListMode,
       );
 
-  /// Attiva/disattiva la modalità spesa. Restituisce false se il permesso
-  /// di notifica è stato negato.
+  /// Turns shopping mode on/off. Returns false if the notification
+  /// permission was denied.
   Future<bool> setShoppingMode(bool on) async {
     if (on && _service.isSupported && !await _service.requestPermission()) return false;
     _shoppingActive = on;
@@ -83,7 +83,7 @@ class NotificationController extends ChangeNotifier with WidgetsBindingObserver 
     return true;
   }
 
-  /// Tocco su una notifica (o su "Chiudi") con l'app in esecuzione.
+  /// Tap on a notification (or on "Close") with the app running.
   void handleResponse(NotificationResponse r) {
     if (r.actionId == NotificationService.closeActionId) {
       _shoppingActive = false;
@@ -111,8 +111,8 @@ class NotificationController extends ChangeNotifier with WidgetsBindingObserver 
   }
 
   void _onDataChanged() {
-    // Lista, lingua, zona o modalità cambiate: aggiorna la notifica aperta e
-    // riprogramma gli avvisi (con un piccolo ritardo per raggruppare i tocchi).
+    // List, language, zone or mode changed: update the open notification and
+    // reschedule the alerts (with a short delay to group taps together).
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 600), () async {
       if (_shoppingActive) await _service.showShopping(shoppingContent(), _s);
@@ -144,11 +144,11 @@ class NotificationController extends ChangeNotifier with WidgetsBindingObserver 
     if (state == AppLifecycleState.resumed) syncShoppingWithSystem(refresh: true);
   }
 
-  /// Allinea il pulsante "Sono a fare la spesa" alla notifica reale.
-  /// "Chiudi" premuto in background scrive da un altro isolate (si rilegge
-  /// da disco); uno swipe sulla notifica non avvisa l'app, quindi su Android
-  /// si guarda se la notifica è ancora visibile. Lo stato spento viene anche
-  /// salvato: riaprendo l'app il pulsante non si riaccende da solo.
+  /// Aligns the "I'm out shopping" button with the real notification.
+  /// "Close" pressed in the background writes from another isolate (re-read
+  /// from disk); swiping the notification does not notify the app, so on Android
+  /// it checks whether the notification is still visible. The off state is also
+  /// saved: reopening the app does not turn the button back on by itself.
   @visibleForTesting
   Future<void> syncShoppingWithSystem({bool refresh = false}) async {
     await _prefs.reload();
@@ -161,7 +161,7 @@ class NotificationController extends ChangeNotifier with WidgetsBindingObserver 
       _shoppingActive = active;
       notifyListeners();
     } else if (active && refresh) {
-      await _service.showShopping(shoppingContent(), _s); // il mese può essere cambiato
+      await _service.showShopping(shoppingContent(), _s); // the month may have changed
     }
   }
 

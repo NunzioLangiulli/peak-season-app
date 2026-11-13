@@ -1,6 +1,6 @@
 import 'food_item.dart';
 
-/// Fonte citata da una voce del glossario.
+/// Source cited by a glossary entry.
 class GlossarySource {
   const GlossarySource({
     required this.name,
@@ -13,19 +13,19 @@ class GlossarySource {
   final String name;
   final String? url;
 
-  /// Chiave della fonte (es. `uc_davis`): serve per mostrarne il logo.
+  /// Source key (e.g. `uc_davis`): used to show its logo.
   final String? key;
 
-  /// Editore (es. "UC Davis") e titolo del documento, separati dal database.
+  /// Publisher (e.g. "UC Davis") and document title, kept separate by the database.
   final LocalizedText publisher;
   final LocalizedText title;
 
-  /// File del logo in `assets/sources/` (anche di un'altra fonte della
-  /// stessa organizzazione), null se non c'è.
+  /// Logo file in `assets/sources/` (possibly of another source from the
+  /// same organisation), null if there is none.
   final String? favicon;
 }
 
-/// Voce di `metadata.glossary`: alimenta i pulsanti grigi "?".
+/// Entry of `metadata.glossary`: feeds the grey "?" buttons.
 class GlossaryEntry {
   const GlossaryEntry({
     required this.id,
@@ -64,8 +64,8 @@ class GlossaryEntry {
       );
 }
 
-/// Lettura sicura di percorsi annidati nel JSON grezzo
-/// (es. `item.raw.at('ripening_and_storage.home_storage.tip')`).
+/// Safe reading of nested paths in the raw JSON
+/// (e.g. `item.raw.at('ripening_and_storage.home_storage.tip')`).
 extension JsonPath on Map<String, dynamic> {
   Object? at(String path) {
     Object? cur = this;

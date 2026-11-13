@@ -11,11 +11,11 @@ import '../providers/settings_controller.dart';
 import '../theme/icon_service.dart';
 import 'seasonality_three_dots.dart';
 
-/// BottomSheet dei filtri avanzati. I filtri si applicano dal vivo; il
-/// pulsante in fondo mostra quanti prodotti resteranno.
+/// BottomSheet of the advanced filters. Filters apply live; the
+/// button at the bottom shows how many products will remain.
 ///
-/// Ogni gruppo è una griglia di opzioni della stessa larghezza (2 o 3 per
-/// riga), così il pannello resta compatto e simmetrico.
+/// Each group is a grid of equal-width options (2 or 3 per
+/// row), so the panel stays compact and symmetrical.
 class AdvancedFiltersSheet extends StatelessWidget {
   const AdvancedFiltersSheet({super.key});
 
@@ -185,7 +185,7 @@ class AdvancedFiltersSheet extends StatelessWidget {
   }
 }
 
-/// Griglia di opzioni con la stessa larghezza, [columns] per riga.
+/// Grid of equal-width options, [columns] per row.
 class _OptionGrid extends StatelessWidget {
   const _OptionGrid({required this.columns, required this.children});
   final int columns;
@@ -207,8 +207,8 @@ class _OptionGrid extends StatelessWidget {
       );
 }
 
-/// Opzione selezionabile: icona + etichetta, bordo sottile; da selezionata
-/// prende il colore del tema (o [tint], es. il colore del livello d'impronta).
+/// Selectable option: icon + label, thin border; when selected it
+/// takes the theme colour (or [tint], e.g. the footprint level colour).
 class _Option extends StatelessWidget {
   const _Option({
     required this.icon,
@@ -275,7 +275,7 @@ class _Option extends StatelessWidget {
   }
 }
 
-/// Interruttore compatto con icona, titolo e spiegazione breve.
+/// Compact switch with icon, title and short explanation.
 class _CompactSwitch extends StatelessWidget {
   const _CompactSwitch({
     required this.icon,

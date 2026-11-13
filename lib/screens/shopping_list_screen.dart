@@ -19,9 +19,9 @@ import 'storage_tips_screen.dart';
 import '../theme/app_backdrop.dart';
 import '../theme/icon_service.dart';
 
-/// TAB 2 — Lista della Spesa, pensata per l'uso al banco/al supermercato:
-/// spunta "nel carrello", cosa controllare, peso da comprare, e alla fine i
-/// consigli per conservare.
+/// TAB 2 — Shopping List, designed for use at the counter/in the supermarket:
+/// "in the cart" tick, what to check, weight to buy, and at the end the
+/// storage tips.
 class ShoppingListScreen extends StatelessWidget {
   const ShoppingListScreen({super.key});
 
@@ -31,7 +31,7 @@ class ShoppingListScreen extends StatelessWidget {
     final db = context.read<FoodDatabase>();
     final lib = context.watch<LibraryController>();
     final ids = lib.shoppingListIds.where(db.byId.containsKey).toList();
-    // da comprare prima, già nel carrello in fondo
+    // still to buy first, already in the cart at the bottom
     final toBuy = [for (final id in ids) if (!lib.isInCart(id)) id];
     final inCart = [for (final id in ids) if (lib.isInCart(id)) id];
     final theme = Theme.of(context);
@@ -97,7 +97,7 @@ class ShoppingListScreen extends StatelessWidget {
                 children: [
                   Text(s.shoppingEmpty, style: theme.textTheme.titleMedium),
                   const SizedBox(height: 4),
-                  // L'icona nel testo è la stessa delle card ("aggiungi alla lista").
+                  // The icon in the text is the same as on the cards ("add to list").
                   Text.rich(
                     TextSpan(children: [
                       for (final (i, part) in s.shoppingEmptyHint.split('{icon}').indexed) ...[
@@ -147,7 +147,7 @@ class ShoppingListScreen extends StatelessWidget {
       false;
 }
 
-/// "+ Aggiungi Alimento": cerca nel database e aggiunge senza uscire dalla lista.
+/// "+ Add Product": searches the database and adds without leaving the list.
 class _AddFoodField extends StatefulWidget {
   const _AddFoodField();
 
@@ -231,7 +231,7 @@ class _AddFoodFieldState extends State<_AddFoodField> {
   }
 }
 
-/// Banner "Hai finito la spesa?" → guida alla conservazione.
+/// "Done shopping?" banner → storage guide.
 class _StorageBanner extends StatelessWidget {
   const _StorageBanner();
 
@@ -271,7 +271,7 @@ class _StorageBanner extends StatelessWidget {
   }
 }
 
-/// Card di un alimento in lista: spunta, cosa controllare, peso da comprare.
+/// Card of a product on the list: tick, what to check, weight to buy.
 class _ShoppingCard extends StatefulWidget {
   const _ShoppingCard({super.key, required this.item});
   final FoodItem item;
@@ -441,7 +441,7 @@ class _ShoppingCardState extends State<_ShoppingCard> {
   }
 }
 
-/// Peso netto desiderato → peso lordo da comprare, con la resa edibile
+/// Desired net weight → gross weight to buy, with the edible yield
 /// (`nutrition_and_sustainability.edible_portion_percentage`).
 class _GrossCalculator extends StatefulWidget {
   const _GrossCalculator({required this.controller, required this.ediblePercent});
@@ -496,7 +496,7 @@ class _GrossCalculatorState extends State<_GrossCalculator> {
   }
 }
 
-/// Peso lordo da comprare (arrotondato per eccesso ai 10 g, "da banco").
+/// Gross weight to buy (rounded up to 10 g, "counter style").
 int grossWeight(double netGrams, double ediblePercent) {
   if (netGrams <= 0 || ediblePercent <= 0) return 0;
   return ((netGrams * 100 / ediblePercent) / 10).ceil() * 10;

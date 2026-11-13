@@ -6,11 +6,11 @@ plugins {
 
 android {
     namespace = "it.peakseason.peak_season"
-    compileSdk = 37 // richiesto da flutter_local_notifications 23
+    compileSdk = 37 // required by flutter_local_notifications 23
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        // Desugaring: richiesto da flutter_local_notifications (notifiche programmate)
+        // Desugaring: required by flutter_local_notifications (scheduled notifications)
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

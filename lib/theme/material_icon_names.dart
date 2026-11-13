@@ -1,6 +1,6 @@
-// Generato a mano: nomi Material accettati in data/ui_config.json ("material:<nome>").
-// L'Admin Studio legge questa lista (regex 'nome': Icons.) per proporre solo icone
-// che l'app sa disegnare. Si usa la variante Rounded. Per aggiungerne una: una riga qui.
+// Hand-written: Material names accepted in data/ui_config.json ("material:<name>").
+// The Admin Studio reads this list (regex 'name': Icons.) to offer only icons
+// the app can draw. The Rounded variant is used. To add one: one line here.
 import 'package:flutter/material.dart';
 
 const materialIconNames = <String, IconData>{

@@ -8,8 +8,8 @@ import '../providers/settings_controller.dart';
 import '../widgets/food_cards.dart';
 import '../widgets/help_button.dart';
 
-/// Tutti gli alimenti della stessa famiglia botanica (es. Solanaceae),
-/// ordinati per stagionalità nel mese selezionato.
+/// All products of the same botanical family (e.g. Solanaceae),
+/// sorted by seasonality in the selected month.
 class FamilyScreen extends StatelessWidget {
   const FamilyScreen({super.key, required this.family});
   final String family;

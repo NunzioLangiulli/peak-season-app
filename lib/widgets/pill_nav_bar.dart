@@ -15,14 +15,14 @@ class PillNavItem {
     this.badgeCount = 0,
   });
 
-  /// Slot di IconService (la stessa icona, selezionata o no).
+  /// IconService slot (the same icon, selected or not).
   final String icon;
   final String selectedIcon;
   final String label;
   final int badgeCount;
 }
 
-/// Barra di navigazione fluttuante a pillola, con sfondo sfocato.
+/// Floating pill navigation bar, with a blurred background.
 class PillNavBar extends StatelessWidget {
   const PillNavBar({
     super.key,
@@ -34,8 +34,8 @@ class PillNavBar extends StatelessWidget {
   static const height = 64.0;
   static const bottomMargin = 12.0;
 
-  /// Spazio da lasciare in fondo alle liste perché la barra non copra
-  /// l'ultimo elemento.
+  /// Space to leave at the bottom of lists so the bar does not cover
+  /// the last item.
   static double overlap(BuildContext context) =>
       height + bottomMargin + MediaQuery.paddingOf(context).bottom + 12;
 

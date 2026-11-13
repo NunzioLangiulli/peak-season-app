@@ -8,14 +8,14 @@ import '../models/season_state.dart';
 import '../providers/settings_controller.dart';
 import 'copy_service.dart';
 
-/// Testi dell'interfaccia in italiano e inglese. Cambiano all'istante quando
-/// l'utente cambia lingua (si ricostruisce tutto tramite SettingsController).
+/// Interface texts in Italian and English. They change instantly when
+/// the user changes language (everything is rebuilt through SettingsController).
 ///
-/// I testi stanno in `data/ui_copy.json` (copiato in assets/data/), che
-/// l'utente modifica con scripts/copy_editor.py: qui restano solo le chiavi,
-/// lette tramite [CopyService]. La classe tipizzata resta come facciata, così
-/// l'analyzer segnala un getter mancante e i test verificano che ogni chiave
-/// usata esista nel file.
+/// Texts live in `data/ui_copy.json` (copied to assets/data/), which
+/// is edited with the Admin Studio: only the keys remain here,
+/// read through [CopyService]. The typed class stays as a facade, so
+/// the analyzer flags a missing getter and the tests check that every key
+/// used exists in the file.
 class S {
   const S(this.lang);
   final AppLanguage lang;
@@ -181,8 +181,8 @@ class S {
         ClimaticZone.mountain => _c('settings.zone.mountain'),
         ClimaticZone.pannonian => _c('settings.zone.pannonian'),
       };
-  /// Nome del Paese (il database li riporta in inglese, come EUFIC). Se
-  /// manca nei testi resta il nome inglese.
+  /// Country name (the database stores them in English, like EUFIC). If
+  /// missing from the texts, the English name is kept.
   String country(String en) {
     final key = 'settings.country.${en.toLowerCase().replaceAll(' ', '_')}';
     return CopyService.has(key) ? _c(key) : en;
@@ -231,7 +231,7 @@ class S {
   String get notifPermissionDenied => _c('settings.notif_permission_denied');
   String get notifUnsupported => _c('settings.notif_unsupported');
 
-  // --- Testi delle notifiche ----------------------------------------------
+  // --- Notification texts -------------------------------------------------
   String notifSeasonTitle(String month) => _c('notifications.notif_season_title', {'month': month});
   String notifListTitle(int inSeason, int total) => _c('notifications.notif_list_title', {'inSeason': inSeason, 'total': total});
   String get notifClose => _c('notifications.notif_close');
@@ -290,7 +290,7 @@ class S {
   String get sources => _c('detail.sources');
   String get seeAlso => _c('detail.see_also');
 
-  // --- Sezioni della scheda alimento --------------------------------------
+  // --- Product page sections ----------------------------------------------
   String sectionTitle(DetailSection d) => switch (d) {
         DetailSection.calendar => seasonCalendar,
         DetailSection.varieties => secVarieties,

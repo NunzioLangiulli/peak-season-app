@@ -7,15 +7,15 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'material_icon_names.dart';
 
-/// Mappa delle icone dell'app: `assets/data/ui_config.json` (copia di
-/// `data/ui_config.json`, che l'utente modifica con l'Admin Studio, scheda
-/// Icone). Ogni "slot" (es. `nav.home`, `storage.frigorifero`) indica quale
-/// icona usare:
-///   `svg:<cartella>/<nome>` → `assets/icons/<cartella>/<nome>.svg`
-///   `material:<nome>`       → icona Material Rounded (vedi [materialIconNames])
-/// I nomi degli slot sono un'API stabile come le chiavi di ui_copy.json.
-/// Se uno slot manca nel file vale il default qui sotto; se l'icona scelta
-/// non esiste si vede quella di riserva (punto interrogativo).
+/// Map of the app icons: `assets/data/ui_config.json` (a copy of
+/// `data/ui_config.json`, edited with the Admin Studio, Icons
+/// tab). Each "slot" (e.g. `nav.home`, `storage.frigorifero`) says which
+/// icon to use:
+///   `svg:<folder>/<name>` → `assets/icons/<folder>/<name>.svg`
+///   `material:<name>`       → Material Rounded icon (see [materialIconNames])
+/// Slot names are a stable API, like the ui_copy.json keys.
+/// If a slot is missing from the file the default below applies; if the chosen icon
+/// does not exist, the fallback (question mark) is shown.
 class IconService {
   IconService._();
 
@@ -41,16 +41,16 @@ class IconService {
     };
   }
 
-  /// Riferimento dell'icona di uno slot (`svg:...` / `material:...`).
+  /// Icon reference of a slot (`svg:...` / `material:...`).
   static String ref(String slot) => _slots[slot] ?? defaults[slot] ?? 'material:help';
 
-  /// Slot letti dal file (per i test).
+  /// Slots read from the file (for the tests).
   static Map<String, String> get loaded => _slots;
 
-  /// Icona predefinita di ogni slot usato dall'app: le stesse in
-  /// data/ui_config.json al momento della creazione.
+  /// Default icon of each slot used by the app: the same as in
+  /// data/ui_config.json at creation time.
   static const defaults = <String, String>{
-    // --- Database (scritte anche nel database da build_app_support_metadata.py)
+    // --- Database (also written into the database by build_app_support_metadata.py)
     'seasonality.state.primizie': 'svg:season/primizie',
     'seasonality.state.in_season': 'svg:season/in_season',
     'seasonality.state.peak_season': 'svg:season/peak_season',
@@ -150,7 +150,7 @@ class IconService {
   };
 }
 
-/// Slot dell'icona di dove conservare un prodotto
+/// Icon slot for where to store a product
 /// (`ripening_and_storage.primary_location`).
 String storageSlot(String? location) => switch (location) {
       'frigorifero' => 'storage.frigorifero',
@@ -158,7 +158,7 @@ String storageSlot(String? location) => switch (location) {
       _ => 'storage.dispensa',
     };
 
-/// Icona di uno slot di [IconService].
+/// Icon of an [IconService] slot.
 class SlotIcon extends StatelessWidget {
   const SlotIcon(this.slot, {super.key, this.size, this.color});
 
@@ -170,11 +170,11 @@ class SlotIcon extends StatelessWidget {
   Widget build(BuildContext context) => RefIcon(IconService.ref(slot), size: size, color: color);
 }
 
-/// Disegna un riferimento `svg:<cartella>/<nome>` o `material:<nome>`.
+/// Draws an `svg:<folder>/<name>` or `material:<name>` reference.
 ///
-/// Le icone di `ui/` usano `currentColor` (restano le due tonalità di verde e
-/// il logo DOP/IGP mantiene i suoi colori); quelle di `season/` e `zones/`
-/// sono monocromatiche e vengono ricolorate con un filtro.
+/// `ui/` icons use `currentColor` (the two shades of green stay and
+/// the PDO/PGI logo keeps its colours); those in `season/` and `zones/`
+/// are monochrome and get recoloured with a filter.
 class RefIcon extends StatelessWidget {
   const RefIcon(this.ref, {super.key, this.size, this.color});
 
