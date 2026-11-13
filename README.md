@@ -2,7 +2,7 @@
 
 **Peak Season** tells you what is in season **in your area, this month**, when a product is at its **peak**, how to choose it, how to store it and what its environmental footprint is. The app works **fully offline**, in **English or Italian**, and is built on the *Peak Season – Seasonal Fruit & Vegetable Database* ([peak-season-database](https://github.com/NunzioLangiulli/peak-season-database)): 153 products, 46 official sources, no invented data.
 
-Flutter app for Android (iOS planned). **Current version: 1.1.0.** Versions follow semantic versioning (MAJOR.MINOR.PATCH).
+Flutter app for Android and iPhone (iPhone via sideloading, see below). **Current version: 1.1.0.** Versions follow semantic versioning (MAJOR.MINOR.PATCH).
 
 ---
 
@@ -67,7 +67,7 @@ A complete product page, split into blocks that you can **reorder, collapse or h
 - **❤️ Favourites**, **🚫 I Don't Eat It** (hidden from Home, but recoverable) and **📋 Shopping list**.
 - The **Shopping list** shows whether each product is in season this month.
 
-### Notifications (Android)
+### Notifications (Android; on iPhone, alerts only)
 
 - **Shopping mode:** a persistent notification, visible on the lock screen too, with what is in season. If you have a shopping list, the notification highlights your items or shows only those.
 - **After-shopping tips:** when you close shopping mode, a notification arrives, immediately or after a 0–60 minute delay, and opens **storage tips** for what you bought.
@@ -96,6 +96,27 @@ The app does not need an internet connection, except to open the source links.
 
 ---
 
+## Installing on iPhone (sideloading, free)
+
+The app is not on the App Store. Each release also includes an **unsigned** `.ipa` file, built automatically by GitHub Actions. You sign it with **your own free Apple ID** while installing it.
+
+1. Download `PeakSeason-<version>-unsigned.ipa` from the latest version in the **Releases** section.
+2. Install it with one of these tools:
+   - **[Sideloadly](https://sideloadly.io/)** (Windows or macOS): connect the iPhone with a cable, drag the `.ipa` into Sideloadly, enter your Apple ID and press *Start*.
+   - **[AltStore](https://altstore.io/)** or **[SideStore](https://sidestore.io/)**: install it once, then open the `.ipa` from the iPhone.
+3. On the iPhone:
+   - trust your Apple ID under *Settings → General → VPN & Device Management*;
+   - turn on *Settings → Privacy & Security → Developer Mode* (iOS 16 and later) and restart.
+
+**Limits of a free Apple ID** (Apple rules, not app rules):
+
+- the app **expires after 7 days** and must be signed again. AltStore and SideStore can refresh it automatically; with Sideloadly, install it again. Your favourites, lists and settings are kept;
+- at most **3 sideloaded apps** can be active at the same time.
+
+On iPhone, the persistent shopping-mode notification is not available, because iOS does not support it. Peak Season alerts and storage tips work as normal notifications.
+
+---
+
 ## For developers
 
 ### Requirements
@@ -112,6 +133,8 @@ flutter run               # connected phone or emulator
 flutter run -d chrome     # quick browser preview (no notifications)
 flutter build apk --release
 ```
+
+The iOS build needs macOS and Xcode. The `.github/workflows/ios.yml` workflow builds it on a free GitHub macOS runner with `flutter build ios --release --no-codesign`, then packages it as an unsigned `.ipa`. It runs by hand from the **Actions** tab, where the `.ipa` is kept as a workflow artifact, and every time a release is published, when the `.ipa` is attached to the release.
 
 ### Architecture
 
