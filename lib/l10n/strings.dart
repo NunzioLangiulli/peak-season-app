@@ -166,7 +166,7 @@ class S {
   String paletteName(BackdropPalette p) => switch (p) {
         BackdropPalette.green => _c('settings.palette_name.green'),
         BackdropPalette.greenTeal => _c('settings.palette_name.green_teal'),
-        BackdropPalette.greenAmber => _c('settings.palette_name.green_amber'),
+        BackdropPalette.custom => _c('settings.palette_name.custom'),
         BackdropPalette.none => _c('settings.palette_name.none'),
       };
   String get zoneArctic => _c('settings.zone_arctic');
@@ -360,7 +360,18 @@ class S {
   String get otherCategories => _c('home.category_other');
   String carbonTag(String level) => _c('home.tag_carbon', {'level': level});
   String waterTag(String level) => _c('home.tag_water', {'level': level});
-  String get keepLonger => _c('detail.keep_longer');
+  String get seedbedSowing => _c('detail.seedbed_sowing');
+  String get directSowing => _c('detail.direct_sowing');
+  String get transplant => _c('detail.transplant');
+  String get paletteTopColor => _c('settings.palette_top_color');
+  String get paletteBottomColor => _c('settings.palette_bottom_color');
+  String appVersionLabel(String v) => _c('settings.app_version', {'v': v});
+  String get githubApp => _c('settings.github_app');
+  String get githubAppSub => _c('settings.github_app_sub');
+  String get githubDatabase => _c('settings.github_database');
+  String get githubDatabaseSub => _c('settings.github_database_sub');
+  String get licenseTitle => _c('settings.license_title');
+  String get licenseSub => _c('settings.license_sub');
 }
 
 extension StringsX on BuildContext {

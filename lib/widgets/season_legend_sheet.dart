@@ -57,11 +57,12 @@ class SeasonLegendContent extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Flexible(child: Text(title, style: theme.textTheme.titleSmall)),
-                    ?help,
-                  ],
+                Text.rich(
+                  TextSpan(children: [
+                    TextSpan(text: title),
+                    if (help != null) WidgetSpan(alignment: PlaceholderAlignment.middle, child: help),
+                  ]),
+                  style: theme.textTheme.titleSmall,
                 ),
                 const SizedBox(height: 2),
                 Text(text, style: theme.textTheme.bodySmall?.copyWith(color: muted, height: 1.35)),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../l10n/strings.dart';
 import '../providers/detail_layout_controller.dart';
+import '../theme/screen_edges.dart';
 
 /// Settings → Product Page Sections: order (by dragging) and
 /// mode of each block (Open / Collapsed / Hidden).
@@ -27,7 +28,7 @@ class DetailSectionsScreen extends StatelessWidget {
         actions: [TextButton(onPressed: layout.reset, child: Text(s.restoreDefaults))],
       ),
       body: ReorderableListView.builder(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+        padding: EdgeInsets.fromLTRB(16, 0, 16, safeBottomPadding(context)),
         header: Padding(
           padding: const EdgeInsets.fromLTRB(4, 0, 4, 12),
           child: Text('${s.detailSectionsSub}\n${s.detailSectionsHint}',

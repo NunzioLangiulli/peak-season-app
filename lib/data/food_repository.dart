@@ -13,8 +13,7 @@ import '../models/season_state.dart';
 class AssetPaths {
   static const database = 'assets/data/database.json';
 
-  static String _webp(String jpg) =>
-      '${jpg.substring(0, jpg.lastIndexOf('.'))}.webp';
+  static String _webp(String jpg) => '${jpg.substring(0, jpg.lastIndexOf('.'))}.webp';
 
   /// Thumbnail (600 px) for cards and rows.
   static String thumb(String jpg) => 'assets/images/thumb/${_webp(jpg)}';
@@ -32,11 +31,7 @@ class SeasonLegendEntry {
 
 /// Text of the "More Sustainable Diet" page (`metadata.sustainable_diet_summary`).
 class SustainableDietSummary {
-  const SustainableDietSummary({
-    required this.text,
-    required this.keyPoints,
-    this.sourceUrl,
-  });
+  const SustainableDietSummary({required this.text, required this.keyPoints, this.sourceUrl});
 
   final LocalizedText text;
   final Map<AppLanguage, List<String>> keyPoints;
@@ -59,12 +54,25 @@ class FoodDatabase {
     this.zoneColors = const {},
     this.zoneIcons = const {},
     this.footprintLevels = const {},
+    this.perishabilityLevels = const {},
     this.claimRules = NutritionClaimRules.empty,
   }) : byId = {for (final i in items) i.id: i};
 
   /// Carbon and water footprint levels (`environmental_footprint_method.levels`):
   /// code (`low`/`medium`/`high`) -> ARGB colour.
   final Map<String, int> footprintLevels;
+
+  /// Colour of each perishability level 1-5 (`perishability_legend.levels[].color_hex`).
+  final Map<int, int> perishabilityLevels;
+
+  /// Fallback ramp until the database has the colours: dark green … red.
+  static const _perishRamp = {1: 0xFF2E7D32, 2: 0xFF66BB6A, 3: 0xFFF9A825, 4: 0xFFEF6C00, 5: 0xFFC62828, 6: 0xFF8E1B1B};
+
+  /// Number of perishability levels (6 in the database: up to "extremely high" respiration).
+  int get perishabilityLevelCount =>
+      perishabilityLevels.isEmpty ? 6 : perishabilityLevels.keys.reduce((a, b) => a > b ? a : b);
+
+  int perishabilityColor(int level) => perishabilityLevels[level] ?? _perishRamp[level] ?? 0xFF9E9E9E;
 
   /// Colour of the footprint level (grey if unknown).
   int footprintColor(String? level) => footprintLevels[level] ?? 0xFF9E9E9E;
@@ -103,8 +111,7 @@ class FoodDatabase {
 
   /// Botanical family name in the active language (`vocabulary["botany.family"]`),
   /// e.g. Solanaceae → Solanacee; if missing, the Latin name.
-  LocalizedText familyName(String latin) =>
-      vocabulary['botany.family']?[latin] ?? LocalizedText(it: latin, en: latin);
+  LocalizedText familyName(String latin) => vocabulary['botany.family']?[latin] ?? LocalizedText(it: latin, en: latin);
 
   /// `metadata.seasonality_estimates_method`.
   final LocalizedText estimatesMethod;
@@ -115,14 +122,14 @@ class FoodDatabase {
 
   /// Glossary entries linked to a field (empty if none).
   List<GlossaryEntry> helpFor(String fieldPath) => [
-        for (final id in fieldHelp[fieldPath] ?? const <String>[])
-          if (glossary[id] != null) glossary[id]!,
-      ];
+    for (final id in fieldHelp[fieldPath] ?? const <String>[])
+      if (glossary[id] != null) glossary[id]!,
+  ];
 
   List<GlossaryEntry> entries(List<String> ids) => [
-        for (final id in ids)
-          if (glossary[id] != null) glossary[id]!,
-      ];
+    for (final id in ids)
+      if (glossary[id] != null) glossary[id]!,
+  ];
 }
 
 class FoodRepository {
@@ -154,6 +161,7 @@ class FoodRepository {
         final a = add is Map ? '${add[l] ?? ''}' : '';
         return '$b $a'.trim();
       }
+
       return <String, dynamic>{'it': join('it'), 'en': join('en')};
     }
 
@@ -221,16 +229,13 @@ class FoodRepository {
         if (v['icon'] is String) zoneIcons[z] = (v['icon'] as String).replaceFirst(RegExp(r'^svg:zones/'), '');
       }
       if (v is Map) {
-        zones[z] = [
-          ...((v['countries_primary'] as List?) ?? const []).map((e) => e.toString()),
-        ];
+        zones[z] = [...((v['countries_primary'] as List?) ?? const []).map((e) => e.toString())];
       }
     }
 
     final diet = (meta['sustainable_diet_summary'] as Map?) ?? const {};
     final kp = (diet['key_points'] as Map?) ?? const {};
-    List<String> points(Object? v) =>
-        v is List ? v.map((e) => e.toString()).toList() : const [];
+    List<String> points(Object? v) => v is List ? v.map((e) => e.toString()).toList() : const [];
 
     final glossary = <String, GlossaryEntry>{};
     ((meta['glossary'] as Map?) ?? const {}).forEach((k, v) {
@@ -257,7 +262,18 @@ class FoodRepository {
       if (hex != null) footprintLevels['$k'] = int.parse('FF${hex.replaceFirst('#', '')}', radix: 16);
     });
 
+    final perishabilityLevels = <int, int>{};
+    for (final l in (((meta['perishability_legend'] as Map?)?['levels'] as List?) ?? const [])) {
+      if (l is Map && l['level'] is num && l['color_hex'] is String) {
+        perishabilityLevels[(l['level'] as num).toInt()] = int.parse(
+          'FF${(l['color_hex'] as String).replaceFirst('#', '')}',
+          radix: 16,
+        );
+      }
+    }
+
     return FoodDatabase(
+      perishabilityLevels: perishabilityLevels,
       footprintLevels: footprintLevels,
       claimRules: NutritionClaimRules.fromJson(meta['nutrition_claims_eu_rules']),
       glossary: glossary,
@@ -272,10 +288,7 @@ class FoodRepository {
       zoneCountries: zones,
       sustainableDiet: SustainableDietSummary(
         text: LocalizedText.fromJson(diet),
-        keyPoints: {
-          AppLanguage.it: points(kp['it']),
-          AppLanguage.en: points(kp['en']),
-        },
+        keyPoints: {AppLanguage.it: points(kp['it']), AppLanguage.en: points(kp['en'])},
         sourceUrl: diet['source_url'] as String?,
       ),
       version: (meta['version'] ?? '').toString(),

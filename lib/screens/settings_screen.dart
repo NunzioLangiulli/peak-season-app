@@ -6,12 +6,16 @@ import '../l10n/strings.dart';
 import '../models/app_enums.dart';
 import '../models/notification_prefs.dart';
 import '../theme/app_backdrop.dart';
+import '../widgets/source_badge.dart';
 import '../widgets/help_button.dart';
 import '../providers/settings_controller.dart';
 import '../widgets/pill_nav_bar.dart';
 import 'detail_sections_screen.dart';
 import 'sustainable_diet_screen.dart';
 import '../theme/icon_service.dart';
+import '../widgets/detail_parts.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../app_info.dart';
 
 /// TAB 3 — Impostazioni.
 class SettingsScreen extends StatelessWidget {
@@ -29,14 +33,12 @@ class SettingsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Flexible(
-                    child: Text(text,
-                        style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.primary)),
-                  ),
-                  ?help,
-                ],
+              Text.rich(
+                TextSpan(children: [
+                  TextSpan(text: text),
+                  if (help != null) WidgetSpan(alignment: PlaceholderAlignment.middle, child: help),
+                ]),
+                style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.primary),
               ),
               if (sub != null) ...[
                 const SizedBox(height: 2),
@@ -120,12 +122,25 @@ class SettingsScreen extends StatelessWidget {
                   ChoiceChip(
                     selected: st.palette == p,
                     onSelected: (_) => st.setPalette(p),
-                    avatar: _PaletteSwatch(palette: p),
+                    avatar: _PaletteSwatch(palette: p, top: st.customTop, bottom: st.customBottom),
                     label: Text(s.paletteName(p)),
                   ),
               ],
             ),
           ),
+          // Custom palette: base colour (top) and secondary colour (bottom)
+          if (st.palette == BackdropPalette.custom) ...[
+            _ColorRow(
+              label: s.paletteTopColor,
+              value: st.customTop,
+              onChanged: (c) => st.setCustomColors(top: c),
+            ),
+            _ColorRow(
+              label: s.paletteBottomColor,
+              value: st.customBottom,
+              onChanged: (c) => st.setCustomColors(bottom: c),
+            ),
+          ],
           header(s.climateZone, sub: s.climateZoneSub, help: const HelpButton(field: 'seasonality.eufic_climatic_zones')),
           RadioGroup<ClimaticZone>(
             groupValue: st.zone,
@@ -173,12 +188,7 @@ class SettingsScreen extends StatelessWidget {
           ),
           SwitchListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-            title: Row(
-              children: [
-                Flexible(child: Text(s.approxSetting)),
-                const HelpButton(ids: ['seasonality_estimate']),
-              ],
-            ),
+            title: TextWithHelp(s.approxSetting, helpIds: const ['seasonality_estimate'], helpSize: 18),
             subtitle: Text(s.approxSettingSub),
             value: st.allowApproximate,
             onChanged: st.setAllowApproximate,
@@ -297,8 +307,35 @@ class SettingsScreen extends StatelessWidget {
           ),
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+            leading: const SlotIcon('settings.app_version'),
+            title: Text(s.appVersionLabel(appVersion)),
+          ),
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20),
             leading: const SlotIcon('settings.database'),
             title: Text(s.databaseVersion(db.version, db.items.length)),
+          ),
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+            leading: const SourceBadge(sourceKey: 'github', size: 26),
+            title: Text(s.githubApp),
+            subtitle: Text(s.githubAppSub),
+            trailing: const Icon(Icons.open_in_new_rounded, size: 20),
+            onTap: () => launchUrl(Uri.parse(appRepoUrl), mode: LaunchMode.externalApplication),
+          ),
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+            leading: const SourceBadge(sourceKey: 'github', size: 26),
+            title: Text(s.githubDatabase),
+            subtitle: Text(s.githubDatabaseSub),
+            trailing: const Icon(Icons.open_in_new_rounded, size: 20),
+            onTap: () => launchUrl(Uri.parse(databaseRepoUrl), mode: LaunchMode.externalApplication),
+          ),
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+            leading: const SlotIcon('settings.license'),
+            title: Text(s.licenseTitle),
+            subtitle: Text(s.licenseSub),
           ),
         ],
       ),
@@ -351,13 +388,15 @@ class _DelayPicker extends StatelessWidget {
 
 /// Two-colour dot showing the tints of a palette.
 class _PaletteSwatch extends StatelessWidget {
-  const _PaletteSwatch({required this.palette});
+  const _PaletteSwatch({required this.palette, required this.top, required this.bottom});
   final BackdropPalette palette;
+  final int top;
+  final int bottom;
 
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
-    final c = BackdropColors.of(palette, false);
+    final c = BackdropColors.of(palette, false, customTop: top, customBottom: bottom);
     return Container(
       width: 18,
       height: 18,
@@ -368,6 +407,61 @@ class _PaletteSwatch extends StatelessWidget {
             ? null
             : LinearGradient(colors: [c.first, c.second], stops: const [0.5, 0.5]),
         color: c == null ? (dark ? Colors.black : const Color(0xFFF3F5EE)) : null,
+      ),
+    );
+  }
+}
+
+/// Row of colour dots to pick one colour of the custom palette.
+class _ColorRow extends StatelessWidget {
+  const _ColorRow({required this.label, required this.value, required this.onChanged});
+  final String label;
+  final int value;
+  final ValueChanged<int> onChanged;
+
+  /// Choices: one colour per hue, the app softens them for the background.
+  static const colors = <int>[
+    0xFF66BB6A, 0xFF9CCC65, 0xFF4DB6AC, 0xFF4DD0E1, 0xFF64B5F6, 0xFF7986CB,
+    0xFF9575CD, 0xFFF06292, 0xFFE57373, 0xFFFFB74D, 0xFFFFD54F, 0xFFA1887F, 0xFF90A4AE,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: theme.textTheme.labelLarge?.copyWith(color: cs.onSurfaceVariant)),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final c in colors)
+                Semantics(
+                  button: true,
+                  selected: c == value,
+                  child: GestureDetector(
+                    onTap: () => onChanged(c),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: Color(c),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: c == value ? cs.onSurface : Colors.transparent, width: 2.5),
+                      ),
+                      child: c == value ? const Icon(Icons.check_rounded, size: 18, color: Colors.white) : null,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }

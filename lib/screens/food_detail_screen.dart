@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,6 +18,7 @@ import '../widgets/calendar_view.dart';
 import '../widgets/food_actions.dart';
 import '../widgets/food_image.dart';
 import '../widgets/help_button.dart';
+import '../widgets/detail_parts.dart';
 import '../widgets/fullscreen_gallery.dart';
 import '../widgets/seasonality_three_dots.dart';
 import '../widgets/source_link_tile.dart';
@@ -24,6 +26,7 @@ import '../widgets/storage_summary.dart';
 import 'family_screen.dart';
 import '../theme/app_backdrop.dart';
 import '../theme/icon_service.dart';
+import '../theme/screen_edges.dart';
 
 /// Product page, in wireframe order: gallery, category, name and
 /// actions, state, scientific name, calendar, then the database sections.
@@ -64,303 +67,293 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
     final layout = context.watch<DetailLayoutController>();
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            pinned: true,
-            stretch: true,
-            expandedHeight: 300,
-            backgroundColor: (theme.brightness == Brightness.dark ? Colors.black : const Color(0xFFF3F5EE)).withValues(
-              alpha: 0.86,
-            ),
-            leading: Padding(
-              padding: const EdgeInsets.all(6),
-              child: CircleAvatar(
-                backgroundColor: Colors.black.withValues(alpha: 0.35),
-                child: const BackButton(color: Colors.white),
+      body: BottomEdgeFade(
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              pinned: true,
+              stretch: true,
+              expandedHeight: 300,
+              backgroundColor: (theme.brightness == Brightness.dark ? Colors.black : const Color(0xFFF3F5EE))
+                  .withValues(alpha: 0.86),
+              leading: Padding(
+                padding: const EdgeInsets.all(6),
+                child: CircleAvatar(
+                  backgroundColor: Colors.black.withValues(alpha: 0.35),
+                  child: const BackButton(color: Colors.white),
+                ),
               ),
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  if (gallery.isEmpty)
-                    Hero(
-                      tag: 'food-${item.id}',
-                      child: FoodImagePlaceholder(category: item.category),
-                    )
-                  else
-                    PageView.builder(
-                      controller: _page,
-                      itemCount: gallery.length,
-                      onPageChanged: (i) => setState(() => _index = i),
-                      itemBuilder: (_, i) {
-                        final img = GestureDetector(
-                          onTap: () => FullscreenGallery.show(context, item, initialIndex: i),
-                          child: FoodImage(item: item, file: gallery[i], full: true),
-                        );
-                        return i == 0 ? Hero(tag: 'food-${item.id}', child: img) : img;
-                      },
-                    ),
-                  if (gallery.length > 1)
-                    Positioned(
-                      bottom: 14,
-                      left: 0,
-                      right: 0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          for (var i = 0; i < gallery.length; i++)
-                            AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              margin: const EdgeInsets.symmetric(horizontal: 3),
-                              width: i == _index ? 18 : 7,
-                              height: 7,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: i == _index ? 0.95 : 0.55),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                        ],
+              flexibleSpace: FlexibleSpaceBar(
+                background: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (gallery.isEmpty)
+                      Hero(
+                        tag: 'food-${item.id}',
+                        child: FoodImagePlaceholder(category: item.category),
+                      )
+                    else
+                      PageView.builder(
+                        controller: _page,
+                        itemCount: gallery.length,
+                        onPageChanged: (i) => setState(() => _index = i),
+                        itemBuilder: (_, i) {
+                          final img = GestureDetector(
+                            onTap: () => FullscreenGallery.show(context, item, initialIndex: i),
+                            child: FoodImage(item: item, file: gallery[i], full: true),
+                          );
+                          return i == 0 ? Hero(tag: 'food-${item.id}', child: img) : img;
+                        },
                       ),
-                    ),
-                  if (credit != null)
-                    Positioned(
-                      right: 8,
-                      bottom: 30,
-                      child: Container(
-                        constraints: const BoxConstraints(maxWidth: 240),
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          '© ${credit.author} · ${credit.license}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.white, fontSize: 10),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // --- Intestazione --------------------------------------
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    alignment: WrapAlignment.center,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Chip(visualDensity: VisualDensity.compact, label: Text(s.category(item.category))),
-                      Chip(
-                        visualDensity: VisualDensity.compact,
-                        avatar: SeasonDot(state: state, size: 18, showIcon: true),
-                        label: Text(
-                          '${state == SeasonState.unknown ? s.unknownTitle : s.state(state)}'
-                          '${calendar.isApproximate ? ' ≈' : ''}',
-                        ),
-                        backgroundColor: SeasonPalette.color(state, theme.brightness).withValues(alpha: 0.15),
-                      ),
-                      if (item.hasDopIgp) Chip(visualDensity: VisualDensity.compact, label: Text(s.dopOnlyChip)),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          item.name.of(lang),
-                          style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
-                        ),
-                      ),
-                      SeasonalityThreeDots(calendar: calendar, month: month, scale: 1.3),
-                    ],
-                  ),
-                  if (item.scientificName != null)
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Wrap(
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: [
-                              Text(
-                                item.scientificName!,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: cs.onSurfaceVariant,
-                                  fontStyle: FontStyle.italic,
+                    if (gallery.length > 1)
+                      Positioned(
+                        bottom: 14,
+                        left: 0,
+                        right: 0,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            for (var i = 0; i < gallery.length; i++)
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                margin: const EdgeInsets.symmetric(horizontal: 3),
+                                width: i == _index ? 18 : 7,
+                                height: 7,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: i == _index ? 0.95 : 0.55),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
-                              if (item.family != null) ...[
-                                Text(' · ', style: theme.textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
-                                // The family opens the list of products of the same family
-                                InkWell(
-                                  borderRadius: BorderRadius.circular(8),
+                          ],
+                        ),
+                      ),
+                    if (credit != null)
+                      Positioned(
+                        right: 8,
+                        bottom: 30,
+                        child: Container(
+                          constraints: const BoxConstraints(maxWidth: 240),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.4),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            '© ${credit.author} · ${credit.license}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(color: Colors.white, fontSize: 10),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16, 16, 16, safeBottomPadding(context)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // --- Intestazione --------------------------------------
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Chip(visualDensity: VisualDensity.compact, label: Text(s.category(item.category))),
+                        Chip(
+                          visualDensity: VisualDensity.compact,
+                          avatar: SeasonDot(state: state, size: 18, showIcon: true),
+                          label: Text(
+                            '${state == SeasonState.unknown ? s.unknownTitle : s.state(state)}'
+                            '${calendar.isApproximate ? ' ≈' : ''}',
+                          ),
+                          backgroundColor: SeasonPalette.color(state, theme.brightness).withValues(alpha: 0.15),
+                        ),
+                        if (item.hasDopIgp) Chip(visualDensity: VisualDensity.compact, label: Text(s.dopOnlyChip)),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.name.of(lang),
+                            style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                        SeasonalityThreeDots(calendar: calendar, month: month, scale: 1.3),
+                      ],
+                    ),
+                    if (item.scientificName != null)
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: item.scientificName!,
+                              style: TextStyle(color: cs.onSurfaceVariant, fontStyle: FontStyle.italic),
+                            ),
+                            if (item.family != null) ...[
+                              TextSpan(
+                                text: ' · ',
+                                style: TextStyle(color: cs.onSurfaceVariant),
+                              ),
+                              // The family opens the list of products of the same family
+                              TextSpan(
+                                text: db.familyName(item.family!).of(lang),
+                                style: TextStyle(color: cs.primary, fontWeight: FontWeight.w600),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () =>
+                                      Navigator.of(context)
+                                          .push(AppPageRoute(builder: (_) => FamilyScreen(family: item.family!))),
+                              ),
+                              WidgetSpan(
+                                alignment: PlaceholderAlignment.middle,
+                                child: GestureDetector(
                                   onTap: () =>
                                       Navigator.of(context)
                                           .push(AppPageRoute(builder: (_) => FamilyScreen(family: item.family!))),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 2),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          db.familyName(item.family!).of(lang),
-                                          style: theme.textTheme.bodyMedium?.copyWith(
-                                            color: cs.primary,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        Icon(Icons.chevron_right_rounded, size: 18, color: cs.primary),
-                                      ],
+                                  child: Icon(Icons.chevron_right_rounded, size: 18, color: cs.primary),
+                                ),
+                              ),
+                            ],
+                            const WidgetSpan(
+                              alignment: PlaceholderAlignment.middle,
+                              child: HelpButton(field: 'botany.scientific_name', size: 16),
+                            ),
+                          ],
+                        ),
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _ActionButton(
+                            icon: lib.isFavorite(item.id)
+                                ? FoodActionStyle.favoriteActiveIcon
+                                : FoodActionStyle.favoriteIcon,
+                            color: lib.isFavorite(item.id) ? FoodActionStyle.favoriteColor : null,
+                            label: s.favorite,
+                            selected: lib.isFavorite(item.id),
+                            onTap: () => lib.toggleFavorite(item.id),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _ActionButton(
+                            icon: lib.isDisliked(item.id)
+                                ? FoodActionStyle.dislikeActiveIcon
+                                : FoodActionStyle.dislikeIcon,
+                            color: lib.isDisliked(item.id) ? _ActionButton.dangerColor : null,
+                            danger: true,
+                            label: s.dislike,
+                            selected: lib.isDisliked(item.id),
+                            onTap: () => lib.toggleDisliked(item.id),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _ActionButton(
+                            icon: lib.isInShoppingList(item.id)
+                                ? FoodActionStyle.shoppingActiveIcon
+                                : FoodActionStyle.shoppingIcon,
+                            color: lib.isInShoppingList(item.id) ? FoodActionStyle.shoppingColor : null,
+                            label: s.inList,
+                            selected: lib.isInShoppingList(item.id),
+                            onTap: () => lib.toggleShopping(item.id),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Blocks in the order and mode chosen in Settings.
+                    for (final id in layout.visibleOrder)
+                      switch (id) {
+                        DetailSection.calendar => _Section(
+                          id: DetailSection.calendar,
+                          title: s.seasonCalendar,
+                          helpLegend: true,
+                          helpField:
+                              settings.zone == ClimaticZone.mediterranean &&
+                                  settings.area != ItalyMacroArea.euficMediterranean
+                              ? 'seasonality.italy_macro_areas'
+                              : 'seasonality.eufic_climatic_zones',
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _AreaLabel(
+                                text: settings.zone == ClimaticZone.mediterranean
+                                    ? s.area(settings.area)
+                                    : s.zone(settings.zone),
+                                area: settings.zone == ClimaticZone.mediterranean ? settings.area : null,
+                                zone: settings.zone,
+                              ),
+                              const SizedBox(height: 8),
+                              _HighlightedCalendar(calendar: calendar, month: month, height: 22),
+                              // Long-keeping products: why the season
+                              // lasts longer than the harvest (seasonality.availability_note).
+                              if (item.raw.text('seasonality.availability_note').of(lang).isNotEmpty) ...[
+                                const SizedBox(height: 10),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SlotIcon('detail.availability_note', size: 18, color: cs.primary),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        item.raw.text('seasonality.availability_note').of(lang),
+                                        style: theme.textTheme.bodySmall?.copyWith(height: 1.35),
+                                      ),
                                     ),
-                                  ),
+                                  ],
+                                ),
+                              ],
+                              if (calendar.isApproximate) ...[
+                                const SizedBox(height: 10),
+                                TextWithHelp(
+                                  '≈ ${db.vocab('seasonality.estimates', 'estimate').of(lang)}: '
+                                  '${db.vocab('seasonality.estimates.from', calendar.sourceKey).of(lang)}',
+                                  helpIds: const ['seasonality_estimate'],
+                                  style: theme.textTheme.bodySmall,
+                                ),
+                              ],
+                              if (!calendar.hasData) ...[
+                                const SizedBox(height: 10),
+                                _UnknownNotice(),
+                                ?_referenceCalendar(
+                                  context,
+                                  settings.resolver.reference(item, order: db.referenceOrder),
+                                  month,
                                 ),
                               ],
                             ],
                           ),
                         ),
-                        const HelpButton(field: 'botany.scientific_name', size: 16),
-                      ],
-                    ),
-                  const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _ActionButton(
-                          icon: lib.isFavorite(item.id)
-                              ? FoodActionStyle.favoriteActiveIcon
-                              : FoodActionStyle.favoriteIcon,
-                          color: lib.isFavorite(item.id) ? FoodActionStyle.favoriteColor : null,
-                          label: s.favorite,
-                          selected: lib.isFavorite(item.id),
-                          onTap: () => lib.toggleFavorite(item.id),
+                        DetailSection.varieties => _VarietiesSection(item: item),
+                        DetailSection.buyStore => _BuyStoreSection(item: item),
+                        DetailSection.nutrition => _NutritionSection(item: item),
+                        DetailSection.sustainability => _SustainabilitySection(item: item),
+                        DetailSection.garden => _GardenSection(item: item),
+                        DetailSection.curiosities => _CuriositiesSection(item: item),
+                        DetailSection.recipes => _Section(
+                          id: DetailSection.recipes,
+                          title: s.secRecipes,
+                          child: Text(s.recipesSoon, style: theme.textTheme.bodyMedium),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _ActionButton(
-                          icon: lib.isDisliked(item.id)
-                              ? FoodActionStyle.dislikeActiveIcon
-                              : FoodActionStyle.dislikeIcon,
-                          color: lib.isDisliked(item.id) ? _ActionButton.dangerColor : null,
-                          danger: true,
-                          label: s.dislike,
-                          selected: lib.isDisliked(item.id),
-                          onTap: () => lib.toggleDisliked(item.id),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _ActionButton(
-                          icon: lib.isInShoppingList(item.id)
-                              ? FoodActionStyle.shoppingActiveIcon
-                              : FoodActionStyle.shoppingIcon,
-                          color: lib.isInShoppingList(item.id) ? FoodActionStyle.shoppingColor : null,
-                          label: s.inList,
-                          selected: lib.isInShoppingList(item.id),
-                          onTap: () => lib.toggleShopping(item.id),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Blocks in the order and mode chosen in Settings.
-                  for (final id in layout.visibleOrder)
-                    switch (id) {
-                      DetailSection.calendar => _Section(
-                        id: DetailSection.calendar,
-                        title: s.seasonCalendar,
-                        helpLegend: true,
-                        helpField:
-                            settings.zone == ClimaticZone.mediterranean &&
-                                settings.area != ItalyMacroArea.euficMediterranean
-                            ? 'seasonality.italy_macro_areas'
-                            : 'seasonality.eufic_climatic_zones',
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _AreaLabel(
-                              text: settings.zone == ClimaticZone.mediterranean
-                                  ? s.area(settings.area)
-                                  : s.zone(settings.zone),
-                              area: settings.zone == ClimaticZone.mediterranean ? settings.area : null,
-                            ),
-                            const SizedBox(height: 8),
-                            _HighlightedCalendar(calendar: calendar, month: month, height: 22),
-                            // Long-keeping products: why the season
-                            // lasts longer than the harvest (seasonality.availability_note).
-                            if (item.raw.text('seasonality.availability_note').of(lang).isNotEmpty) ...[
-                              const SizedBox(height: 10),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SlotIcon('detail.availability_note', size: 18, color: cs.primary),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      item.raw.text('seasonality.availability_note').of(lang),
-                                      style: theme.textTheme.bodySmall?.copyWith(height: 1.35),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                            if (calendar.isApproximate) ...[
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      '≈ ${db.vocab('seasonality.estimates', 'estimate').of(lang)}: '
-                                      '${db.vocab('seasonality.estimates.from', calendar.sourceKey).of(lang)}',
-                                      style: theme.textTheme.bodySmall,
-                                    ),
-                                  ),
-                                  const HelpButton(ids: ['seasonality_estimate'], size: 16),
-                                ],
-                              ),
-                            ],
-                            if (!calendar.hasData) ...[
-                              const SizedBox(height: 10),
-                              _UnknownNotice(),
-                              ?_referenceCalendar(
-                                context,
-                                settings.resolver.reference(item, order: db.referenceOrder),
-                                month,
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      DetailSection.varieties => _VarietiesSection(item: item),
-                      DetailSection.buyStore => _BuyStoreSection(item: item),
-                      DetailSection.nutrition => _NutritionSection(item: item),
-                      DetailSection.sustainability => _SustainabilitySection(item: item),
-                      DetailSection.garden => _GardenSection(item: item),
-                      DetailSection.curiosities => _CuriositiesSection(item: item),
-                      DetailSection.recipes => _Section(
-                        id: DetailSection.recipes,
-                        title: s.secRecipes,
-                        child: Text(s.recipesSoon, style: theme.textTheme.bodyMedium),
-                      ),
-                      DetailSection.links => _LinksSection(item: item),
-                    },
-                ],
+                        DetailSection.links => _LinksSection(item: item),
+                      },
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -483,55 +476,18 @@ String _sectionSlot(DetailSection d) => switch (d) {
 };
 
 /// Subtitle inside a section, with optional "?".
-class _Sub extends StatelessWidget {
-  const _Sub(this.text, {required this.icon, this.field, this.trailing});
-  final String text;
-  final String? field;
-
-  /// Icon slot in front of the subtitle: each subheading has its own.
-  final String icon;
-
-  /// Tag next to the subheading ("Ripening: Climacteric"); wraps if
-  /// there is no room.
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(top: 10, bottom: 2),
-      child: Wrap(
-        spacing: 6,
-        runSpacing: 6,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SlotIcon(icon, size: 18, color: theme.colorScheme.primary),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  trailing == null ? text : '$text:',
-                  style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                ),
-              ),
-              if (field != null) HelpButton(field: field, size: 16),
-            ],
-          ),
-          ?trailing,
-        ],
-      ),
-    );
-  }
-}
 
 /// "Northern Italy" with the outline of Italy and the macro-area filled
 /// (assets/icons/italy, from scripts/build_italy_area_icons.py).
 class _AreaLabel extends StatelessWidget {
-  const _AreaLabel({required this.text, this.area});
+  const _AreaLabel({required this.text, this.area, this.zone});
   final String text;
   final ItalyMacroArea? area;
+
+  /// EUFIC zone: mini map of Europe with the zone filled
+  /// (assets/icons/zones_map, from scripts/build_europe_map.py), used when
+  /// there is no Italian macro-area.
+  final ClimaticZone? zone;
 
   @override
   Widget build(BuildContext context) {
@@ -542,26 +498,14 @@ class _AreaLabel extends StatelessWidget {
       ItalyMacroArea.sudIsole => 'sud_isole',
       _ => null,
     };
+    final ref = file != null ? 'svg:italy/$file' : (zone != null ? 'svg:zones_map/${zone!.code}' : null);
     return Row(
       children: [
-        if (file != null) ...[
-          RefIcon('svg:italy/$file', size: 24, color: theme.colorScheme.primary),
-          const SizedBox(width: 6),
-        ],
+        if (ref != null) ...[RefIcon(ref, size: 24, color: theme.colorScheme.primary), const SizedBox(width: 6)],
         Text(text, style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
       ],
     );
   }
-}
-
-class _Para extends StatelessWidget {
-  const _Para(this.text);
-  final String text;
-
-  @override
-  Widget build(BuildContext context) => text.isEmpty
-      ? const SizedBox.shrink()
-      : Text(text, style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.4));
 }
 
 /// Month initials and dots from January to December, with the vertical
@@ -584,7 +528,7 @@ class _HighlightedCalendar extends StatelessWidget {
               const SizedBox(height: 3),
               _MonthInitials(selected: month),
               const SizedBox(height: 4),
-              MonthSquares(calendar: calendar, selected: month, height: height),
+              MonthSquares(calendar: calendar, selected: month, height: height, allIcons: true),
               const SizedBox(height: 2),
             ],
           ),
@@ -739,7 +683,7 @@ class _VarietiesSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (dop.isNotEmpty) ...[
-            _Sub(s.dopIgp, icon: 'detail.dop_igp', field: 'italian_varieties_and_territories.dop_igp_labels'),
+            SubHeading(s.dopIgp, icon: 'detail.dop_igp', field: 'italian_varieties_and_territories.dop_igp_labels'),
             Wrap(
               spacing: 6,
               runSpacing: 6,
@@ -754,12 +698,16 @@ class _VarietiesSection extends StatelessWidget {
             ),
           ],
           if (varieties.isNotEmpty) ...[
-            _Sub(s.notableVarieties, icon: 'detail.notable_varieties', field: 'italian_varieties_and_territories.notable_varieties'),
-            _Para(varieties.join(' · ')),
+            SubHeading(
+              s.notableVarieties,
+              icon: 'detail.notable_varieties',
+              field: 'italian_varieties_and_territories.notable_varieties',
+            ),
+            Para(varieties.join(' · ')),
           ],
           if (patCount > 0) ...[
-            _Sub('PAT', icon: 'detail.pat', field: 'nutrition_and_sustainability.traditional_products_pat'),
-            _Para(s.patCount(patCount, patRegions)),
+            SubHeading('PAT', icon: 'detail.pat', field: 'nutrition_and_sustainability.traditional_products_pat'),
+            Para(s.patCount(patCount, patRegions)),
           ],
         ],
       ),
@@ -775,37 +723,16 @@ class _BuyStoreSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = context.s;
     final lang = context.watch<SettingsController>().language;
-    final r = item.raw;
-    const base = 'ripening_and_storage';
-    final speedUp = r.text('$base.ripening_management.speed_up').of(lang);
-    final slowDown = r.text('$base.ripening_management.slow_down').of(lang);
-    final perish = r.text('$base.perishability.label').of(lang);
-    // metadata.detail_display_rules.ripening.non_climacteric: a
-    // non-climacteric produce does not ripen after harvest, so no "To Ripen
-    // It"; "To Slow Down" becomes a storage tip.
-    final climacteric = item.ripeningType == 'climaterico';
-
     return _Section(
       id: DetailSection.buyStore,
       title: s.secBuyStore,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _Sub(s.whatToLookFor, icon: 'detail.how_to_choose'),
-          _Para(r.text('buying_guide.detailed_selection').of(lang)),
+          SubHeading(s.whatToLookFor, icon: 'detail.how_to_choose'),
+          Para(item.raw.text('buying_guide.detailed_selection').of(lang)),
           const Divider(height: 28),
-          // The meaning (e.g. "does not ripen after harvest") is in the tag's "?".
-          _Sub(s.ripening, icon: 'detail.ripening', trailing: RipeningTypeLabel(item: item)),
-          if (climacteric) ...[
-            if (speedUp.isNotEmpty) ...[_Sub(s.ripeningSpeedUp, icon: 'detail.speed_up', field: '$base.ethylene_compatibility'), _Para(speedUp)],
-            if (slowDown.isNotEmpty) ...[_Sub(s.ripeningSlowDown, icon: 'detail.slow_down'), _Para(slowDown)],
-          ],
-          const Divider(height: 28),
-          StorageSummary(item: item, keepLonger: climacteric ? '' : slowDown),
-          if (perish.isNotEmpty) ...[
-            _Sub(s.perishability, icon: 'detail.perishability', field: '$base.perishability'),
-            _Para('$perish. ${r.text('$base.perishability.tip').of(lang)}'),
-          ],
+          RipeningStorageBlock(item: item),
         ],
       ),
     );
@@ -944,7 +871,7 @@ class _NutritionSection extends StatelessWidget {
             ],
           ),
           if (claims.isNotEmpty) ...[
-            _Sub(s.nutritionClaims, icon: 'detail.nutrition_claims', field: '$base.nutrition_claims_eu'),
+            SubHeading(s.nutritionClaims, icon: 'detail.nutrition_claims', field: '$base.nutrition_claims_eu'),
             if (loose.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
@@ -972,7 +899,7 @@ class _NutritionSection extends StatelessWidget {
               ),
           ],
           if (micros.isNotEmpty) ...[
-            _Sub(s.vitaminsMinerals, icon: 'detail.vitamins_minerals', field: '$base.vitamins'),
+            SubHeading(s.vitaminsMinerals, icon: 'detail.vitamins_minerals', field: '$base.vitamins'),
             for (final m in micros.take(8))
               Builder(
                 builder: (context) {
@@ -980,9 +907,12 @@ class _NutritionSection extends StatelessWidget {
                   final claimed = toneOf.containsKey(m['key']);
                   final key = m['key'] as String?;
                   // uniform short name from the database ("Vitamin A", not "Vitamin A (Retinol…)")
-                  final name = db.claimRules.nutrientNames[key]?.of(lang) ??
-                      '${lang == AppLanguage.en ? (m['name_en'] ?? m['name']) : m['name']}'
-                          .replaceAll(RegExp(r'\s*\([^)]*\)'), '');
+                  final name =
+                      db.claimRules.nutrientNames[key]?.of(lang) ??
+                      '${lang == AppLanguage.en ? (m['name_en'] ?? m['name']) : m['name']}'.replaceAll(
+                        RegExp(r'\s*\([^)]*\)'),
+                        '',
+                      );
                   final pct = (m['percent_nrv'] as num).round();
                   final weight = claimed ? FontWeight.w800 : FontWeight.w600;
                   return Padding(
@@ -1012,14 +942,16 @@ class _NutritionSection extends StatelessWidget {
                         SizedBox(
                           width: 104,
                           child: Text.rich(
-                            TextSpan(children: [
-                              // actual amount per 100 g, then the % of reference values
-                              TextSpan(text: '${_n(m['amount'] as num?)} ${m['unit'] ?? ''} '),
-                              TextSpan(
-                                text: '($pct%)',
-                                style: TextStyle(fontWeight: weight, color: claimed ? peakGreen : null),
-                              ),
-                            ]),
+                            TextSpan(
+                              children: [
+                                // actual amount per 100 g, then the % of reference values
+                                TextSpan(text: '${_n(m['amount'] as num?)} ${m['unit'] ?? ''} '),
+                                TextSpan(
+                                  text: '($pct%)',
+                                  style: TextStyle(fontWeight: weight, color: claimed ? peakGreen : null),
+                                ),
+                              ],
+                            ),
                             textAlign: TextAlign.right,
                             maxLines: 1,
                             style: theme.textTheme.labelMedium?.copyWith(color: cs.onSurfaceVariant),
@@ -1123,13 +1055,7 @@ class _SustainabilitySection extends StatelessWidget {
           ],
           if (tips.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: _Para(tips)),
-                const HelpButton(ids: ['greenhouse'], size: 16),
-              ],
-            ),
+            TextWithHelp(tips, helpIds: const ['greenhouse'], style: theme.textTheme.bodyMedium?.copyWith(height: 1.4)),
           ],
         ],
       ),
@@ -1147,13 +1073,32 @@ class _GardenSection extends StatelessWidget {
     final settings = context.watch<SettingsController>();
     final lang = settings.language;
     final theme = Theme.of(context);
-    final areaKey = settings.area.dbKey ?? 'nord';
+    // The garden calendar exists only for the Italian macro-areas: with
+    // another zone (or the generic Mediterranean one) the section is hidden
+    // instead of showing the calendar of a different area.
+    final areaKey = settings.zone == ClimaticZone.mediterranean ? settings.area.dbKey : null;
+    if (areaKey == null) return const SizedBox.shrink();
     final area = item.raw.obj('agricultural_calendar_italy.$areaKey');
     if (area.isEmpty) return const SizedBox.shrink();
     Set<int> months(String k) => {...((area[k] as List?) ?? const []).whereType<num>().map((e) => e.toInt() - 1)};
     final sowing = months('sowing_or_transplant_months');
     final harvest = months('harvest_months');
     if (sowing.isEmpty && harvest.isEmpty) return const SizedBox.shrink();
+    // One row per phase the database knows (only the non-empty ones); the
+    // combined "Sowing / Transplant" row only when there is no detail.
+    final seedbed = months('seedbed_sowing_months');
+    final direct = months('direct_sowing_months');
+    final transplant = months('transplant_months');
+    final detailed = seedbed.isNotEmpty || direct.isNotEmpty || transplant.isNotEmpty;
+    // extra_phases: [{key, label{it,en}, months[]}] (special processes, if any)
+    final extra = [
+      for (final e in (area['extra_phases'] as List?) ?? const [])
+        if (e is Map)
+          (
+            label: LocalizedText.fromJson(e['label']).of(lang),
+            months: {...((e['months'] as List?) ?? const []).whereType<num>().map((m) => m.toInt() - 1)},
+          ),
+    ];
     final notes = LocalizedText.fromJson(area['cultivation_notes']).of(lang);
 
     Widget bar(String label, Set<int> on, Color color) => Padding(
@@ -1189,10 +1134,7 @@ class _GardenSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _AreaLabel(
-            text: s.area(settings.area.dbKey == null ? ItalyMacroArea.nord : settings.area),
-            area: settings.area.dbKey == null ? ItalyMacroArea.nord : settings.area,
-          ),
+          _AreaLabel(text: s.area(settings.area), area: settings.area),
           const SizedBox(height: 6),
           const Row(
             children: [
@@ -1200,9 +1142,16 @@ class _GardenSection extends StatelessWidget {
               Expanded(child: _MonthInitials()),
             ],
           ),
-          bar(s.sowing, sowing, const Color(0xFF8D6E63)),
-          bar(s.harvest, harvest, const Color(0xFF43A047)),
-          if (notes.isNotEmpty) ...[const SizedBox(height: 10), _Para(notes)],
+          if (detailed) ...[
+            if (seedbed.isNotEmpty) bar(s.seedbedSowing, seedbed, const Color(0xFFBCAAA4)),
+            if (direct.isNotEmpty) bar(s.directSowing, direct, const Color(0xFF8D6E63)),
+            if (transplant.isNotEmpty) bar(s.transplant, transplant, const Color(0xFF6D4C41)),
+          ] else if (sowing.isNotEmpty)
+            bar(s.sowing, sowing, const Color(0xFF8D6E63)),
+          for (final e in extra)
+            if (e.months.isNotEmpty && e.label.isNotEmpty) bar(e.label, e.months, const Color(0xFF7E57C2)),
+          if (harvest.isNotEmpty) bar(s.harvest, harvest, const Color(0xFF43A047)),
+          if (notes.isNotEmpty) ...[const SizedBox(height: 10), Para(notes)],
         ],
       ),
     );
@@ -1227,8 +1176,8 @@ class _CuriositiesSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (benefits.isNotEmpty) ...[_Sub(s.curiosities, icon: 'detail.curiosities'), _Para(benefits)],
-          if (waste.isNotEmpty) ...[_Sub(s.antiWaste, icon: 'detail.zero_waste'), _Para(waste)],
+          if (benefits.isNotEmpty) ...[SubHeading(s.curiosities, icon: 'detail.curiosities'), Para(benefits)],
+          if (waste.isNotEmpty) ...[SubHeading(s.antiWaste, icon: 'detail.zero_waste'), Para(waste)],
         ],
       ),
     );

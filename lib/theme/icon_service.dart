@@ -132,7 +132,6 @@ class IconService {
     'home.category_other': 'material:local_florist',
     'home.list_card_how_to_choose': 'svg:ui/choose',
     'detail.how_to_choose': 'svg:ui/choose',
-    'detail.keep_longer': 'material:timer',
     'sources.law': 'material:gavel',
     'sources.generic': 'material:link',
     'detail.ripening': 'svg:ui/ripening',
@@ -146,7 +145,9 @@ class IconService {
     'detail.pat': 'svg:ui/pat',
     'detail.nutrition_claims': 'material:verified',
     'detail.vitamins_minerals': 'material:science',
-    'detail.curiosities': 'material:tips_and_updates',
+    'detail.curiosities': 'material:lightbulb',
+    'settings.app_version': 'material:info',
+    'settings.license': 'material:policy',
   };
 }
 

@@ -23,7 +23,13 @@ class SettingsController extends ChangeNotifier {
     _storageTipsDelay = _prefs.getInt(PrefKeys.storageTipsDelayMinutes) ?? 0;
     _frost = _prefs.getDouble(_kFrost) ?? 0.6;
     _palette = BackdropPalette.fromName(_prefs.getString(_kPalette));
+    _customTop = _prefs.getInt(_kCustomTop) ?? defaultCustomTop;
+    _customBottom = _prefs.getInt(_kCustomBottom) ?? defaultCustomBottom;
   }
+
+  /// Default colours of the custom palette (ARGB).
+  static const defaultCustomTop = 0xFF66BB6A;
+  static const defaultCustomBottom = 0xFF4DB6AC;
 
   static const _kLanguage = PrefKeys.language;
   static const _kTheme = 'themeMode';
@@ -34,6 +40,8 @@ class SettingsController extends ChangeNotifier {
   static const _kShoppingListMode = 'shoppingNotifListMode';
   static const _kFrost = 'frostStrength';
   static const _kPalette = 'backdropPalette';
+  static const _kCustomTop = 'backdropCustomTop';
+  static const _kCustomBottom = 'backdropCustomBottom';
 
   final SharedPreferences _prefs;
 
@@ -48,6 +56,8 @@ class SettingsController extends ChangeNotifier {
   late int _storageTipsDelay;
   late double _frost;
   late BackdropPalette _palette;
+  late int _customTop;
+  late int _customBottom;
 
   AppLanguage get language => _language;
   ThemeMode get themeMode => _themeMode;
@@ -62,6 +72,11 @@ class SettingsController extends ChangeNotifier {
   /// Frosted-glass intensity, 0 (solid surfaces) - 1 (very transparent).
   double get frost => _frost;
   BackdropPalette get palette => _palette;
+
+  /// Custom palette: base colour (top of the screen) and secondary colour
+  /// (bottom), ARGB.
+  int get customTop => _customTop;
+  int get customBottom => _customBottom;
 
   Locale get locale => Locale(_language.name);
 
@@ -138,6 +153,16 @@ class SettingsController extends ChangeNotifier {
   void setPalette(BackdropPalette v) {
     _palette = v;
     _prefs.setString(_kPalette, v.name);
+    notifyListeners();
+  }
+
+  void setCustomColors({int? top, int? bottom}) {
+    if (top != null) _customTop = top;
+    if (bottom != null) _customBottom = bottom;
+    _prefs.setInt(_kCustomTop, _customTop);
+    _prefs.setInt(_kCustomBottom, _customBottom);
+    _palette = BackdropPalette.custom;
+    _prefs.setString(_kPalette, _palette.name);
     notifyListeners();
   }
 }

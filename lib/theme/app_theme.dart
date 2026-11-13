@@ -20,9 +20,16 @@ class AppTheme {
   static ThemeData light({double frost = 0.6}) => _build(Brightness.light, frost);
   static ThemeData dark({double frost = 0.6}) => _build(Brightness.dark, frost);
 
-  /// Card opacity: more "frost" = more transparency.
-  static double cardOpacity(bool dark, double frost) =>
-      dark ? 0.11 - 0.07 * frost : 0.97 - 0.42 * frost;
+  /// Card colour: frost 0 = fully opaque surface, frost 1 = very
+  /// transparent glass (white veil over the background glows).
+  static Color cardColor(bool dark, double frost) => dark
+      ? Color.lerp(const Color(0xFF161916), satin(0.04), frost)!
+      : Color.lerp(Colors.white, Colors.white.withValues(alpha: 0.55), frost)!;
+
+  /// Colour of the floating pill navigation bar, same rule as the cards.
+  static Color barColor(bool dark, double frost) => dark
+      ? Color.lerp(const Color(0xFF1B1F1B), satin(0.06), frost)!
+      : Color.lerp(Colors.white, Colors.white.withValues(alpha: 0.5), frost)!;
 
   static ThemeData _build(Brightness b, double frost) {
     final dark = b == Brightness.dark;
@@ -54,7 +61,7 @@ class AppTheme {
         elevation: 0,
         margin: EdgeInsets.zero,
         // frosted glass: semi-transparent white over the background with glows
-        color: dark ? satin(cardOpacity(true, frost)) : Colors.white.withValues(alpha: cardOpacity(false, frost)),
+        color: cardColor(dark, frost),
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radiusCard),

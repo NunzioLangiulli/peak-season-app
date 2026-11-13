@@ -42,6 +42,7 @@ const materialIconNames = <String, IconData>{
   'do_not_disturb_on': Icons.do_not_disturb_on_rounded,
   'block': Icons.block_rounded,
   'gavel': Icons.gavel_rounded,
+  'code': Icons.code_rounded,
   'policy': Icons.policy_rounded,
   'visibility': Icons.visibility_rounded,
   'visibility_off': Icons.visibility_off_rounded,

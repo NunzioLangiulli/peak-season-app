@@ -11,13 +11,13 @@ import '../providers/library_controller.dart';
 import '../providers/settings_controller.dart';
 import '../widgets/food_actions.dart';
 import '../widgets/food_image.dart';
-import '../widgets/help_button.dart';
 import '../widgets/pill_nav_bar.dart';
 import '../widgets/seasonality_three_dots.dart';
 import 'home_screen.dart' show ShoppingModeToggle;
 import 'storage_tips_screen.dart';
 import '../theme/app_backdrop.dart';
 import '../theme/icon_service.dart';
+import '../widgets/detail_parts.dart';
 
 /// TAB 2 — Shopping List, designed for use at the counter/in the supermarket:
 /// "in the cart" tick, what to check, weight to buy, and at the end the
@@ -408,10 +408,12 @@ class _ShoppingCardState extends State<_ShoppingCard> {
                                   SlotIcon('shopping.weight_calculator', size: 19, color: cs.primary),
                                   const SizedBox(width: 6),
                                   Expanded(
-                                    child: Text(s.grossWeightCalc,
-                                        style: theme.textTheme.labelLarge?.copyWith(color: cs.primary)),
+                                    child: TextWithHelp(
+                                      s.grossWeightCalc,
+                                      helpIds: const ['edible_portion'],
+                                      style: theme.textTheme.labelLarge?.copyWith(color: cs.primary),
+                                    ),
                                   ),
-                                  const HelpButton(ids: ['edible_portion'], size: 16),
                                   AnimatedRotation(
                                     turns: _calcOpen ? 0.5 : 0,
                                     duration: const Duration(milliseconds: 200),

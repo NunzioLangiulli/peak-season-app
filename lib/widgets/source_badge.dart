@@ -46,15 +46,16 @@ class SourceBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final fallback = _monogram(context);
     if (sourceKey == null && favicon == null) return fallback;
-    // Laws and regulations: generic icon instead of a logo.
+    // Laws and regulations without a logo file: generic icon instead of letters.
     final k = sourceKey ?? '';
-    if (favicon == null && (k.startsWith('reg_') || k.startsWith('legge_'))) {
-      return SizedBox(
-        width: size,
-        height: size,
-        child: SlotIcon('sources.law', size: size * 0.7, color: Theme.of(context).colorScheme.primary),
-      );
-    }
+    final law = k.startsWith('reg_') || k.startsWith('legge_');
+    final noLogo = law
+        ? SizedBox(
+            width: size,
+            height: size,
+            child: SlotIcon('sources.law', size: size * 0.7, color: Theme.of(context).colorScheme.primary),
+          )
+        : fallback;
     final file = favicon ?? '$sourceKey.png';
     final dark = Theme.of(context).brightness == Brightness.dark;
     Widget logo = Image.asset(
@@ -63,7 +64,7 @@ class SourceBadge extends StatelessWidget {
       height: size,
       fit: BoxFit.contain,
       filterQuality: FilterQuality.medium,
-      errorBuilder: (_, _, _) => fallback,
+      errorBuilder: (_, _, _) => noLogo,
     );
     if (dark && darkSourceLogos.contains(file.replaceAll('.png', ''))) {
       logo = ColorFiltered(colorFilter: _smartInvert, child: logo);

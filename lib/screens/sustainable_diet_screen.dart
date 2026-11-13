@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../data/food_repository.dart';
 import '../l10n/strings.dart';
 import '../providers/settings_controller.dart';
+import '../theme/screen_edges.dart';
 
 /// Pagina informativa "More Sustainable Diet" (testo EUFIC dal database).
 class SustainableDietScreen extends StatelessWidget {
@@ -20,7 +21,7 @@ class SustainableDietScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(s.sustainableDiet)),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+        padding: EdgeInsets.fromLTRB(20, 8, 20, safeBottomPadding(context)),
         children: [
           Text(diet.text.of(lang), style: theme.textTheme.bodyLarge?.copyWith(height: 1.5)),
           if (points.isNotEmpty) ...[

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/settings_controller.dart';
 import '../theme/icon_service.dart';
+import '../theme/app_theme.dart';
 
 class PillNavItem {
   const PillNavItem({
@@ -59,9 +60,7 @@ class PillNavBar extends StatelessWidget {
               height: height,
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: dark
-                    ? Colors.white.withValues(alpha: 0.13 - 0.07 * frost)
-                    : Colors.white.withValues(alpha: 0.9 - 0.4 * frost),
+                color: AppTheme.barColor(dark, frost),
                 borderRadius: BorderRadius.circular(height / 2),
                 border: Border.all(color: dark ? Colors.white.withValues(alpha: 0.14) : Colors.white.withValues(alpha: 0.9)),
               ),

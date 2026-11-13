@@ -28,15 +28,19 @@ class CalendarView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final month = context.select<HomeController, int>((h) => h.month);
     return LayoutBuilder(builder: (context, box) {
-      // Column of the selected month: always in the middle (the months rotate).
+      // Months fixed from January to December; the pill moves to the month
+      // chosen in the month slider at the top.
       final col = (box.maxWidth - _rowPadding.horizontal - _nameColumnWidth - 4) / 12;
-      final left = _rowPadding.left + _nameColumnWidth + 2 + col * centeredMonthIndex;
+      final left = _rowPadding.left + _nameColumnWidth + 2 + col * month;
       return Stack(
         children: [
-          // Un'unica pillola verticale, dall'iniziale nell'header fino in fondo
-          // alle righe, dietro i pallini.
-          Positioned(
+          // A single vertical pill, from the initial in the header down to the
+          // bottom of the rows, behind the dots.
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 260),
+            curve: Curves.easeOutCubic,
             left: left + 1,
             width: col - 2,
             top: 4,
@@ -109,8 +113,8 @@ String compactName(String name) {
   return out.isEmpty ? name : out;
 }
 
-/// Fixed header: the 12 initials, rotated so that the selected month
-/// is in the middle, above the vertical pill.
+/// Fixed header: the 12 initials from January to December, above the
+/// vertical pill.
 class CalendarMonthHeader extends StatelessWidget {
   const CalendarMonthHeader({super.key});
 
@@ -142,7 +146,7 @@ class CalendarMonthHeader extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  for (final m in monthOrder(home.month, rotate: true))
+                  for (var m = 0; m < 12; m++)
                     Expanded(
                       child: Semantics(
                         button: true,
@@ -225,7 +229,7 @@ class CalendarRow extends StatelessWidget {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 2),
-                child: MonthSquares(calendar: entry.calendar, selected: month, rotate: true),
+                child: MonthSquares(calendar: entry.calendar, selected: month),
               ),
             ),
           ],
@@ -247,7 +251,11 @@ class MonthSquares extends StatelessWidget {
     required this.selected,
     this.height = 20,
     this.rotate = false,
+    this.allIcons = false,
   });
+
+  /// Every dot the same size with its micro-icon (product page calendar),
+  /// instead of only the selected month.
 
   final SeasonCalendar calendar;
   final int selected;
@@ -256,6 +264,7 @@ class MonthSquares extends StatelessWidget {
   /// column is narrow).
   final double height;
   final bool rotate;
+  final bool allIcons;
 
   @override
   Widget build(BuildContext context) {
@@ -273,10 +282,10 @@ class MonthSquares extends StatelessWidget {
                 child: Builder(builder: (context) {
                   final st = calendar.at(m);
                   final isSel = m == selected;
-                  final size = isSel ? d : d * 0.78;
+                  final size = isSel || allIcons ? d : d * 0.78;
                   final accent = SeasonPalette.accentBorder(st, b);
                   return Opacity(
-                    opacity: isSel ? 1 : 0.82,
+                    opacity: isSel || allIcons ? 1 : 0.82,
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       width: size,
@@ -286,7 +295,7 @@ class MonthSquares extends StatelessWidget {
                         shape: BoxShape.circle,
                         border: accent != null ? Border.all(color: accent, width: 1) : null,
                       ),
-                      child: isSel && st.isAvailable
+                      child: (isSel || allIcons) && st.isAvailable
                           ? Center(
                               child: SeasonGlyph(
                                 state: st,

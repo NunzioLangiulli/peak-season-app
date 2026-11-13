@@ -6,7 +6,8 @@ import '../l10n/strings.dart';
 import '../providers/home_controller.dart';
 import '../providers/settings_controller.dart';
 import '../widgets/food_cards.dart';
-import '../widgets/help_button.dart';
+import '../widgets/detail_parts.dart';
+import '../theme/screen_edges.dart';
 
 /// All products of the same botanical family (e.g. Solanaceae),
 /// sorted by seasonality in the selected month.
@@ -44,22 +45,16 @@ class FamilyScreen extends StatelessWidget {
         ),
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+        padding: EdgeInsets.fromLTRB(16, 0, 16, safeBottomPadding(context)),
         children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Flexible(
-                  child: Text(
-                    s.familyCount(entries.length, s.monthName(month)),
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                  ),
-                ),
-                const HelpButton(ids: ['scientific_name'], size: 16),
-              ],
+            child: Center(
+              child: TextWithHelp(
+                s.familyCount(entries.length, s.monthName(month)),
+                helpIds: const ['scientific_name'],
+                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              ),
             ),
           ),
           for (final e in entries)

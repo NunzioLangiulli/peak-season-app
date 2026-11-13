@@ -89,15 +89,16 @@ enum BackdropPalette {
   /// Greens only (default).
   green,
 
-  /// Verde e verde acqua.
+  /// Green and teal.
   greenTeal,
 
-  /// Verde e ambra.
-  greenAmber,
+  /// Two colours chosen by the user (Settings → Background Tints).
+  custom,
 
-  /// Nessuna sfumatura: tinta unita.
+  /// No tint: plain background.
   none;
 
+  /// Unknown or removed names (e.g. the old "greenAmber") fall back to green.
   static BackdropPalette fromName(String? n) =>
       values.firstWhere((v) => v.name == n, orElse: () => BackdropPalette.green);
 }
