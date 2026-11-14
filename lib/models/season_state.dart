@@ -38,6 +38,11 @@ enum SeasonState {
     notApplicable,
   ];
 
+  /// States drawn with a micro-icon inside the dot: the in-season phases
+  /// and "not grown here" (globe). Out of season (red) and no data (grey)
+  /// are plain dots everywhere.
+  bool get hasIcon => isAvailable || this == notApplicable;
+
   bool get isAvailable =>
       this == peakSeason ||
       this == primizie ||

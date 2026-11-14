@@ -55,6 +55,7 @@ class FoodDatabase {
     this.zoneIcons = const {},
     this.footprintLevels = const {},
     this.perishabilityLevels = const {},
+    this.vocabColors = const {},
     this.claimRules = NutritionClaimRules.empty,
   }) : byId = {for (final i in items) i.id: i};
 
@@ -115,6 +116,11 @@ class FoodDatabase {
 
   /// `metadata.seasonality_estimates_method`.
   final LocalizedText estimatesMethod;
+
+  /// Optional colour of a coded value (`vocabulary[field][code].color_hex`).
+  final Map<String, Map<String, int>> vocabColors;
+
+  int? vocabColor(String field, String code) => vocabColors[field]?[code];
 
   /// Translated label of a coded value (e.g. `climaterico`).
   LocalizedText vocab(String field, String? code) =>
@@ -242,11 +248,19 @@ class FoodRepository {
       if (v is Map) glossary[k.toString()] = GlossaryEntry.fromJson(k.toString(), v);
     });
     final vocabulary = <String, Map<String, LocalizedText>>{};
+    final vocabColors = <String, Map<String, int>>{};
     ((meta['vocabulary'] as Map?) ?? const {}).forEach((field, values) {
       if (values is Map) {
         final m = <String, LocalizedText>{};
         values.forEach((code, v) {
-          if (v is Map && !code.toString().startsWith('_')) m[code.toString()] = LocalizedText.fromJson(v);
+          if (v is Map && !code.toString().startsWith('_')) {
+            m[code.toString()] = LocalizedText.fromJson(v);
+            final hex = v['color_hex'];
+            if (hex is String) {
+              (vocabColors[field.toString()] ??= {})[code.toString()] =
+                  int.parse('FF${hex.replaceFirst('#', '')}', radix: 16);
+            }
+          }
         });
         vocabulary[field.toString()] = m;
       }
@@ -274,6 +288,7 @@ class FoodRepository {
 
     return FoodDatabase(
       perishabilityLevels: perishabilityLevels,
+      vocabColors: vocabColors,
       footprintLevels: footprintLevels,
       claimRules: NutritionClaimRules.fromJson(meta['nutrition_claims_eu_rules']),
       glossary: glossary,

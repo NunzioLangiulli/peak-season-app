@@ -372,6 +372,10 @@ class S {
   String get githubDatabaseSub => _c('settings.github_database_sub');
   String get licenseTitle => _c('settings.license_title');
   String get licenseSub => _c('settings.license_sub');
+  String ediblePortion(int pct) => _c('detail.edible_portion', {'pct': pct});
+  String get ethylene => _c('detail.ethylene');
+  String ethyleneProduction(String c) => _c('detail.ethylene_production.$c');
+  String ethyleneSensitive(bool v) => _c('detail.ethylene_sensitive.$v');
 }
 
 extension StringsX on BuildContext {

@@ -12,6 +12,7 @@ import 'food_image.dart';
 import 'seasonality_three_dots.dart';
 import 'storage_summary.dart';
 import '../theme/icon_service.dart';
+import 'tag_pill.dart';
 
 /// 2-column Home grid (shared with the "No Data" section).
 const homeGridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
@@ -314,25 +315,6 @@ class _InfoPill extends StatelessWidget {
   final Color onColor;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(20)),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SlotIcon(icon, size: 13, color: onColor),
-          const SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              text,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(color: onColor),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      TagPill(compact: true, icon: icon, text: text, background: color, foreground: onColor);
 }

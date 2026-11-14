@@ -8,6 +8,7 @@ import '../models/food_item.dart';
 import '../models/glossary.dart';
 import '../providers/settings_controller.dart';
 import 'detail_parts.dart';
+import 'tag_pill.dart';
 import 'help_button.dart';
 import '../theme/icon_service.dart';
 
@@ -82,6 +83,7 @@ class StorageSummary extends StatelessWidget {
           ),
           Text(keepAway.join(', '), style: theme.textTheme.bodyMedium),
         ],
+        EthyleneTags(item: item),
         if (room.isNotEmpty || fridge.isNotEmpty || freezer.isNotEmpty || mode == 'until_ripe') ...[
           const SizedBox(height: 12),
           SubHeading(
@@ -120,29 +122,7 @@ class _Callout extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: cs.secondaryContainer.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SlotIcon(icon, size: 16, color: cs.onSecondaryContainer),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              text,
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: cs.onSecondaryContainer),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => TagPill(icon: icon, text: text);
 }
 
 class _ShelfChip extends StatelessWidget {
@@ -152,28 +132,7 @@ class _ShelfChip extends StatelessWidget {
   final String value;
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: cs.secondaryContainer.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SlotIcon(icon, size: 16, color: cs.onSecondaryContainer),
-          const SizedBox(width: 6),
-          Text('$title · ', style: TextStyle(fontSize: 12, color: cs.onSecondaryContainer)),
-          Text(
-            value,
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: cs.onSecondaryContainer),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => TagPill(icon: icon, prefix: '$title · ', text: value);
 }
 
 /// "Climacteric / Non-climacteric" label with the glossary "?".
@@ -187,27 +146,72 @@ class RipeningTypeLabel extends StatelessWidget {
     final db = context.read<FoodDatabase>();
     final lang = context.select<SettingsController, AppLanguage>((s) => s.language);
     if (item.ripeningType == null) return const SizedBox.shrink();
-    final label = db.vocab('ripening_and_storage.ripening_type', item.ripeningType).of(lang);
     final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: EdgeInsets.only(left: compact ? 8 : 10, right: 0),
-      decoration: BoxDecoration(color: cs.tertiaryContainer, borderRadius: BorderRadius.circular(20)),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SlotIcon('storage.ripening_type', size: compact ? 13 : 15, color: cs.onTertiaryContainer),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: (compact ? Theme.of(context).textTheme.labelSmall : Theme.of(context).textTheme.labelMedium)
-                ?.copyWith(color: cs.onTertiaryContainer),
-          ),
-          HelpButton(
-            ids: [item.ripeningType == 'climaterico' ? 'climacteric' : 'non_climacteric'],
-            size: compact ? 14 : 16,
-          ),
-        ],
+    // same height and padding as the other tags (TagPill)
+    return TagPill(
+      compact: compact,
+      icon: 'storage.ripening_type',
+      text: db.vocab('ripening_and_storage.ripening_type', item.ripeningType).of(lang),
+      background: cs.tertiaryContainer,
+      foreground: cs.onTertiaryContainer,
+      trailing: HelpButton(
+        ids: [item.ripeningType == 'climaterico' ? 'climacteric' : 'non_climacteric'],
+        size: compact ? 13 : 16,
       ),
+    );
+  }
+}
+
+/// Ethylene tags (production class and sensitivity), colour-coded, shown
+/// only for the values the database knows for this product. Labels and
+/// colours from metadata.vocabulary when present, otherwise the app's.
+class EthyleneTags extends StatelessWidget {
+  const EthyleneTags({super.key, required this.item});
+  final FoodItem item;
+
+  static const _prodField = 'ripening_and_storage.ethylene_compatibility.ethylene_production_class';
+  static const _sensField = 'ripening_and_storage.ethylene_compatibility.sensitive_to_ethylene';
+  static const _prodColors = {
+    'very_low': 0xFF2E7D32,
+    'low': 0xFF66BB6A,
+    'moderate': 0xFFF9A825,
+    'high': 0xFFEF6C00,
+    'very_high': 0xFFC62828,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final s = context.s;
+    final db = context.read<FoodDatabase>();
+    final lang = context.select<SettingsController, AppLanguage>((s) => s.language);
+    final theme = Theme.of(context);
+    final prod = item.raw.at(_prodField) as String?;
+    final sens = item.raw.at(_sensField);
+    final tags = <Widget>[];
+    Widget tag(String text, int color) {
+      final c = Color(color);
+      return TagPill(
+        text: text,
+        background: c.withValues(alpha: 0.16),
+        foreground: Color.lerp(c, theme.colorScheme.onSurface, 0.3),
+      );
+    }
+
+    if (prod != null && _prodColors.containsKey(prod)) {
+      final v = db.vocabulary[_prodField]?[prod];
+      tags.add(tag(v?.of(lang) ?? s.ethyleneProduction(prod), db.vocabColor(_prodField, prod) ?? _prodColors[prod]!));
+    }
+    if (sens is bool) {
+      final v = db.vocabulary[_sensField]?['$sens'];
+      tags.add(tag(v?.of(lang) ?? s.ethyleneSensitive(sens),
+          db.vocabColor(_sensField, '$sens') ?? (sens ? 0xFFF9A825 : 0xFF2E7D32)));
+    }
+    if (tags.isEmpty) return const SizedBox.shrink();
+    return SubHeading(
+      s.ethylene,
+      icon: 'storage.ethylene_alert',
+      helpIds: const ['ethylene'],
+      trailing: Wrap(spacing: 6, runSpacing: 6, children: tags),
     );
   }
 }
@@ -303,7 +307,7 @@ class PerishabilityBox extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SubHeading(s.perishability, icon: 'detail.perishability', field: 'ripening_and_storage.perishability'),
+        SubHeading(s.perishability, icon: 'detail.perishability', helpIds: const ['perishability']),
         const SizedBox(height: 4),
         Container(
           width: double.infinity,

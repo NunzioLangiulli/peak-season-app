@@ -16,6 +16,7 @@ import '../widgets/month_selector.dart';
 import '../widgets/no_data_section.dart';
 import '../widgets/pill_nav_bar.dart';
 import '../widgets/season_legend_sheet.dart';
+import '../widgets/seasonality_three_dots.dart';
 import '../theme/icon_service.dart';
 
 /// TAB 1 — "Peak Season".
@@ -304,7 +305,7 @@ class _ActiveFilterChips extends StatelessWidget {
     }
     if (home.includeNoData) {
       chips.add(InputChip(
-        avatar: const SlotIcon('seasonality.estimates.unknown', size: 16),
+        avatar: const SeasonDot(state: SeasonState.unknown, size: 14),
         label: Text(s.noDataChip),
         onDeleted: () => home.setIncludeNoData(false),
       ));

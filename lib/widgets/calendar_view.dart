@@ -295,7 +295,7 @@ class MonthSquares extends StatelessWidget {
                         shape: BoxShape.circle,
                         border: accent != null ? Border.all(color: accent, width: 1) : null,
                       ),
-                      child: (isSel || allIcons) && st.isAvailable
+                      child: (isSel || allIcons) && st.hasIcon
                           ? Center(
                               child: SeasonGlyph(
                                 state: st,

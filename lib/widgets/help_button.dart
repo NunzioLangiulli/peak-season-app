@@ -6,6 +6,7 @@ import '../l10n/strings.dart';
 import '../models/glossary.dart';
 import '../providers/settings_controller.dart';
 import 'europe_zones_map.dart';
+import 'help_text.dart';
 import 'season_legend_sheet.dart';
 import 'source_link_tile.dart';
 
@@ -112,6 +113,7 @@ class HelpSheet extends StatelessWidget {
     final db = context.read<FoodDatabase>();
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final shownIds = {for (final e in entries) e.id};
 
     return DraggableScrollableSheet(
       expand: false,
@@ -154,7 +156,7 @@ class HelpSheet extends StatelessWidget {
               const EuropeZonesMap(),
               const SizedBox(height: 12),
             ],
-            Text(e.text.of(lang), style: theme.textTheme.bodyMedium?.copyWith(height: 1.45)),
+            HelpText(e.text.of(lang)),
             if (e.sources.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(s.sources, style: theme.textTheme.labelLarge),
@@ -168,7 +170,8 @@ class HelpSheet extends StatelessWidget {
                   badgeSize: 32,
                 ),
             ],
-            if (e.seeAlso.isNotEmpty) ...[
+            // "See also" without the entries already open in this same sheet
+            if (e.seeAlso.any((id) => !shownIds.contains(id))) ...[
               const SizedBox(height: 12),
               Wrap(
                 spacing: 6,
@@ -176,7 +179,7 @@ class HelpSheet extends StatelessWidget {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Text(s.seeAlso, style: theme.textTheme.labelLarge),
-                  for (final other in db.entries(e.seeAlso))
+                  for (final other in db.entries([for (final id in e.seeAlso) if (!shownIds.contains(id)) id]))
                     ActionChip(
                       visualDensity: VisualDensity.compact,
                       label: Text(other.term.of(lang)),
@@ -191,3 +194,4 @@ class HelpSheet extends StatelessWidget {
     );
   }
 }
+

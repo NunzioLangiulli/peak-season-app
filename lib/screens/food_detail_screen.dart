@@ -855,11 +855,16 @@ class _NutritionSection extends StatelessWidget {
     return _Section(
       id: DetailSection.nutrition,
       title: s.secNutrition,
-      helpIds: const ['edible_portion'],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(s.per100g, style: theme.textTheme.labelMedium?.copyWith(color: cs.onSurfaceVariant)),
+          TextWithHelp(
+            r.number('$base.edible_portion_percentage') == null
+                ? s.per100g
+                : '${s.per100g} ${s.ediblePortion(r.number('$base.edible_portion_percentage')!.round())}',
+            helpIds: const ['edible_portion'],
+            style: theme.textTheme.labelMedium?.copyWith(color: cs.onSurfaceVariant),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -871,7 +876,7 @@ class _NutritionSection extends StatelessWidget {
             ],
           ),
           if (claims.isNotEmpty) ...[
-            SubHeading(s.nutritionClaims, icon: 'detail.nutrition_claims', field: '$base.nutrition_claims_eu'),
+            SubHeading(s.nutritionClaims, icon: 'detail.nutrition_claims', helpIds: const ['nutrition_claims']),
             if (loose.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
@@ -985,10 +990,17 @@ class _SustainabilitySection extends StatelessWidget {
     if (carbon == null && water == null) return const SizedBox.shrink();
     final beefC = r.number('$base.sustainability_rating.times_lower_than_beef_carbon')?.toInt();
     final tips = r.text('$base.sustainability_rating.tips').of(lang);
+    // sustainability_rating.tips_topic (database) says when the sentence is
+    // about greenhouses; until then, a check on the text.
+    final topic = r.at('$base.sustainability_rating.tips_topic');
+    final greenhouseTip = topic != null
+        ? topic == 'greenhouse'
+        : RegExp('serra|greenhouse', caseSensitive: false)
+            .hasMatch(r.text('$base.sustainability_rating.tips').it);
 
     // Same height for both boxes (IntrinsicHeight + stretch): the
     // content stays at the top, extra space goes to the bottom.
-    Widget tile(String icon, String title, String value, String label, Color color) => Expanded(
+    Widget tile(String icon, String title, String value, String label, Color color, String help) => Expanded(
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(14)),
@@ -999,8 +1011,9 @@ class _SustainabilitySection extends StatelessWidget {
             const SizedBox(height: 6),
             Text(value, style: theme.textTheme.titleMedium, semanticsLabel: '$title: $value'),
             const SizedBox(height: 2),
-            Text(
+            TextWithHelp(
               label,
+              helpIds: [help],
               style: theme.textTheme.labelMedium?.copyWith(color: Color.lerp(color, theme.colorScheme.onSurface, 0.25)),
             ),
           ],
@@ -1030,6 +1043,7 @@ class _SustainabilitySection extends StatelessWidget {
                     '${carbon.toStringAsFixed(2)} kg CO₂e/kg',
                     r.text('$base.sustainability_rating.carbon_label').of(lang),
                     level(r.at('$base.sustainability_rating.carbon_level') as String?),
+                    'carbon_footprint',
                   ),
                 if (carbon != null && water != null) const SizedBox(width: 8),
                 if (water != null)
@@ -1039,6 +1053,7 @@ class _SustainabilitySection extends StatelessWidget {
                     '${water.round()} L/kg',
                     r.text('$base.sustainability_rating.water_label').of(lang),
                     level(r.at('$base.sustainability_rating.water_level') as String?),
+                    'water_footprint',
                   ),
               ],
             ),
@@ -1055,7 +1070,11 @@ class _SustainabilitySection extends StatelessWidget {
           ],
           if (tips.isNotEmpty) ...[
             const SizedBox(height: 8),
-            TextWithHelp(tips, helpIds: const ['greenhouse'], style: theme.textTheme.bodyMedium?.copyWith(height: 1.4)),
+            TextWithHelp(
+              tips,
+              helpIds: greenhouseTip ? const ['greenhouse'] : const [],
+              style: theme.textTheme.bodyMedium?.copyWith(height: 1.4),
+            ),
           ],
         ],
       ),
@@ -1200,7 +1219,7 @@ class _LinksSection extends StatelessWidget {
     return _Section(
       id: DetailSection.links,
       title: s.secLinks,
-      helpIds: const ['data_quality'],
+      helpIds: const ['useful_links'],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

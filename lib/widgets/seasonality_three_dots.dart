@@ -66,7 +66,9 @@ class SeasonalityThreeDots extends StatelessWidget {
   }
 }
 
-/// Coloured dot of a state, with optional micro-icon.
+/// Coloured dot of a state, with optional micro-icon. The icon is drawn
+/// for the in-season phases and the blue "not grown here" (globe): red
+/// and grey dots stay plain everywhere.
 class SeasonDot extends StatelessWidget {
   const SeasonDot({
     super.key,
@@ -98,7 +100,7 @@ class SeasonDot extends StatelessWidget {
         borderRadius: square ? BorderRadius.circular(size * 0.22) : null,
         border: border != null ? Border.all(color: border, width: 1.2) : null,
       ),
-      child: showIcon
+      child: showIcon && state.hasIcon
           ? Center(
               child: SeasonGlyph(
                 state: state,
