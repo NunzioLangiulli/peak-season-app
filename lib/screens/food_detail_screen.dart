@@ -851,6 +851,19 @@ class _NutritionSection extends StatelessWidget {
       ..sort((a, b) => a.text.length.compareTo(b.text.length));
 
     final peakGreen = SeasonPalette.color(SeasonState.peakSeason, theme.brightness);
+    final starch = r.number('$base.macros_per_100g.starch_g');
+    final carbs = r.number('$base.macros_per_100g.carbs_g');
+    final sugars = r.number('$base.macros_per_100g.sugars_g') ?? 0;
+    // per-product note (macros_per_100g.carbs_note = glossary id), e.g. inulin
+    final ownNote = r.at('$base.macros_per_100g.carbs_note') as String?;
+    final itemCarbsNote = ownNote != null && db.glossary[ownNote] != null ? ownNote : null;
+    final carbsNoteId = itemCarbsNote ?? db.carbsNoteGlossary;
+    final showCarbsNote = itemCarbsNote != null ||
+        starch != null &&
+        carbs != null &&
+        starch >= db.carbsNoteMinStarch &&
+        carbs - starch - sugars >= db.carbsNoteMinGap &&
+        db.glossary[db.carbsNoteGlossary] != null;
 
     return _Section(
       id: DetailSection.nutrition,
@@ -875,6 +888,19 @@ class _NutritionSection extends StatelessWidget {
               macro(s.fiber, r.number('$base.macros_per_100g.fiber_g'), ' g', const ['fiber']),
             ],
           ),
+          // starchy products from the CREA/BDA tables: carbohydrates are
+          // monosaccharide equivalents (starch x 1.1), so they exceed
+          // starch + sugars; short note + "?" (rule in metadata.macros_note)
+          if (showCarbsNote)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: TextWithHelp(
+                (db.glossary[carbsNoteId]!.footnote ?? db.glossary[carbsNoteId]!.short).of(lang),
+                helpIds: [carbsNoteId],
+                helpSize: 14,
+                style: theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant, fontStyle: FontStyle.italic),
+              ),
+            ),
           if (claims.isNotEmpty) ...[
             SubHeading(s.nutritionClaims, icon: 'detail.nutrition_claims', helpIds: const ['nutrition_claims']),
             if (loose.isNotEmpty)

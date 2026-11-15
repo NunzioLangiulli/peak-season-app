@@ -4,7 +4,7 @@
 /// test/app_info_test.dart). Versions follow semantic versioning:
 /// MAJOR.MINOR.PATCH — patch for fixes, minor for new features that keep
 /// the saved data compatible, major for breaking changes.
-const appVersion = '1.1.1';
+const appVersion = '1.1.2';
 
 const appRepoUrl = 'https://github.com/NunzioLangiulli/peak-season-app';
 const databaseRepoUrl = 'https://github.com/NunzioLangiulli/peak-season-database';

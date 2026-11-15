@@ -31,6 +31,7 @@ class GlossaryEntry {
     required this.id,
     required this.term,
     required this.short,
+    this.footnote,
     required this.text,
     required this.sources,
     required this.seeAlso,
@@ -39,6 +40,9 @@ class GlossaryEntry {
   final String id;
   final LocalizedText term;
   final LocalizedText short;
+
+  /// Optional very short line shown in a page next to its "?" (`footnote`).
+  final LocalizedText? footnote;
   final LocalizedText text;
   final List<GlossarySource> sources;
   final List<String> seeAlso;
@@ -47,6 +51,7 @@ class GlossaryEntry {
         id: id,
         term: LocalizedText.fromJson(json['term']),
         short: LocalizedText.fromJson(json['short']),
+        footnote: json['footnote'] is Map ? LocalizedText.fromJson(json['footnote']) : null,
         text: LocalizedText.fromJson(json['text']),
         sources: [
           for (final s in (json['sources'] as List?) ?? const [])

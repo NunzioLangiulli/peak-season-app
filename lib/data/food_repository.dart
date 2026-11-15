@@ -56,8 +56,22 @@ class FoodDatabase {
     this.footprintLevels = const {},
     this.perishabilityLevels = const {},
     this.vocabColors = const {},
+    this.carbsNoteMinStarch = 10,
+    this.carbsNoteMinGap = 1,
+    this.carbsNoteGlossary = 'available_carbohydrates',
     this.claimRules = NutritionClaimRules.empty,
   }) : byId = {for (final i in items) i.id: i};
+
+  /// Starch (g per 100 g) from which the "available carbohydrates" note is
+  /// shown under the macros (`metadata.macros_note.min_starch_g`).
+  final double carbsNoteMinStarch;
+
+  /// ... and only if carbs exceed starch + sugars by at least this much
+  /// (`macros_note.min_gap_g`): the MSE convention of the CREA/BDA tables.
+  final double carbsNoteMinGap;
+
+  /// Glossary entry of the note (`macros_note.glossary`).
+  final String carbsNoteGlossary;
 
   /// Carbon and water footprint levels (`environmental_footprint_method.levels`):
   /// code (`low`/`medium`/`high`) -> ARGB colour.
@@ -287,6 +301,9 @@ class FoodRepository {
     }
 
     return FoodDatabase(
+      carbsNoteMinStarch: (((meta['macros_note'] as Map?)?['min_starch_g'] as num?) ?? 10).toDouble(),
+      carbsNoteMinGap: (((meta['macros_note'] as Map?)?['min_gap_g'] as num?) ?? 1).toDouble(),
+      carbsNoteGlossary: ((meta['macros_note'] as Map?)?['glossary'] as String?) ?? 'available_carbohydrates',
       perishabilityLevels: perishabilityLevels,
       vocabColors: vocabColors,
       footprintLevels: footprintLevels,
