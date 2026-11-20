@@ -53,9 +53,9 @@ A complete product page, split into blocks that you can **reorder, collapse or h
   - how to ripen it and how to slow down spoilage;
   - **where to store it** (fridge, room temperature, pantry…) and **how long it lasts** at room temperature, in the fridge and in the freezer;
   - **perishability** on 6 levels;
-  - **what to keep it away from** (ethylene-producing products).
-- **Nutrition facts** per 100 g, **vitamins and minerals as % NRV**, **EU nutrition claims** grouped and colour-coded according to Regulation (EC) 1924/2006, allergens and portions.
-- **Sustainability:** carbon and water footprint, compared with beef.
+  - **what to keep it away from** (ethylene-producing products), shown right below ethylene.
+- **Nutrition facts** per 100 g, **vitamins and minerals as % NRV**, **EU nutrition claims** grouped and colour-coded according to Regulation (EC) 1924/2006, **allergens** (Regulation (EU) 1169/2011), **bioactive compounds** (carotenoids, flavonoids, polyphenols) and portions.
+- **Sustainability:** carbon and water footprint, compared with beef, with the min–max range of the water footprint across studies.
 - **Garden calendar:** sowing, transplanting and harvest for Northern, Central and Southern Italy.
 - **More information:** benefits, curiosities, anti-waste tips.
 - **Sources and useful links:** every source with its acronym or logo and a direct link to the page used.

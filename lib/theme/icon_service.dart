@@ -140,7 +140,7 @@ class IconService {
     'detail.perishability': 'svg:ui/perishability',
     'detail.where_to_store': 'material:inventory_2',
     'detail.how_long': 'material:schedule',
-    'detail.keep_away_from': 'svg:ui/ethylene',
+    'detail.keep_away_from': 'svg:ui/keep_away',
     'detail.notable_varieties': 'material:label',
     'detail.pat': 'svg:ui/pat',
     'detail.nutrition_claims': 'material:verified',
@@ -148,6 +148,8 @@ class IconService {
     'detail.curiosities': 'material:lightbulb',
     'settings.app_version': 'material:info',
     'settings.license': 'material:policy',
+    'detail.section.allergens': 'material:warning',
+    'detail.bioactive': 'svg:ui/bioactive',
   };
 }
 

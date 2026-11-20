@@ -14,6 +14,15 @@ class AppTheme {
   static const radiusCard = 20.0;
 
   /// Frosted veil of the dark theme (low-opacity white on black).
+  /// Dark theme only: "highlight" pills (EU nutrition claims, PDO/PGI),
+  /// green-grey with a green border instead of near-black.
+  static Color? highlightPill(ColorScheme cs) => cs.brightness == Brightness.dark
+      ? Color.alphaBlend(cs.primary.withValues(alpha: 0.22), const Color(0xFF39413A))
+      : null;
+
+  static BorderSide? highlightPillSide(ColorScheme cs) =>
+      cs.brightness == Brightness.dark ? BorderSide(color: cs.primary.withValues(alpha: 0.38)) : null;
+
   static Color satin(double opacity) => Colors.white.withValues(alpha: opacity);
 
   /// [frost]: frosted-glass intensity (Settings → Appearance), 0-1.
@@ -79,7 +88,18 @@ class AppTheme {
         titleMedium: base.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         titleSmall: base.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
       ),
-      snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
+      // pop-up messages follow the theme: dark green-grey glass in dark mode
+      // (Material's default is the inverse colour, i.e. white on black).
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: dark ? const Color(0xFF1C211C) : const Color(0xFF243024),
+        contentTextStyle: TextStyle(color: dark ? scheme.onSurface : Colors.white, fontSize: 14),
+        actionTextColor: dark ? scheme.primary : scheme.inversePrimary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: dark ? satin(0.12) : Colors.transparent),
+        ),
+      ),
       bottomSheetTheme: BottomSheetThemeData(
         showDragHandle: true,
         // In the dark theme panels are frosted glass over black.

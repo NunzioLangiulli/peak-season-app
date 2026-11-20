@@ -56,6 +56,7 @@ class FoodDatabase {
     this.footprintLevels = const {},
     this.perishabilityLevels = const {},
     this.vocabColors = const {},
+    this.vocabGlossaries = const {},
     this.carbsNoteMinStarch = 10,
     this.carbsNoteMinGap = 1,
     this.carbsNoteGlossary = 'available_carbohydrates',
@@ -135,6 +136,11 @@ class FoodDatabase {
   final Map<String, Map<String, int>> vocabColors;
 
   int? vocabColor(String field, String code) => vocabColors[field]?[code];
+
+  /// Optional "?" entry of a single coded value (`vocabulary[field][code].glossary`).
+  final Map<String, Map<String, String>> vocabGlossaries;
+
+  String? vocabGlossary(String field, String code) => vocabGlossaries[field]?[code];
 
   /// Translated label of a coded value (e.g. `climaterico`).
   LocalizedText vocab(String field, String? code) =>
@@ -263,12 +269,15 @@ class FoodRepository {
     });
     final vocabulary = <String, Map<String, LocalizedText>>{};
     final vocabColors = <String, Map<String, int>>{};
+    final vocabGlossaries = <String, Map<String, String>>{};
     ((meta['vocabulary'] as Map?) ?? const {}).forEach((field, values) {
       if (values is Map) {
         final m = <String, LocalizedText>{};
         values.forEach((code, v) {
           if (v is Map && !code.toString().startsWith('_')) {
             m[code.toString()] = LocalizedText.fromJson(v);
+            final gl = v['glossary'];
+            if (gl is String) (vocabGlossaries[field.toString()] ??= {})[code.toString()] = gl;
             final hex = v['color_hex'];
             if (hex is String) {
               (vocabColors[field.toString()] ??= {})[code.toString()] =
@@ -306,6 +315,7 @@ class FoodRepository {
       carbsNoteGlossary: ((meta['macros_note'] as Map?)?['glossary'] as String?) ?? 'available_carbohydrates',
       perishabilityLevels: perishabilityLevels,
       vocabColors: vocabColors,
+      vocabGlossaries: vocabGlossaries,
       footprintLevels: footprintLevels,
       claimRules: NutritionClaimRules.fromJson(meta['nutrition_claims_eu_rules']),
       glossary: glossary,

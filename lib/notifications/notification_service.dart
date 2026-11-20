@@ -29,7 +29,11 @@ class NotificationService {
   static const _peakIdBase = 2000;
   static const closeActionId = 'close_shopping';
 
-  static const _chShopping = 'shopping_mode';
+  // v2: "default" importance (silent), so Android shows it on the lock screen
+  // and in the status bar; "low" channels are hidden there on many phones.
+  // A channel's importance can't change once created, hence the new id.
+  static const _chShopping = 'shopping_mode_v2';
+  static const _chShoppingOld = 'shopping_mode';
   static const _chTips = 'storage_tips';
   static const _chPeak = 'peak_season';
   static const _smallIcon = 'ic_notification';
@@ -60,6 +64,11 @@ class NotificationService {
       onDidReceiveNotificationResponse: (r) => onResponse?.call(r),
       onDidReceiveBackgroundNotificationResponse: notificationBackgroundHandler,
     );
+    try {
+      await _plugin
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+          ?.deleteNotificationChannel(channelId: _chShoppingOld);
+    } catch (_) {}
     _ready = true;
   }
 
@@ -110,8 +119,10 @@ class NotificationService {
         android: AndroidNotificationDetails(
           _chShopping,
           s.notifChannelShopping,
-          importance: Importance.low, // no sound on every update
-          priority: Priority.low,
+          importance: Importance.defaultImportance, // visible on the lock screen
+          priority: Priority.defaultPriority,
+          playSound: false, // silent: no sound or vibration on updates
+          enableVibration: false,
           ongoing: true,
           autoCancel: false,
           onlyAlertOnce: true,
@@ -119,9 +130,11 @@ class NotificationService {
           visibility: NotificationVisibility.public, // readable from the lock screen
           category: AndroidNotificationCategory.reminder,
           color: const Color(0xFF2E7D32),
-          styleInformation: InboxStyleInformation(
-            c.lines,
-            htmlFormatLines: true,
+          // BigText, not Inbox: Inbox cuts each line to one row with "…", so
+          // long season lines lost names; BigText wraps them and shows all.
+          styleInformation: BigTextStyleInformation(
+            c.lines.join('<br>'),
+            htmlFormatBigText: true,
             contentTitle: c.title,
             summaryText: c.summary,
           ),

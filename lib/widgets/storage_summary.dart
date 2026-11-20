@@ -73,6 +73,8 @@ class StorageSummary extends StatelessWidget {
           const SizedBox(height: 6),
           Text(r.text('$base.home_storage.tip').of(lang), style: theme.textTheme.bodyMedium?.copyWith(height: 1.4)),
         ],
+        // "Ethylene" first, then "Keep it away from" right below it
+        EthyleneTags(item: item),
         if (keepAway.isNotEmpty) ...[
           const SizedBox(height: 12),
           SubHeading(
@@ -83,7 +85,6 @@ class StorageSummary extends StatelessWidget {
           ),
           Text(keepAway.join(', '), style: theme.textTheme.bodyMedium),
         ],
-        EthyleneTags(item: item),
         if (room.isNotEmpty || fridge.isNotEmpty || freezer.isNotEmpty || mode == 'until_ripe') ...[
           const SizedBox(height: 12),
           SubHeading(

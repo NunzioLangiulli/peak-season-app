@@ -23,8 +23,10 @@ import '../widgets/fullscreen_gallery.dart';
 import '../widgets/seasonality_three_dots.dart';
 import '../widgets/source_link_tile.dart';
 import '../widgets/storage_summary.dart';
+import '../widgets/tag_pill.dart';
 import 'family_screen.dart';
 import '../theme/app_backdrop.dart';
+import '../theme/app_theme.dart';
 import '../theme/icon_service.dart';
 import '../theme/screen_edges.dart';
 
@@ -173,7 +175,13 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                           ),
                           backgroundColor: SeasonPalette.color(state, theme.brightness).withValues(alpha: 0.15),
                         ),
-                        if (item.hasDopIgp) Chip(visualDensity: VisualDensity.compact, label: Text(s.dopOnlyChip)),
+                        if (item.hasDopIgp)
+                          Chip(
+                            visualDensity: VisualDensity.compact,
+                            label: Text(s.dopOnlyChip),
+                            backgroundColor: AppTheme.highlightPill(theme.colorScheme),
+                            side: AppTheme.highlightPillSide(theme.colorScheme),
+                          ),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -338,6 +346,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                         DetailSection.varieties => _VarietiesSection(item: item),
                         DetailSection.buyStore => _BuyStoreSection(item: item),
                         DetailSection.nutrition => _NutritionSection(item: item),
+                        DetailSection.allergens => _AllergensSection(item: item),
                         DetailSection.sustainability => _SustainabilitySection(item: item),
                         DetailSection.garden => _GardenSection(item: item),
                         DetailSection.curiosities => _CuriositiesSection(item: item),
@@ -468,6 +477,7 @@ String _sectionSlot(DetailSection d) => switch (d) {
   DetailSection.varieties => 'detail.section.varieties',
   DetailSection.buyStore => 'detail.section.buy_store',
   DetailSection.nutrition => 'detail.section.nutrition',
+  DetailSection.allergens => 'detail.section.allergens',
   DetailSection.sustainability => 'detail.section.sustainability',
   DetailSection.garden => 'detail.section.garden',
   DetailSection.curiosities => 'detail.section.curiosities',
@@ -692,6 +702,8 @@ class _VarietiesSection extends StatelessWidget {
                   Chip(
                     visualDensity: VisualDensity.compact,
                     avatar: const SlotIcon('detail.dop_igp', size: 20),
+                    backgroundColor: AppTheme.highlightPill(theme.colorScheme),
+                    side: AppTheme.highlightPillSide(theme.colorScheme),
                     label: Text(d, style: theme.textTheme.labelMedium),
                   ),
               ],
@@ -790,6 +802,10 @@ class _NutritionSection extends StatelessWidget {
 
     // Box of a per-100 g value: grey, green if an EU claim flags it
     // positively, red if it flags it as something to watch.
+    // dark theme: the green/red numbers a little lighter, to read on dark
+    Color? numberColor(Color? c) =>
+        c != null && theme.brightness == Brightness.dark ? Color.lerp(c, Colors.white, 0.35) : c;
+
     Widget macro(String label, num? v, String unit, List<String> nutrients) {
       final tone = nutrients
           .map((n) => toneOf[n])
@@ -812,7 +828,7 @@ class _NutritionSection extends StatelessWidget {
             children: [
               FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text('${_n(v)}$unit', style: theme.textTheme.titleMedium?.copyWith(color: color)),
+                child: Text('${_n(v)}$unit', style: theme.textTheme.titleMedium?.copyWith(color: numberColor(color))),
               ),
               FittedBox(
                 fit: BoxFit.scaleDown,
@@ -831,7 +847,10 @@ class _NutritionSection extends StatelessWidget {
     Widget claimChip(String text, ClaimRule? rule) => Chip(
       visualDensity: VisualDensity.compact,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      side: BorderSide(color: (rule?.isWarning ?? false) ? _warning.withValues(alpha: 0.5) : cs.outlineVariant),
+      side: (rule?.isWarning ?? false)
+          ? BorderSide(color: _warning.withValues(alpha: 0.5))
+          : AppTheme.highlightPillSide(cs) ?? BorderSide(color: cs.outlineVariant),
+      backgroundColor: AppTheme.highlightPill(cs),
       label: Text(text, style: theme.textTheme.labelSmall),
     );
 
@@ -858,12 +877,13 @@ class _NutritionSection extends StatelessWidget {
     final ownNote = r.at('$base.macros_per_100g.carbs_note') as String?;
     final itemCarbsNote = ownNote != null && db.glossary[ownNote] != null ? ownNote : null;
     final carbsNoteId = itemCarbsNote ?? db.carbsNoteGlossary;
-    final showCarbsNote = itemCarbsNote != null ||
+    final showCarbsNote =
+        itemCarbsNote != null ||
         starch != null &&
-        carbs != null &&
-        starch >= db.carbsNoteMinStarch &&
-        carbs - starch - sugars >= db.carbsNoteMinGap &&
-        db.glossary[db.carbsNoteGlossary] != null;
+            carbs != null &&
+            starch >= db.carbsNoteMinStarch &&
+            carbs - starch - sugars >= db.carbsNoteMinGap &&
+            db.glossary[db.carbsNoteGlossary] != null;
 
     return _Section(
       id: DetailSection.nutrition,
@@ -979,7 +999,7 @@ class _NutritionSection extends StatelessWidget {
                                 TextSpan(text: '${_n(m['amount'] as num?)} ${m['unit'] ?? ''} '),
                                 TextSpan(
                                   text: '($pct%)',
-                                  style: TextStyle(fontWeight: weight, color: claimed ? peakGreen : null),
+                                  style: TextStyle(fontWeight: weight, color: claimed ? numberColor(peakGreen) : null),
                                 ),
                               ],
                             ),
@@ -994,6 +1014,7 @@ class _NutritionSection extends StatelessWidget {
                 },
               ),
           ],
+          _BioactiveList(item: item),
         ],
       ),
     );
@@ -1013,6 +1034,8 @@ class _SustainabilitySection extends StatelessWidget {
     final theme = Theme.of(context);
     final carbon = r.number('$base.carbon_kg_co2eq_per_kg');
     final water = r.number('$base.water_l_per_kg');
+    final waterMin = r.number('$base.water_reference.min');
+    final waterMax = r.number('$base.water_reference.max');
     if (carbon == null && water == null) return const SizedBox.shrink();
     final beefC = r.number('$base.sustainability_rating.times_lower_than_beef_carbon')?.toInt();
     final tips = r.text('$base.sustainability_rating.tips').of(lang);
@@ -1021,31 +1044,36 @@ class _SustainabilitySection extends StatelessWidget {
     final topic = r.at('$base.sustainability_rating.tips_topic');
     final greenhouseTip = topic != null
         ? topic == 'greenhouse'
-        : RegExp('serra|greenhouse', caseSensitive: false)
-            .hasMatch(r.text('$base.sustainability_rating.tips').it);
+        : RegExp('serra|greenhouse', caseSensitive: false).hasMatch(r.text('$base.sustainability_rating.tips').it);
 
     // Same height for both boxes (IntrinsicHeight + stretch): the
     // content stays at the top, extra space goes to the bottom.
-    Widget tile(String icon, String title, String value, String label, Color color, String help) => Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(14)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SlotIcon(icon, color: color),
-            const SizedBox(height: 6),
-            Text(value, style: theme.textTheme.titleMedium, semanticsLabel: '$title: $value'),
-            const SizedBox(height: 2),
-            TextWithHelp(
-              label,
-              helpIds: [help],
-              style: theme.textTheme.labelMedium?.copyWith(color: Color.lerp(color, theme.colorScheme.onSurface, 0.25)),
+    Widget tile(String icon, String title, String value, String label, Color color, String help, {String? range}) =>
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(14)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SlotIcon(icon, color: color),
+                const SizedBox(height: 6),
+                Text(value, style: theme.textTheme.titleMedium, semanticsLabel: '$title: $value'),
+                // min-max of the values found (no number of studies: see help text)
+                if (range != null)
+                  Text(range, style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                const SizedBox(height: 2),
+                TextWithHelp(
+                  label,
+                  helpIds: [help],
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: Color.lerp(color, theme.colorScheme.onSurface, 0.25),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        );
 
     final db = context.read<FoodDatabase>();
     // environmental_footprint_method.levels.*.color_hex
@@ -1080,6 +1108,9 @@ class _SustainabilitySection extends StatelessWidget {
                     r.text('$base.sustainability_rating.water_label').of(lang),
                     level(r.at('$base.sustainability_rating.water_level') as String?),
                     'water_footprint',
+                    range: waterMin != null && waterMax != null && waterMax > waterMin
+                        ? s.waterRange(waterMin.round(), waterMax.round())
+                        : null,
                   ),
               ],
             ),
@@ -1203,6 +1234,161 @@ class _GardenSection extends StatelessWidget {
   }
 }
 
+/// "Allergens" section: the EU allergens (Reg. 1169/2011 Annex II) of the
+/// product; the whole section is hidden when there are none.
+class _AllergensSection extends StatelessWidget {
+  const _AllergensSection({required this.item});
+  final FoodItem item;
+
+  static const _field = 'nutrition_and_sustainability.allergens_eu';
+
+  @override
+  Widget build(BuildContext context) {
+    final s = context.s;
+    final db = context.read<FoodDatabase>();
+    final lang = context.watch<SettingsController>().language;
+    final cs = Theme.of(context).colorScheme;
+    final allergens = item.raw.list(_field).whereType<Map>().toList();
+    if (allergens.isEmpty) return const SizedBox.shrink();
+    return _Section(
+      id: DetailSection.allergens,
+      title: s.secAllergens,
+      helpField: _field,
+      child: Wrap(
+        spacing: 6,
+        runSpacing: 6,
+        children: [
+          for (final a in allergens)
+            TagPill(
+              text: (a['name'] is Map
+                      ? LocalizedText.fromJson(a['name'])
+                      : db.vocab('$_field.annex_ii_number', '${a['annex_ii_number']}'))
+                  .of(lang),
+              background: const Color(0xFFF9A825).withValues(alpha: 0.18),
+              foreground: Color.lerp(const Color(0xFFF9A825), cs.onSurface, 0.45),
+              // gluten has its own "?" next to the cereal pill
+              trailing: a['annex_ii_number'] == 1 ? const HelpButton(ids: ['gluten'], size: 16) : null,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Bioactive compounds (carotenoids, flavonoids, polyphenols) per 100 g,
+/// grouped by family, inside "Nutritional Values"; nothing if none.
+class _BioactiveList extends StatelessWidget {
+  const _BioactiveList({required this.item});
+  final FoodItem item;
+
+  static const _groupField = 'nutrition_and_sustainability.bioactive_compounds.group';
+
+  // Fallback until the database links each group to its "?" entry.
+  static const _groupHelp = {'carotenoidi': 'carotenoids', 'flavonoidi': 'flavonoids'};
+
+  static String _n(num v) => v >= 100
+      ? v.toStringAsFixed(0)
+      : v >= 10
+      ? v.toStringAsFixed(1).replaceAll('.0', '')
+      : v.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
+
+  @override
+  Widget build(BuildContext context) {
+    final s = context.s;
+    final db = context.read<FoodDatabase>();
+    final lang = context.watch<SettingsController>().language;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final compounds = item.raw.list('nutrition_and_sustainability.bioactive_compounds').whereType<Map>().toList();
+    if (compounds.isEmpty) return const SizedBox.shrink();
+
+    String nameOf(Map c) => ((lang == AppLanguage.en ? c['name_en'] : null) ?? c['name'] ?? '').toString();
+    // compound names in Title Case ("Acido Ferulico", "Quercetina, Miricetina");
+    // short connecting words stay lowercase, chemical prefixes (5-, (-)-) unchanged
+    const small = {'di', 'e', 'del', 'della', 'dei', 'delle', 'and', 'of', 'the'};
+    String? main(Map c) {
+      final t = (lang == AppLanguage.en ? c['main_compounds_en'] : c['main_compounds'])?.toString().trim();
+      if (t == null || t.isEmpty) return null;
+      var first = true;
+      return t.replaceAllMapped(RegExp(r'[A-Za-zÀ-ÿ]+'), (m) {
+        final w = m[0]!;
+        final start = m.start == 0 || RegExp(r'[\s,(]').hasMatch(t[m.start - 1]);
+        final out = !start || (!first && small.contains(w.toLowerCase())) ? w : w[0].toUpperCase() + w.substring(1);
+        first = false;
+        return out;
+      });
+    }
+    final amountStyle = theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600);
+    final subStyle = theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant);
+    String amount(Map c) => c['amount'] is num ? '${_n(c['amount'] as num)} ${c['unit'] ?? ''}' : '';
+
+    final groups = <String, List<Map>>{};
+    for (final c in compounds) {
+      (groups[(c['group'] ?? '').toString()] ??= []).add(c);
+    }
+
+    final rows = <Widget>[];
+    for (final g in groups.entries) {
+      final label = db.vocab(_groupField, g.key).of(lang);
+      // a group with a single compound of the same name: one row
+      final single = g.value.length == 1 && nameOf(g.value.first).toLowerCase() == label.toLowerCase();
+      rows.add(
+        Padding(
+          padding: const EdgeInsets.only(top: 8, bottom: 2),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: TextWithHelp(
+                  label,
+                  helpIds: [db.vocabGlossary(_groupField, g.key) ?? _groupHelp[g.key] ?? 'polyphenols'],
+                  helpSize: 14,
+                  style: theme.textTheme.labelLarge?.copyWith(color: cs.primary, fontWeight: FontWeight.w700),
+                ),
+              ),
+              if (single) Text(amount(g.value.first), style: amountStyle),
+            ],
+          ),
+        ),
+      );
+      if (single) {
+        if (main(g.value.first) != null) rows.add(Text(main(g.value.first)!, style: subStyle));
+        continue;
+      }
+      for (final c in g.value) {
+        rows.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(nameOf(c), style: theme.textTheme.bodyMedium),
+                      if (main(c) != null) Text(main(c)!, style: subStyle),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(amount(c), style: amountStyle),
+              ],
+            ),
+          ),
+        );
+      }
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SubHeading(s.bioactive, icon: 'detail.bioactive', field: 'nutrition_and_sustainability.bioactive_compounds'),
+        ...rows,
+      ],
+    );
+  }
+}
+
 class _CuriositiesSection extends StatelessWidget {
   const _CuriositiesSection({required this.item});
   final FoodItem item;
@@ -1215,14 +1401,30 @@ class _CuriositiesSection extends StatelessWidget {
     final benefits = r.text('nutrition_and_sustainability.health_benefits_and_curiosities').of(lang);
     final waste = r.text('nutrition_and_sustainability.culinary_waste_reduction').of(lang);
     if (benefits.isEmpty && waste.isEmpty) return const SizedBox.shrink();
+    // help_refs: "?" entries for terms the text mentions (e.g. favism for fava)
+    Widget para(String text, String field) {
+      final ids = [
+        for (final h in r.list('help_refs').whereType<Map>())
+          if ((h['fields'] as List?)?.contains(field) ?? false) h['glossary_id'].toString(),
+      ];
+      if (ids.isEmpty) return Para(text);
+      return TextWithHelp(text, helpIds: ids, style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.4));
+    }
+
     return _Section(
       id: DetailSection.curiosities,
       title: s.secCuriosities,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (benefits.isNotEmpty) ...[SubHeading(s.curiosities, icon: 'detail.curiosities'), Para(benefits)],
-          if (waste.isNotEmpty) ...[SubHeading(s.antiWaste, icon: 'detail.zero_waste'), Para(waste)],
+          if (benefits.isNotEmpty) ...[
+            SubHeading(s.curiosities, icon: 'detail.curiosities'),
+            para(benefits, 'nutrition_and_sustainability.health_benefits_and_curiosities'),
+          ],
+          if (waste.isNotEmpty) ...[
+            SubHeading(s.antiWaste, icon: 'detail.zero_waste'),
+            para(waste, 'nutrition_and_sustainability.culinary_waste_reduction'),
+          ],
         ],
       ),
     );

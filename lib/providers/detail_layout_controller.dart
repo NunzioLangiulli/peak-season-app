@@ -7,6 +7,7 @@ enum DetailSection {
   varieties,
   buyStore,
   nutrition,
+  allergens,
   sustainability,
   garden,
   curiosities,
@@ -43,8 +44,11 @@ class DetailLayoutController extends ChangeNotifier {
     if (saved != null) {
       final parsed = [...saved.map(DetailSection.fromName).whereType<DetailSection>()];
       // blocchi aggiunti in versioni successive vanno in fondo
+      // (right after the block that precedes them in the default order)
       for (final s in DetailSection.values) {
-        if (!parsed.contains(s)) parsed.add(s);
+        if (parsed.contains(s)) continue;
+        final prev = s.index == 0 ? -1 : parsed.indexOf(DetailSection.values[s.index - 1]);
+        prev < 0 ? parsed.add(s) : parsed.insert(prev + 1, s);
       }
       _order = parsed;
     }

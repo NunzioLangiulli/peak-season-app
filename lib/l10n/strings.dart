@@ -296,6 +296,7 @@ class S {
         DetailSection.varieties => secVarieties,
         DetailSection.buyStore => secBuyStore,
         DetailSection.nutrition => secNutrition,
+        DetailSection.allergens => secAllergens,
         DetailSection.sustainability => secSustainability,
         DetailSection.garden => secGarden,
         DetailSection.curiosities => secCuriosities,
@@ -376,6 +377,9 @@ class S {
   String get ethylene => _c('detail.ethylene');
   String ethyleneProduction(String c) => _c('detail.ethylene_production.$c');
   String ethyleneSensitive(bool v) => _c('detail.ethylene_sensitive.$v');
+  String waterRange(int min, int max) => _c('detail.water_range', {'min': min, 'max': max});
+  String get secAllergens => _c('detail.sec_allergens');
+  String get bioactive => _c('detail.bioactive');
 }
 
 extension StringsX on BuildContext {

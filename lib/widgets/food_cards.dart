@@ -22,7 +22,6 @@ const homeGridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
   childAspectRatio: 0.74,
 );
 
-
 /// Piccoli badge sovrapposti in alto a sinistra: DOP/IGP e "nascosto".
 class _TopLeftBadges extends StatelessWidget {
   const _TopLeftBadges({required this.item});
@@ -34,21 +33,13 @@ class _TopLeftBadges extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (disliked)
-          const _Badge(
-            child: SlotIcon(FoodActionStyle.dislikeActiveIcon, size: 14, color: Colors.white),
-          ),
+        if (disliked) const _Badge(child: SlotIcon(FoodActionStyle.dislikeActiveIcon, size: 14, color: Colors.white)),
         if (disliked && item.hasDopIgp) const SizedBox(width: 4),
         if (item.hasDopIgp)
           const _Badge(
             child: Text(
               'DOP',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.5,
-              ),
+              style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5),
             ),
           ),
       ],
@@ -62,13 +53,10 @@ class _Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.45),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: child,
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+    decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.45), borderRadius: BorderRadius.circular(20)),
+    child: child,
+  );
 }
 
 /// MODE 1 — 2-column grid card.
@@ -94,7 +82,10 @@ class FoodGridCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Hero(tag: 'food-${item.id}', child: FoodImage(item: item)),
+                  Hero(
+                    tag: 'food-${item.id}',
+                    child: FoodImage(item: item),
+                  ),
                   Positioned(top: 8, right: 8, child: ShoppingFavoriteButtons(item: item, size: 32)),
                   Positioned(top: 10, left: 8, child: _TopLeftBadges(item: item)),
                 ],
@@ -176,80 +167,84 @@ class FoodListCard extends StatelessWidget {
     final cs = theme.colorScheme;
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => FoodNavigation.openDetail(context, item),
         onLongPress: () => FoodNavigation.showQuickActions(context, item),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
+        // the photo covers the whole left side of the card, whatever its height
+        child: IntrinsicHeight(
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: SizedBox(
-                  width: 96,
-                  height: 96,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Hero(tag: 'food-${item.id}', child: FoodImage(item: item)),
-                      Positioned(top: 5, left: 5, child: _TopLeftBadges(item: item)),
-                    ],
-                  ),
+              SizedBox(
+                width: 108,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Hero(
+                      tag: 'food-${item.id}',
+                      child: FoodImage(item: item),
+                    ),
+                    Positioned(top: 6, left: 6, child: _TopLeftBadges(item: item)),
+                  ],
                 ),
               ),
-              const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            item.name.of(lang),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleMedium?.copyWith(height: 1.15),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              item.name.of(lang),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleMedium?.copyWith(height: 1.15),
+                            ),
                           ),
-                        ),
-                        SeasonalityThreeDots(calendar: entry.calendar, month: month),
-                        const SizedBox(width: 6),
-                        _CompactToggles(item: item),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
-                      children: [
-                        _InfoPill(
-                          icon: storageSlot(item.primaryLocation),
-                          text: item.cardShortStorage.of(lang),
-                          color: cs.secondaryContainer,
-                          onColor: cs.onSecondaryContainer,
-                        ),
-                        RipeningTypeLabel(item: item, compact: true),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    // "How to Choose the Best": the icon says what the text refers to.
-                    Text.rich(
-                      TextSpan(children: [
-                        WidgetSpan(
-                          alignment: PlaceholderAlignment.middle,
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 4),
-                            child: SlotIcon('home.list_card_how_to_choose', size: 15, color: cs.primary),
+                          SeasonalityThreeDots(calendar: entry.calendar, month: month),
+                          const SizedBox(width: 6),
+                          _CompactToggles(item: item),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          _InfoPill(
+                            icon: storageSlot(item.primaryLocation),
+                            text: item.cardShortStorage.of(lang),
+                            color: cs.secondaryContainer,
+                            onColor: cs.onSecondaryContainer,
                           ),
+                          RipeningTypeLabel(item: item, compact: true),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      // "How to Choose the Best": the icon says what the text refers to.
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            WidgetSpan(
+                              alignment: PlaceholderAlignment.middle,
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 4),
+                                child: SlotIcon('home.list_card_how_to_choose', size: 15, color: cs.primary),
+                              ),
+                            ),
+                            TextSpan(text: item.shoppingListPreview.of(lang)),
+                          ],
                         ),
-                        TextSpan(text: item.shoppingListPreview.of(lang)),
-                      ]),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-                    ),
-                  ],
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -273,14 +268,14 @@ class _CompactToggles extends StatelessWidget {
     final fav = lib.isFavorite(item.id);
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     Widget btn(String i, Color c, String tip, VoidCallback onTap) => IconButton(
-          visualDensity: VisualDensity.compact,
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints.tightFor(width: 32, height: 32),
-          iconSize: 20,
-          tooltip: tip,
-          onPressed: onTap,
-          icon: SlotIcon(i, color: c),
-        );
+      visualDensity: VisualDensity.compact,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+      iconSize: 20,
+      tooltip: tip,
+      onPressed: onTap,
+      icon: SlotIcon(i, color: c),
+    );
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -302,12 +297,7 @@ class _CompactToggles extends StatelessWidget {
 }
 
 class _InfoPill extends StatelessWidget {
-  const _InfoPill({
-    required this.icon,
-    required this.text,
-    required this.color,
-    required this.onColor,
-  });
+  const _InfoPill({required this.icon, required this.text, required this.color, required this.onColor});
 
   final String icon;
   final String text;
