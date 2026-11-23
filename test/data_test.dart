@@ -20,7 +20,7 @@ void main() {
   });
 
   test('the real database loads with all Phase 2 fields', () {
-    expect(db.items.length, 153);
+    expect(db.items.length, 152);
     final garlic = db.byId['aglio_garlic']!;
     expect(garlic.name.it, 'Aglio');
     expect(garlic.name.en, 'Garlic');
@@ -113,7 +113,7 @@ void main() {
       ),
       language: AppLanguage.it,
     );
-    expect(list.length, 153);
+    expect(list.length, 152);
     for (var i = 1; i < list.length; i++) {
       final a = list[i - 1], b = list[i];
       final ra = a.calendar.at(10).sortRank, rb = b.calendar.at(10).sortRank;

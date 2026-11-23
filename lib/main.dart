@@ -62,7 +62,9 @@ class PeakSeasonApp extends StatelessWidget {
         Provider<FoodDatabase>.value(value: database),
         ChangeNotifierProvider(create: (_) => AppNavigation()),
         ChangeNotifierProvider(create: (_) => SettingsController(prefs)),
-        ChangeNotifierProvider(create: (_) => LibraryController(prefs)),
+        ChangeNotifierProvider(
+          create: (_) => LibraryController(prefs, knownIds: database.byId.keys.toSet(), redirects: database.idRedirects),
+        ),
         ChangeNotifierProvider(create: (_) => HomeController(prefs, now: now)),
         ChangeNotifierProvider(create: (_) => DetailLayoutController(prefs)),
         ChangeNotifierProvider(

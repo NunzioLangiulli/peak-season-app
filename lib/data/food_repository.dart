@@ -56,6 +56,7 @@ class FoodDatabase {
     this.footprintLevels = const {},
     this.perishabilityLevels = const {},
     this.vocabColors = const {},
+    this.idRedirects = const {},
     this.vocabGlossaries = const {},
     this.carbsNoteMinStarch = 10,
     this.carbsNoteMinGap = 1,
@@ -131,6 +132,10 @@ class FoodDatabase {
 
   /// `metadata.seasonality_estimates_method`.
   final LocalizedText estimatesMethod;
+
+  /// Removed/merged product id -> id of the product that replaces it
+  /// (`metadata.id_redirects`): used to update the user's saved lists.
+  final Map<String, String> idRedirects;
 
   /// Optional colour of a coded value (`vocabulary[field][code].color_hex`).
   final Map<String, Map<String, int>> vocabColors;
@@ -315,6 +320,10 @@ class FoodRepository {
       carbsNoteGlossary: ((meta['macros_note'] as Map?)?['glossary'] as String?) ?? 'available_carbohydrates',
       perishabilityLevels: perishabilityLevels,
       vocabColors: vocabColors,
+      idRedirects: {
+        for (final e in ((meta['id_redirects'] as Map?) ?? const {}).entries)
+          if (e.value is String) '${e.key}': e.value as String,
+      },
       vocabGlossaries: vocabGlossaries,
       footprintLevels: footprintLevels,
       claimRules: NutritionClaimRules.fromJson(meta['nutrition_claims_eu_rules']),
