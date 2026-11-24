@@ -31,12 +31,12 @@ jobs:
       # The tests check that the app's copies of ui_copy.json and ui_config.json
       # match ../data/ in the database repository.
       - name: Check out the database
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           repository: NunzioLangiulli/peak-season-database
 
       - name: Check out the app
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           path: app
 
@@ -44,7 +44,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.47.9
+          flutter-version: 3.50.1
           cache: true
 
       - name: Install dependencies
@@ -69,7 +69,7 @@ jobs:
           ls -lh "$IPA"
 
       - name: Keep the .ipa as a workflow artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.package.outputs.ipa }}
           path: app/${{ steps.package.outputs.ipa }}

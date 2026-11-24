@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Space to leave at the bottom of a scrolling page so the last card is
 /// never cut by the rounded corners of the phone screen: the system inset

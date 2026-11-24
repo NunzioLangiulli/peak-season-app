@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Text of a help entry: blank lines separate paragraphs, and lines that
 /// start with "• ", "- " or "– " are drawn as bullet rows with a hanging

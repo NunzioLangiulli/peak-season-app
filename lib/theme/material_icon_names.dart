@@ -1,7 +1,7 @@
 // Hand-written: Material names accepted in data/ui_config.json ("material:<name>").
 // The Admin Studio reads this list (regex 'name': Icons.) to offer only icons
 // the app can draw. The Rounded variant is used. To add one: one line here.
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 const materialIconNames = <String, IconData>{
   'eco': Icons.eco_rounded,

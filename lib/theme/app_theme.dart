@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Material 3 theme with a natural green seed.
 /// - Light: slightly warm surfaces.

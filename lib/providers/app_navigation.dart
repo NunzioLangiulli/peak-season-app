@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Navigation requests coming from outside the widget tree
 /// (tapping a notification): the shell listens to them and switches tab or opens pages.
