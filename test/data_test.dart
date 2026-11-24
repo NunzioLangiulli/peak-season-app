@@ -14,9 +14,7 @@ void main() {
   late FoodDatabase db;
 
   setUpAll(() {
-    db = FoodRepository.parseDatabase(
-      File('assets/data/database.json').readAsStringSync(),
-    );
+    db = FoodRepository.parseDatabase(File('assets/data/database.json').readAsStringSync());
   });
 
   test('the real database loads with all Phase 2 fields', () {
@@ -39,8 +37,7 @@ void main() {
   test('every referenced image exists in the WebP assets', () {
     for (final item in db.items) {
       if (item.primaryImage != null) {
-        expect(File(AssetPaths.thumb(item.primaryImage!)).existsSync(), isTrue,
-            reason: item.primaryImage);
+        expect(File(AssetPaths.thumb(item.primaryImage!)).existsSync(), isTrue, reason: item.primaryImage);
       }
       for (final f in item.gallery) {
         expect(File(AssetPaths.full(f)).existsSync(), isTrue, reason: f);
@@ -107,10 +104,7 @@ void main() {
     final list = home.visibleEntries(
       db: db,
       library: LibraryController(prefs),
-      resolver: const SeasonalityResolver(
-        zone: ClimaticZone.mediterranean,
-        area: ItalyMacroArea.nord,
-      ),
+      resolver: const SeasonalityResolver(zone: ClimaticZone.mediterranean, area: ItalyMacroArea.nord),
       language: AppLanguage.it,
     );
     expect(list.length, 152);
@@ -119,12 +113,27 @@ void main() {
       final ra = a.calendar.at(10).sortRank, rb = b.calendar.at(10).sortRank;
       expect(ra <= rb, isTrue);
       if (ra == rb) {
-        expect(
-          normalizeForSearch(a.item.name.it).compareTo(normalizeForSearch(b.item.name.it)) <= 0,
-          isTrue,
-        );
+        expect(normalizeForSearch(a.item.name.it).compareTo(normalizeForSearch(b.item.name.it)) <= 0, isTrue);
       }
     }
+  });
+
+  test('search: the common name ranks first ("riso" → Riso)', () async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    final lib = LibraryController(prefs);
+    final home = HomeController(prefs, now: DateTime(2026, 11, 6));
+    const r = SeasonalityResolver(zone: ClimaticZone.mediterranean, area: ItalyMacroArea.nord);
+    String first(String q) {
+      home.setQuery(q);
+      final l = home.computeLists(db: db, library: lib, resolver: r, language: AppLanguage.it);
+      return [...l.main, ...l.noData].first.item.name.it;
+    }
+
+    for (final q in ['riso', 'mela', 'pomodoro', 'zucca', 'aglio']) {
+      expect(normalizeForSearch(first(q)), startsWith(q), reason: 'search "$q"');
+    }
+    home.setQuery('');
   });
 
   test('filters: hidden, favourites, categories, search', () async {
@@ -135,10 +144,8 @@ void main() {
       ..toggleFavorite('mela_apple');
     final home = HomeController(prefs, now: DateTime(2026, 11, 6));
     const r = SeasonalityResolver(zone: ClimaticZone.mediterranean, area: ItalyMacroArea.nord);
-    List<String> ids() => home
-        .visibleEntries(db: db, library: lib, resolver: r, language: AppLanguage.it)
-        .map((e) => e.item.id)
-        .toList();
+    List<String> ids() =>
+        home.visibleEntries(db: db, library: lib, resolver: r, language: AppLanguage.it).map((e) => e.item.id).toList();
 
     expect(ids(), isNot(contains('aglio_garlic')));
     home.setShowHidden(true);

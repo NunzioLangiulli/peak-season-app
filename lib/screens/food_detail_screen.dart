@@ -1260,10 +1260,11 @@ class _AllergensSection extends StatelessWidget {
         children: [
           for (final a in allergens)
             TagPill(
-              text: (a['name'] is Map
-                      ? LocalizedText.fromJson(a['name'])
-                      : db.vocab('$_field.annex_ii_number', '${a['annex_ii_number']}'))
-                  .of(lang),
+              text:
+                  (a['name'] is Map
+                          ? LocalizedText.fromJson(a['name'])
+                          : db.vocab('$_field.annex_ii_number', '${a['annex_ii_number']}'))
+                      .of(lang),
               background: const Color(0xFFF9A825).withValues(alpha: 0.18),
               foreground: Color.lerp(const Color(0xFFF9A825), cs.onSurface, 0.45),
               // gluten has its own "?" next to the cereal pill
@@ -1318,6 +1319,7 @@ class _BioactiveList extends StatelessWidget {
         return out;
       });
     }
+
     final amountStyle = theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600);
     final subStyle = theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant);
     String amount(Map c) => c['amount'] is num ? '${_n(c['amount'] as num)} ${c['unit'] ?? ''}' : '';
@@ -1439,29 +1441,18 @@ class _LinksSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = context.s;
     final lang = context.watch<SettingsController>().language;
-    final theme = Theme.of(context);
     final links = item.raw.list('sources_by_topic.useful_links').whereType<Map>().toList();
-    // Technical provenance of the seasonal curve: only here, among the sources.
-    final curveBasis = item.raw.text('seasonality.curve_basis').of(lang);
-    if (links.isEmpty && curveBasis.isEmpty) return const SizedBox.shrink();
+    // The technical note on how the seasonal curve was built
+    // (seasonality.curve_basis) stays in the database but is not shown:
+    // it read like an internal note.
+    if (links.isEmpty) return const SizedBox.shrink();
     return _Section(
       id: DetailSection.links,
       title: s.secLinks,
       helpIds: const ['useful_links'],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (final l in links) _SourceTile(link: l, lang: lang),
-          if (curveBasis.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            Text(
-              s.curveBasisTitle,
-              style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-            ),
-            const SizedBox(height: 2),
-            Text(curveBasis, style: theme.textTheme.bodySmall?.copyWith(height: 1.35)),
-          ],
-        ],
+        children: [for (final l in links) _SourceTile(link: l, lang: lang)],
       ),
     );
   }

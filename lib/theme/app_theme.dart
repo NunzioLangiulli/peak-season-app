@@ -32,13 +32,24 @@ class AppTheme {
   /// Card colour: frost 0 = fully opaque surface, frost 1 = very
   /// transparent glass (white veil over the background glows).
   static Color cardColor(bool dark, double frost) => dark
-      ? Color.lerp(const Color(0xFF161916), satin(0.04), frost)!
+      ? _lerpPremultiplied(const Color(0xFF161916), satin(0.04), frost)
       : Color.lerp(Colors.white, Colors.white.withValues(alpha: 0.55), frost)!;
 
   /// Colour of the floating pill navigation bar, same rule as the cards.
   static Color barColor(bool dark, double frost) => dark
-      ? Color.lerp(const Color(0xFF1B1F1B), satin(0.06), frost)!
+      ? _lerpPremultiplied(const Color(0xFF1B1F1B), satin(0.06), frost)
       : Color.lerp(Colors.white, Colors.white.withValues(alpha: 0.5), frost)!;
+
+  /// Mixes an opaque colour with a translucent one as they look when painted
+  /// (premultiplied alpha). Color.lerp mixes the RGB channels on their own,
+  /// so dark surface → faint white veil gave a light grey at ~40% opacity
+  /// instead of a dark frosted surface.
+  static Color _lerpPremultiplied(Color x, Color y, double t) {
+    final a = x.a + (y.a - x.a) * t;
+    if (a <= 0) return const Color(0x00000000);
+    double ch(double cx, double cy) => ((cx * x.a) + ((cy * y.a) - (cx * x.a)) * t) / a;
+    return Color.from(alpha: a, red: ch(x.r, y.r), green: ch(x.g, y.g), blue: ch(x.b, y.b));
+  }
 
   static ThemeData _build(Brightness b, double frost) {
     final dark = b == Brightness.dark;

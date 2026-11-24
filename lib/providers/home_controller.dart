@@ -18,8 +18,8 @@ class FoodEntry {
 /// State of the Peak Season screen: month, view, filters, search.
 class HomeController extends ChangeNotifier {
   HomeController(this._prefs, {DateTime? now})
-      : _month = (now ?? DateTime.now()).month - 1,
-        currentMonth = (now ?? DateTime.now()).month - 1 {
+    : _month = (now ?? DateTime.now()).month - 1,
+      currentMonth = (now ?? DateTime.now()).month - 1 {
     _viewMode = HomeViewMode.fromName(_prefs.getString(_kView));
     _showHidden = _prefs.getBool(_kShowHidden) ?? false;
     _includeNoData = _prefs.getBool(_kIncludeNoData) ?? false;
@@ -243,8 +243,7 @@ class HomeController extends ChangeNotifier {
     required LibraryController library,
     required SeasonalityResolver resolver,
     required AppLanguage language,
-  }) =>
-      computeLists(db: db, library: library, resolver: resolver, language: language).main;
+  }) => computeLists(db: db, library: library, resolver: resolver, language: language).main;
 
   /// Separate "No Data for This Zone" section (empty if [includeNoData]
   /// is on or if a seasonal-state filter is active).
@@ -253,8 +252,7 @@ class HomeController extends ChangeNotifier {
     required LibraryController library,
     required SeasonalityResolver resolver,
     required AppLanguage language,
-  }) =>
-      computeLists(db: db, library: library, resolver: resolver, language: language).noData;
+  }) => computeLists(db: db, library: library, resolver: resolver, language: language).noData;
 
   /// 153 products: fast enough to redo on every build.
   ({List<FoodEntry> main, List<FoodEntry> noData}) computeLists({
@@ -287,7 +285,24 @@ class HomeController extends ChangeNotifier {
     }
     sortBySeason(main, _month, language);
     sortBySeason(noData, _month, language);
+    if (q.isNotEmpty) {
+      // With a search, the best name match comes first ("riso" → Riso,
+      // not Bietola); equal matches keep the season order.
+      sortByRelevance(main, q);
+      sortByRelevance(noData, q);
+    }
     return (main: main, noData: noData);
+  }
+
+  /// Stable sort by search relevance (List.sort is not stable, so the
+  /// season order is kept through the original index).
+  static void sortByRelevance(List<FoodEntry> list, String normalizedQuery) {
+    final ranked = [
+      for (var i = 0; i < list.length; i++) (rank: list[i].item.searchRank(normalizedQuery), i: i, e: list[i]),
+    ]..sort((a, b) => a.rank != b.rank ? a.rank.compareTo(b.rank) : a.i.compareTo(b.i));
+    list
+      ..clear()
+      ..addAll(ranked.map((r) => r.e));
   }
 
   /// peak → early → in season → end → not grown → out → no data,
@@ -296,8 +311,7 @@ class HomeController extends ChangeNotifier {
     list.sort((a, b) {
       final r = a.calendar.at(month).sortRank.compareTo(b.calendar.at(month).sortRank);
       if (r != 0) return r;
-      return normalizeForSearch(a.item.name.of(lang))
-          .compareTo(normalizeForSearch(b.item.name.of(lang)));
+      return normalizeForSearch(a.item.name.of(lang)).compareTo(normalizeForSearch(b.item.name.of(lang)));
     });
   }
 }

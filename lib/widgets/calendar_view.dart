@@ -18,7 +18,10 @@ const EdgeInsets _rowPadding = EdgeInsets.symmetric(horizontal: 16);
 
 /// MODE 3 — 12-month annual calendar.
 class CalendarView extends StatelessWidget {
-  const CalendarView({super.key, required this.entries, required this.bottomPadding, this.footer});
+  const CalendarView({super.key, required this.entries, required this.bottomPadding, this.footer, this.listKey});
+
+  /// Key of the scrolling list: a new key starts it from the top.
+  final Key? listKey;
 
   final List<FoodEntry> entries;
   final double bottomPadding;
@@ -29,46 +32,49 @@ class CalendarView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final month = context.select<HomeController, int>((h) => h.month);
-    return LayoutBuilder(builder: (context, box) {
-      // Months fixed from January to December; the pill moves to the month
-      // chosen in the month slider at the top.
-      final col = (box.maxWidth - _rowPadding.horizontal - _nameColumnWidth - 4) / 12;
-      final left = _rowPadding.left + _nameColumnWidth + 2 + col * month;
-      return Stack(
-        children: [
-          // A single vertical pill, from the initial in the header down to the
-          // bottom of the rows, behind the dots.
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 260),
-            curve: Curves.easeOutCubic,
-            left: left + 1,
-            width: col - 2,
-            top: 4,
-            bottom: 0,
-            child: const MonthHighlightPill(),
-          ),
-          Column(
-            children: [
-              const CalendarMonthHeader(),
-              Expanded(
-                child: CustomScrollView(
-                  slivers: [
-                    const SliverToBoxAdapter(child: SizedBox(height: 4)),
-                    SliverFixedExtentList.builder(
-                      itemExtent: 46,
-                      itemCount: entries.length,
-                      itemBuilder: (context, i) => CalendarRow(entry: entries[i]),
-                    ),
-                    if (footer != null) SliverToBoxAdapter(child: footer),
-                    SliverToBoxAdapter(child: SizedBox(height: bottomPadding)),
-                  ],
+    return LayoutBuilder(
+      builder: (context, box) {
+        // Months fixed from January to December; the pill moves to the month
+        // chosen in the month slider at the top.
+        final col = (box.maxWidth - _rowPadding.horizontal - _nameColumnWidth - 4) / 12;
+        final left = _rowPadding.left + _nameColumnWidth + 2 + col * month;
+        return Stack(
+          children: [
+            // A single vertical pill, from the initial in the header down to the
+            // bottom of the rows, behind the dots.
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 260),
+              curve: Curves.easeOutCubic,
+              left: left + 1,
+              width: col - 2,
+              top: 4,
+              bottom: 0,
+              child: const MonthHighlightPill(),
+            ),
+            Column(
+              children: [
+                const CalendarMonthHeader(),
+                Expanded(
+                  child: CustomScrollView(
+                    key: listKey,
+                    slivers: [
+                      const SliverToBoxAdapter(child: SizedBox(height: 4)),
+                      SliverFixedExtentList.builder(
+                        itemExtent: 46,
+                        itemCount: entries.length,
+                        itemBuilder: (context, i) => CalendarRow(entry: entries[i]),
+                      ),
+                      if (footer != null) SliverToBoxAdapter(child: footer),
+                      SliverToBoxAdapter(child: SizedBox(height: bottomPadding)),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
-      );
-    });
+              ],
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -79,8 +85,8 @@ const int centeredMonthIndex = 5;
 /// Order of the 12 months: January to December, or rotated so that
 /// [selected] is at position [centeredMonthIndex].
 List<int> monthOrder(int selected, {bool rotate = false}) => [
-      for (var i = 0; i < 12; i++) rotate ? (selected - centeredMonthIndex + i + 12) % 12 : i,
-    ];
+  for (var i = 0; i < 12; i++) rotate ? (selected - centeredMonthIndex + i + 12) % 12 : i,
+];
 
 /// Light green band, low opacity and with a slight glow, that
 /// highlights the selected month's column (12-month view and product page).
@@ -269,48 +275,48 @@ class MonthSquares extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final b = Theme.of(context).brightness;
-    return LayoutBuilder(builder: (context, c) {
-      final col = c.maxWidth / 12;
-      final d = (col - 3).clamp(8.0, height);
-      return Row(
-        children: [
-          for (final m in monthOrder(selected, rotate: rotate))
-            SizedBox(
-              width: col,
-              height: d + 6,
-              child: Center(
-                child: Builder(builder: (context) {
-                  final st = calendar.at(m);
-                  final isSel = m == selected;
-                  final size = isSel || allIcons ? d : d * 0.78;
-                  final accent = SeasonPalette.accentBorder(st, b);
-                  return Opacity(
-                    opacity: isSel || allIcons ? 1 : 0.82,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: size,
-                      height: size,
-                      decoration: BoxDecoration(
-                        color: SeasonPalette.color(st, b),
-                        shape: BoxShape.circle,
-                        border: accent != null ? Border.all(color: accent, width: 1) : null,
-                      ),
-                      child: (isSel || allIcons) && st.hasIcon
-                          ? Center(
-                              child: SeasonGlyph(
-                                state: st,
-                                size: size * 0.74,
-                                color: SeasonPalette.onColor(st, b),
-                              ),
-                            )
-                          : null,
-                    ),
-                  );
-                }),
+    return LayoutBuilder(
+      builder: (context, c) {
+        final col = c.maxWidth / 12;
+        final d = (col - 3).clamp(8.0, height);
+        return Row(
+          children: [
+            for (final m in monthOrder(selected, rotate: rotate))
+              SizedBox(
+                width: col,
+                height: d + 6,
+                child: Center(
+                  child: Builder(
+                    builder: (context) {
+                      final st = calendar.at(m);
+                      final isSel = m == selected;
+                      final size = isSel || allIcons ? d : d * 0.78;
+                      final accent = SeasonPalette.accentBorder(st, b);
+                      return Opacity(
+                        opacity: isSel || allIcons ? 1 : 0.82,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: size,
+                          height: size,
+                          decoration: BoxDecoration(
+                            color: SeasonPalette.color(st, b),
+                            shape: BoxShape.circle,
+                            border: accent != null ? Border.all(color: accent, width: 1) : null,
+                          ),
+                          child: (isSel || allIcons) && st.hasIcon
+                              ? Center(
+                                  child: SeasonGlyph(state: st, size: size * 0.74, color: SeasonPalette.onColor(st, b)),
+                                )
+                              : null,
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ),
-            ),
-        ],
-      );
-    });
+          ],
+        );
+      },
+    );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,7 +10,10 @@ class LibraryController extends ChangeNotifier {
       : _favorites = {...?_prefs.getStringList(_kFav)},
         _disliked = {...?_prefs.getStringList(_kDisliked)},
         _shopping = [...?_prefs.getStringList(_kShopping)],
-        _inCart = {...?_prefs.getStringList(_kInCart)} {
+        _inCart = {...?_prefs.getStringList(_kInCart)},
+        _custom = [
+          for (final raw in _prefs.getStringList(_kCustom) ?? const <String>[]) ?CustomShoppingItem.tryDecode(raw),
+        ] {
     if (knownIds != null) _migrate(knownIds, redirects);
   }
 
@@ -53,6 +58,8 @@ class LibraryController extends ChangeNotifier {
   static const _kDisliked = 'dislikedIds';
   static const _kShopping = 'shoppingListIds';
   static const _kInCart = 'inCartIds';
+  static const _kCustom = 'customShoppingItems';
+  static const _kDoneCollapsed = 'shoppingDoneCollapsed';
 
   final SharedPreferences _prefs;
   final Set<String> _favorites;
@@ -63,6 +70,58 @@ class LibraryController extends ChangeNotifier {
 
   /// Products on the list already "picked / in the cart".
   final Set<String> _inCart;
+
+  /// Free-text items (anything that is not one of the app's products), so
+  /// the list is the only place the user needs for the whole shopping.
+  /// Kept apart from the products: notifications and storage tips use only
+  /// the products.
+  final List<CustomShoppingItem> _custom;
+
+  List<CustomShoppingItem> get customItems => List.unmodifiable(_custom);
+
+  /// "Already got" section of the list folded (remembered between visits).
+  bool get doneCollapsed => _prefs.getBool(_kDoneCollapsed) ?? false;
+
+  void toggleDoneCollapsed() {
+    _prefs.setBool(_kDoneCollapsed, !doneCollapsed);
+    notifyListeners();
+  }
+
+  /// Adds a free-text item (ignored if empty or already on the list, to be bought).
+  void addCustomItem(String text) {
+    final t = text.trim();
+    if (t.isEmpty || _custom.any((c) => !c.done && c.text.toLowerCase() == t.toLowerCase())) return;
+    _custom.add(CustomShoppingItem(id: 'custom-${DateTime.now().microsecondsSinceEpoch}', text: t));
+    _saveCustom();
+    notifyListeners();
+  }
+
+  void toggleCustomDone(String id) {
+    final i = _custom.indexWhere((c) => c.id == id);
+    if (i < 0) return;
+    _custom[i] = _custom[i].copyWith(done: !_custom[i].done);
+    _saveCustom();
+    notifyListeners();
+  }
+
+  /// Removes a free-text item; returns its position, for "Undo".
+  int removeCustomItem(String id) {
+    final i = _custom.indexWhere((c) => c.id == id);
+    if (i < 0) return -1;
+    _custom.removeAt(i);
+    _saveCustom();
+    notifyListeners();
+    return i;
+  }
+
+  void insertCustomItem(int index, CustomShoppingItem item) {
+    if (_custom.any((c) => c.id == item.id)) return;
+    _custom.insert(index.clamp(0, _custom.length), item);
+    _saveCustom();
+    notifyListeners();
+  }
+
+  void _saveCustom() => _prefs.setStringList(_kCustom, [for (final c in _custom) c.encode()]);
 
   Set<String> get inCartIds => Set.unmodifiable(_inCart);
   bool isInCart(String id) => _inCart.contains(id);
@@ -78,6 +137,8 @@ class LibraryController extends ChangeNotifier {
   void clearCompleted() {
     _shopping.removeWhere(_inCart.contains);
     _inCart.clear();
+    _custom.removeWhere((c) => c.done);
+    _saveCustom();
     _save(_kShopping, _shopping);
     _save(_kInCart, _inCart);
     notifyListeners();
@@ -139,6 +200,8 @@ class LibraryController extends ChangeNotifier {
   void clearShopping() {
     _shopping.clear();
     _inCart.clear();
+    _custom.clear();
+    _saveCustom();
     _save(_kInCart, _inCart);
     _save(_kShopping, _shopping);
     notifyListeners();
@@ -146,4 +209,28 @@ class LibraryController extends ChangeNotifier {
 
   void _save(String key, Iterable<String> ids) =>
       _prefs.setStringList(key, ids.toList());
+}
+
+/// A free-text item of the shopping list ("Latte", "Pane"…), with its tick.
+@immutable
+class CustomShoppingItem {
+  const CustomShoppingItem({required this.id, required this.text, this.done = false});
+
+  final String id;
+  final String text;
+  final bool done;
+
+  CustomShoppingItem copyWith({bool? done}) => CustomShoppingItem(id: id, text: text, done: done ?? this.done);
+
+  String encode() => jsonEncode({'id': id, 'text': text, 'done': done});
+
+  static CustomShoppingItem? tryDecode(String raw) {
+    try {
+      final m = jsonDecode(raw);
+      if (m is! Map || m['id'] is! String || m['text'] is! String) return null;
+      return CustomShoppingItem(id: m['id'] as String, text: m['text'] as String, done: m['done'] == true);
+    } catch (_) {
+      return null;
+    }
+  }
 }

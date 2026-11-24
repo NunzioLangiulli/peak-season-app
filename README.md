@@ -2,7 +2,7 @@
 
 **Peak Season** tells you what is in season **in your area, this month**, when a product is at its **peak**, how to choose it, how to store it and what its environmental footprint is. The app works **fully offline**, in **English or Italian**, and is built on the *Peak Season – Seasonal Fruit & Vegetable Database* ([peak-season-database](https://github.com/NunzioLangiulli/peak-season-database)): 152 products, 51 official sources, no invented data.
 
-Flutter app for Android and iPhone (iPhone via sideloading, see below). **Current version: 1.1.7.** Versions follow semantic versioning (MAJOR.MINOR.PATCH).
+Flutter app for Android and iPhone (iPhone via sideloading, see below). **Current version: 1.2.0.** Versions follow semantic versioning (MAJOR.MINOR.PATCH).
 
 ---
 
@@ -15,7 +15,7 @@ Flutter app for Android and iPhone (iPhone via sideloading, see below). **Curren
   - **Grid** with photos and seasonal state;
   - compact **List**, with climacteric/non-climacteric badges and carbon and water footprint;
   - **12-Month Calendar**: every product at a glance, with the selected month in the middle.
-- **Search** by name (Italian, English, synonyms).
+- **Search** by name (Italian, English, synonyms), with the best name match first.
 - Multi-select **categories**: All, Fruit, Vegetables, Other (herbs and spices, mushrooms, cereals).
 - **Advanced filters:** seasonal state in the selected month, PDO/PGI only, favourites only, shopping list only, hidden products.
 - **Sorted by seasonality**: peak first, then in season, early season, end of season.
@@ -65,11 +65,11 @@ A complete product page, split into blocks that you can **reorder, collapse or h
 ### Your lists
 
 - **Favourites**, **I Don't Eat It** (hidden from Home, but recoverable) and **Shopping list**.
-- The **Shopping list** shows whether each product is in season this month.
+- The **Shopping list** shows whether each product is in season this month, and also takes free-text items (milk, bread…), listed below fruit and vegetables. Items already picked up go in a section that can be folded.
 
 ### Notifications (Android; on iPhone, alerts only)
 
-- **Shopping mode:** a persistent notification, visible on the lock screen too, with what is in season. If you have a shopping list, the notification highlights your items or shows only those.
+- **Shopping mode:** a persistent notification, visible on the lock screen too, with what is in season. If you have a shopping list, the notification highlights your items (in bold and first) or shows only those; a setting writes out the full list instead of "+N".
 - **After-shopping tips:** when you close shopping mode, a notification arrives, immediately or after a 0–60 minute delay, and opens **storage tips** for what you bought.
 - **"Peak Season" alerts:** on the first of every month at 9 a.m., what is entering its peak. Choose between no alerts, favourites only, or everything except what you don't eat.
 

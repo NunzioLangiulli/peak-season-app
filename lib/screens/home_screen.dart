@@ -29,12 +29,7 @@ class HomeScreen extends StatelessWidget {
     final home = context.watch<HomeController>();
     final lib = context.watch<LibraryController>();
     final settings = context.watch<SettingsController>();
-    final lists = home.computeLists(
-      db: db,
-      library: lib,
-      resolver: settings.resolver,
-      language: settings.language,
-    );
+    final lists = home.computeLists(db: db, library: lib, resolver: settings.resolver, language: settings.language);
     final entries = lists.main;
     final bottom = PillNavBar.overlap(context);
     // With an active search the "No Data" section opens by itself, so
@@ -52,36 +47,42 @@ class HomeScreen extends StatelessWidget {
     } else {
       body = switch (home.viewMode) {
         HomeViewMode.grid => CustomScrollView(
-            key: const PageStorageKey('grid'),
-            slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                sliver: SliverGrid.builder(
-                  gridDelegate: homeGridDelegate,
-                  itemCount: entries.length,
-                  itemBuilder: (_, i) => FoodGridCard(key: ValueKey(entries[i].item.id), entry: entries[i]),
-                ),
+          // A new search starts from the top, so the best match is visible.
+          key: PageStorageKey('grid-${home.query}'),
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              sliver: SliverGrid.builder(
+                gridDelegate: homeGridDelegate,
+                itemCount: entries.length,
+                itemBuilder: (_, i) => FoodGridCard(key: ValueKey(entries[i].item.id), entry: entries[i]),
               ),
-              SliverToBoxAdapter(child: noData),
-              SliverToBoxAdapter(child: SizedBox(height: bottom)),
-            ],
-          ),
+            ),
+            SliverToBoxAdapter(child: noData),
+            SliverToBoxAdapter(child: SizedBox(height: bottom)),
+          ],
+        ),
         HomeViewMode.list => CustomScrollView(
-            key: const PageStorageKey('list'),
-            slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                sliver: SliverList.separated(
-                  itemCount: entries.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 10),
-                  itemBuilder: (_, i) => FoodListCard(key: ValueKey(entries[i].item.id), entry: entries[i]),
-                ),
+          key: PageStorageKey('list-${home.query}'),
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              sliver: SliverList.separated(
+                itemCount: entries.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 10),
+                itemBuilder: (_, i) => FoodListCard(key: ValueKey(entries[i].item.id), entry: entries[i]),
               ),
-              SliverToBoxAdapter(child: noData),
-              SliverToBoxAdapter(child: SizedBox(height: bottom)),
-            ],
-          ),
-        HomeViewMode.calendar => CalendarView(entries: entries, bottomPadding: bottom, footer: noData),
+            ),
+            SliverToBoxAdapter(child: noData),
+            SliverToBoxAdapter(child: SizedBox(height: bottom)),
+          ],
+        ),
+        HomeViewMode.calendar => CalendarView(
+          listKey: PageStorageKey('calendar-${home.query}'),
+          entries: entries,
+          bottomPadding: bottom,
+          footer: noData,
+        ),
       };
     }
 
@@ -131,10 +132,8 @@ class _Header extends StatelessWidget {
                 children: [
                   Text(
                     s.appTitle,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.3,
-                        ),
+                    style: Theme.of(context).textTheme.headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.3),
                   ),
                 ],
               ),
@@ -274,48 +273,60 @@ class _ActiveFilterChips extends StatelessWidget {
       chips.add(InputChip(label: Text(s.state(st)), onDeleted: () => home.toggleState(st)));
     }
     for (final r in home.ripening) {
-      chips.add(InputChip(
-        label: Text(db.vocab('ripening_and_storage.ripening_type', r).of(lang)),
-        onDeleted: () => home.toggleRipening(r),
-      ));
+      chips.add(
+        InputChip(
+          label: Text(db.vocab('ripening_and_storage.ripening_type', r).of(lang)),
+          onDeleted: () => home.toggleRipening(r),
+        ),
+      );
     }
     for (final l in home.storage) {
-      chips.add(InputChip(
-        avatar: SlotIcon(storageSlot(l), size: 16),
-        label: Text(db.vocab('ripening_and_storage.primary_location', l).of(lang)),
-        onDeleted: () => home.toggleStorage(l),
-      ));
+      chips.add(
+        InputChip(
+          avatar: SlotIcon(storageSlot(l), size: 16),
+          label: Text(db.vocab('ripening_and_storage.primary_location', l).of(lang)),
+          onDeleted: () => home.toggleStorage(l),
+        ),
+      );
     }
     for (final l in home.carbon) {
-      chips.add(InputChip(
-        avatar: const SlotIcon('detail.carbon_footprint', size: 16),
-        label: Text(s.carbonTag(db.vocab('sustainability_level', l).of(lang))),
-        onDeleted: () => home.toggleCarbon(l),
-      ));
+      chips.add(
+        InputChip(
+          avatar: const SlotIcon('detail.carbon_footprint', size: 16),
+          label: Text(s.carbonTag(db.vocab('sustainability_level', l).of(lang))),
+          onDeleted: () => home.toggleCarbon(l),
+        ),
+      );
     }
     for (final l in home.water) {
-      chips.add(InputChip(
-        avatar: const SlotIcon('detail.water_footprint', size: 16),
-        label: Text(s.waterTag(db.vocab('sustainability_level', l).of(lang))),
-        onDeleted: () => home.toggleWater(l),
-      ));
+      chips.add(
+        InputChip(
+          avatar: const SlotIcon('detail.water_footprint', size: 16),
+          label: Text(s.waterTag(db.vocab('sustainability_level', l).of(lang))),
+          onDeleted: () => home.toggleWater(l),
+        ),
+      );
     }
     if (home.dopOnly) {
       chips.add(InputChip(label: Text(s.dopOnlyChip), onDeleted: () => home.setDopOnly(false)));
     }
     if (home.includeNoData) {
-      chips.add(InputChip(
-        avatar: const SeasonDot(state: SeasonState.unknown, size: 14),
-        label: Text(s.noDataChip),
-        onDeleted: () => home.setIncludeNoData(false),
-      ));
+      chips.add(
+        InputChip(
+          avatar: const SeasonDot(state: SeasonState.unknown, size: 14),
+          label: Text(s.noDataChip),
+          onDeleted: () => home.setIncludeNoData(false),
+        ),
+      );
     }
     if (home.showHidden) {
-      chips.add(InputChip(
-        avatar: const SlotIcon('home.hidden_visible', size: 16),
-        label: Text(s.hiddenVisible),
-        onDeleted: () => home.setShowHidden(false),
-      ));
+      chips.add(
+        InputChip(
+          avatar: const SlotIcon('home.hidden_visible', size: 16),
+          label: Text(s.hiddenVisible),
+          onDeleted: () => home.setShowHidden(false),
+        ),
+      );
     }
     if (chips.isEmpty) return const SizedBox.shrink();
     return SizedBox(
@@ -354,10 +365,7 @@ class _EmptyState extends StatelessWidget {
             const SizedBox(height: 4),
             Text(s.noResultsHint, textAlign: TextAlign.center, style: theme.textTheme.bodyMedium),
             const SizedBox(height: 16),
-            FilledButton.tonal(
-              onPressed: context.read<HomeController>().resetAll,
-              child: Text(s.clearFilters),
-            ),
+            FilledButton.tonal(onPressed: context.read<HomeController>().resetAll, child: Text(s.clearFilters)),
           ],
         ),
       ),

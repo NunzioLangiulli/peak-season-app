@@ -46,9 +46,7 @@ class NotificationService {
   void Function(NotificationResponse response)? onResponse;
 
   bool get isSupported =>
-      !kIsWeb &&
-      (defaultTargetPlatform == TargetPlatform.android ||
-          defaultTargetPlatform == TargetPlatform.iOS);
+      !kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS);
 
   Future<void> init() async {
     if (!isSupported || _ready) return;
@@ -92,12 +90,10 @@ class NotificationService {
   Future<bool> requestPermission() async {
     if (!isSupported) return false;
     if (defaultTargetPlatform == TargetPlatform.android) {
-      final android = _plugin.resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>();
+      final android = _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
       return await android?.requestNotificationsPermission() ?? true;
     }
-    final ios = _plugin.resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>();
+    final ios = _plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
     return await ios?.requestPermissions(alert: true, badge: false, sound: true) ?? false;
   }
 
@@ -113,7 +109,8 @@ class NotificationService {
     await _plugin.show(
       id: shoppingId,
       title: c.title,
-      body: c.body,
+      // Android reads the <b> tags (htmlFormatContent); iOS would show them as text.
+      body: defaultTargetPlatform == TargetPlatform.iOS ? c.body.replaceAll(RegExp(r'</?b>'), '') : c.body,
       payload: c.payload,
       notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
@@ -135,16 +132,12 @@ class NotificationService {
           styleInformation: BigTextStyleInformation(
             c.lines.join('<br>'),
             htmlFormatBigText: true,
+            htmlFormatContent: true, // collapsed line: list products in bold
             contentTitle: c.title,
             summaryText: c.summary,
           ),
           actions: [
-            AndroidNotificationAction(
-              closeActionId,
-              s.notifClose,
-              cancelNotification: true,
-              showsUserInterface: false,
-            ),
+            AndroidNotificationAction(closeActionId, s.notifClose, cancelNotification: true, showsUserInterface: false),
           ],
         ),
         iOS: const DarwinNotificationDetails(presentSound: false, interruptionLevel: InterruptionLevel.passive),
@@ -213,11 +206,7 @@ class NotificationService {
 /// Text and sending of the "storage tips" notification, immediately or after
 /// [delayMinutes] minutes. Static function because it is also used by the isolate in
 /// the background. The delay is relative, so UTC time is enough (no time zone).
-Future<void> showStorageTipsNotification(
-  FlutterLocalNotificationsPlugin plugin,
-  S s, {
-  int delayMinutes = 0,
-}) async {
+Future<void> showStorageTipsNotification(FlutterLocalNotificationsPlugin plugin, S s, {int delayMinutes = 0}) async {
   final details = NotificationDetails(
     android: AndroidNotificationDetails(
       NotificationService._chTips,
@@ -265,11 +254,7 @@ Future<void> notificationBackgroundHandler(NotificationResponse response) async 
     WidgetsFlutterBinding.ensureInitialized();
     await CopyService.load();
     final s = S(AppLanguage.fromCode(prefs.getString(PrefKeys.language)));
-    await showStorageTipsNotification(
-      plugin,
-      s,
-      delayMinutes: prefs.getInt(PrefKeys.storageTipsDelayMinutes) ?? 0,
-    );
+    await showStorageTipsNotification(plugin, s, delayMinutes: prefs.getInt(PrefKeys.storageTipsDelayMinutes) ?? 0);
   }
 }
 

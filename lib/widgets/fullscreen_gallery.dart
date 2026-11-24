@@ -12,14 +12,15 @@ class FullscreenGallery extends StatefulWidget {
   final FoodItem item;
   final int initialIndex;
 
-  static Future<void> show(BuildContext context, FoodItem item, {int initialIndex = 0}) =>
-      Navigator.of(context).push(PageRouteBuilder<void>(
-        opaque: false,
-        barrierColor: Colors.black,
-        transitionDuration: const Duration(milliseconds: 220),
-        pageBuilder: (_, _, _) => FullscreenGallery(item: item, initialIndex: initialIndex),
-        transitionsBuilder: (_, a, _, child) => FadeTransition(opacity: a, child: child),
-      ));
+  static Future<void> show(BuildContext context, FoodItem item, {int initialIndex = 0}) => Navigator.of(context).push(
+    PageRouteBuilder<void>(
+      opaque: false,
+      barrierColor: Colors.black,
+      transitionDuration: const Duration(milliseconds: 220),
+      pageBuilder: (_, _, _) => FullscreenGallery(item: item, initialIndex: initialIndex),
+      transitionsBuilder: (_, a, _, child) => FadeTransition(opacity: a, child: child),
+    ),
+  );
 
   @override
   State<FullscreenGallery> createState() => _FullscreenGalleryState();
@@ -33,6 +34,24 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
   late int _index = widget.initialIndex;
   final _zoom = TransformationController();
   bool _zoomed = false;
+
+  /// Fingers on the screen. With two or more the page cannot scroll, so
+  /// the pinch always goes to the zoom (since Flutter 3.50 the PageView
+  /// could win the gesture and the photo no longer zoomed).
+  final _pointers = <int>{};
+  bool get _pinching => _pointers.length > 1;
+
+  void _pointerDown(PointerDownEvent e) {
+    final before = _pinching;
+    _pointers.add(e.pointer);
+    if (_pinching != before) setState(() {});
+  }
+
+  void _pointerUp(PointerEvent e) {
+    final before = _pinching;
+    _pointers.remove(e.pointer);
+    if (_pinching != before) setState(() {});
+  }
 
   @override
   void dispose() {
@@ -55,34 +74,40 @@ class _FullscreenGalleryState extends State<FullscreenGallery> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          PageView.builder(
-            controller: _page,
-            // with the photo zoomed in, the finger moves the photo, not the page
-            physics: _zoomed ? const NeverScrollableScrollPhysics() : const PageScrollPhysics(),
-            itemCount: _n == 1 ? 1 : null,
-            onPageChanged: (p) {
-              _resetZoom();
-              setState(() => _index = p % _n);
-            },
-            itemBuilder: (_, p) {
-              final i = p % _n;
-              return InteractiveViewer(
-                transformationController: i == _index ? _zoom : null,
-                minScale: 1,
-                maxScale: 5,
-                onInteractionEnd: (_) {
-                  final z = _zoom.value.getMaxScaleOnAxis() > 1.02;
-                  if (z != _zoomed) setState(() => _zoomed = z);
-                },
-                child: GestureDetector(
-                  // double tap: back to the whole photo
-                  onDoubleTap: _resetZoom,
-                  child: Center(
-                    child: FoodImage(item: widget.item, file: gallery[i], full: true, fit: BoxFit.contain),
+          Listener(
+            onPointerDown: _pointerDown,
+            onPointerUp: _pointerUp,
+            onPointerCancel: _pointerUp,
+            child: PageView.builder(
+              controller: _page,
+              // with the photo zoomed in, or two fingers pinching, the gesture
+              // moves/zooms the photo, not the page
+              physics: _zoomed || _pinching ? const NeverScrollableScrollPhysics() : const PageScrollPhysics(),
+              itemCount: _n == 1 ? 1 : null,
+              onPageChanged: (p) {
+                _resetZoom();
+                setState(() => _index = p % _n);
+              },
+              itemBuilder: (_, p) {
+                final i = p % _n;
+                return InteractiveViewer(
+                  transformationController: i == _index ? _zoom : null,
+                  minScale: 1,
+                  maxScale: 5,
+                  onInteractionEnd: (_) {
+                    final z = _zoom.value.getMaxScaleOnAxis() > 1.02;
+                    if (z != _zoomed) setState(() => _zoomed = z);
+                  },
+                  child: GestureDetector(
+                    // double tap: back to the whole photo
+                    onDoubleTap: _resetZoom,
+                    child: Center(
+                      child: FoodImage(item: widget.item, file: gallery[i], full: true, fit: BoxFit.contain),
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
           SafeArea(
             child: Padding(

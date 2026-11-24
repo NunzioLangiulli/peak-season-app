@@ -39,12 +39,8 @@ class NotificationPayload {
 }
 
 class NotificationContentBuilder {
-  NotificationContentBuilder({
-    required this.db,
-    required this.resolver,
-    required this.language,
-    required this.disliked,
-  }) : s = S(language);
+  NotificationContentBuilder({required this.db, required this.resolver, required this.language, required this.disliked})
+    : s = S(language);
 
   final FoodDatabase db;
   final SeasonalityResolver resolver;
@@ -64,10 +60,12 @@ class NotificationContentBuilder {
   ///   those on the list in bold and first;
   /// - [ShoppingNotifListMode.onlyList]: only the products on the list,
   ///   including the "out of season"/"no data" lines when needed.
+  /// - [fullList]: every name written out, without the "+N" shortcut.
   NotificationContent shopping({
     required int month,
     required List<String> shoppingIds,
     required ShoppingNotifListMode listMode,
+    bool fullList = false,
   }) {
     final list = shoppingIds.where(db.byId.containsKey).toList();
     final inList = list.toSet();
@@ -78,19 +76,20 @@ class NotificationContentBuilder {
           FoodEntry(item, resolver.resolve(item)),
     ];
     HomeController.sortBySeason(entries, month, language);
-    final payload =
-        list.isEmpty ? NotificationPayload.openSeason : NotificationPayload.openShopping;
+    final payload = list.isEmpty ? NotificationPayload.openSeason : NotificationPayload.openShopping;
 
     String fmt(FoodItem i) => !onlyList && inList.contains(i.id) ? '<b>${_name(i)}</b>' : _name(i);
+    // Order chosen by the owner: peak, in season, (early,) end of season.
     final groups = [
       SeasonState.peakSeason,
-      SeasonState.primizie,
       SeasonState.inSeason,
+      SeasonState.primizie,
       SeasonState.endOfSeason,
       if (onlyList) ...[SeasonState.outOfSeason, SeasonState.notApplicable, SeasonState.unknown],
     ];
     final lines = <String>[];
     final peakNames = <String>[];
+    final listAvailable = <FoodItem>[];
     var available = 0;
     for (final st in groups) {
       final items = [
@@ -99,29 +98,34 @@ class NotificationContentBuilder {
       ];
       if (st.isAvailable) available += items.length;
       if (st == SeasonState.peakSeason) peakNames.addAll(items.map(_name));
+      if (st.isAvailable) listAvailable.addAll(items.where((i) => inList.contains(i.id)));
       if (items.isEmpty) continue;
       // Products on the list go first, so they stay visible
       // (partition, not sort: List.sort is not stable).
-      final ordered = [
-        ...items.where((i) => inList.contains(i.id)),
-        ...items.where((i) => !inList.contains(i.id)),
-      ];
-      final max = onlyList ? ordered.length : _maxNamesPerLine;
+      final ordered = [...items.where((i) => inList.contains(i.id)), ...items.where((i) => !inList.contains(i.id))];
+      final max = onlyList || fullList ? ordered.length : _maxNamesPerLine;
       final shown = ordered.take(max).map(fmt).join(', ');
       final more = ordered.length > max ? ' +${ordered.length - max}' : '';
       lines.add('<b>${s.state(st)}:</b> $shown$more');
     }
-    final body = onlyList
-        ? s.notifListTitle(list.where((id) => resolver.resolve(db.byId[id]!).at(month).isAvailable).length, list.length)
-        : (peakNames.isEmpty
-            ? s.pulse(0, available)
-            : '${peakNames.take(3).join(', ')}${peakNames.length > 3 ? '…' : ''} · ${s.pulse(peakNames.length, available)}');
-    return NotificationContent(
-      title: null,
-      body: body,
-      lines: lines,
-      payload: payload,
-    );
+    // Collapsed line (what the lock screen shows first): the products of the
+    // list that are in season come first and in bold, then the peak ones.
+    final String body;
+    if (onlyList) {
+      body = s.notifListTitle(
+        list.where((id) => resolver.resolve(db.byId[id]!).at(month).isAvailable).length,
+        list.length,
+      );
+    } else {
+      final lead = [
+        ...listAvailable.map((i) => '<b>${_name(i)}</b>'),
+        ...peakNames.where((n) => !listAvailable.any((i) => _name(i) == n)),
+      ];
+      body = lead.isEmpty
+          ? s.pulse(0, available)
+          : '${lead.take(3).join(', ')}${lead.length > 3 ? '…' : ''} · ${s.pulse(peakNames.length, available)}';
+    }
+    return NotificationContent(title: null, body: body, lines: lines, payload: payload);
   }
 
   /// Products entering peak season in month [month]
@@ -146,10 +150,7 @@ class NotificationContentBuilder {
     return NotificationContent(
       title: s.notifPeakTitle(s.monthName(month)),
       body: names.join(', '),
-      lines: [
-        for (final n in names.take(7)) '★ $n',
-        if (names.length > 7) '+${names.length - 7} ${s.lineMore}',
-      ],
+      lines: [for (final n in names.take(7)) '★ $n', if (names.length > 7) '+${names.length - 7} ${s.lineMore}'],
       payload: NotificationPayload.peak(month),
     );
   }

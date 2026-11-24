@@ -14,7 +14,9 @@ import 'detail_sections_screen.dart';
 import 'sustainable_diet_screen.dart';
 import '../theme/icon_service.dart';
 import '../widgets/detail_parts.dart';
+
 import 'package:url_launcher/url_launcher.dart';
+
 import '../app_info.dart';
 
 /// TAB 3 — Impostazioni.
@@ -29,24 +31,26 @@ class SettingsScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     Widget header(String text, {String? sub, Widget? help}) => Padding(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text.rich(
-                TextSpan(children: [
-                  TextSpan(text: text),
-                  if (help != null) WidgetSpan(alignment: PlaceholderAlignment.middle, child: help),
-                ]),
-                style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.primary),
-              ),
-              if (sub != null) ...[
-                const SizedBox(height: 2),
-                Text(sub, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(text: text),
+                if (help != null) WidgetSpan(alignment: PlaceholderAlignment.middle, child: help),
               ],
-            ],
+            ),
+            style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.primary),
           ),
-        );
+          if (sub != null) ...[
+            const SizedBox(height: 2),
+            Text(sub, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+          ],
+        ],
+      ),
+    );
 
     return Scaffold(
       appBar: AppBar(title: Text(s.tabSettings)),
@@ -141,7 +145,11 @@ class SettingsScreen extends StatelessWidget {
               onChanged: (c) => st.setCustomColors(bottom: c),
             ),
           ],
-          header(s.climateZone, sub: s.climateZoneSub, help: const HelpButton(field: 'seasonality.eufic_climatic_zones')),
+          header(
+            s.climateZone,
+            sub: s.climateZoneSub,
+            help: const HelpButton(field: 'seasonality.eufic_climatic_zones'),
+          ),
           RadioGroup<ClimaticZone>(
             groupValue: st.zone,
             onChanged: (z) => st.setZone(z!),
@@ -168,7 +176,11 @@ class SettingsScreen extends StatelessWidget {
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      header(s.macroArea, sub: s.macroAreaSub, help: const HelpButton(ids: ['italy_macro_areas'])),
+                      header(
+                        s.macroArea,
+                        sub: s.macroAreaSub,
+                        help: const HelpButton(ids: ['italy_macro_areas']),
+                      ),
                       RadioGroup<ItalyMacroArea>(
                         groupValue: st.area,
                         onChanged: (a) => st.setArea(a!),
@@ -243,6 +255,13 @@ class SettingsScreen extends StatelessWidget {
           ),
           SwitchListTile(
             contentPadding: const EdgeInsets.only(left: 72, right: 20),
+            title: Text(s.shoppingFullList),
+            subtitle: Text(s.shoppingFullListSub),
+            value: st.shoppingFullList,
+            onChanged: st.setShoppingFullList,
+          ),
+          SwitchListTile(
+            contentPadding: const EdgeInsets.only(left: 72, right: 20),
             title: Text(s.storageAfterShopping),
             subtitle: Text(s.storageAfterShoppingSub),
             value: st.storageTipsAfterShopping,
@@ -290,9 +309,7 @@ class SettingsScreen extends StatelessWidget {
             title: Text(s.detailSections),
             subtitle: Text(s.detailSectionsSub),
             trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => Navigator.of(context).push(
-              AppPageRoute(builder: (_) => const DetailSectionsScreen()),
-            ),
+            onTap: () => Navigator.of(context).push(AppPageRoute(builder: (_) => const DetailSectionsScreen())),
           ),
           header(s.about),
           ListTile(
@@ -301,9 +318,7 @@ class SettingsScreen extends StatelessWidget {
             title: Text(s.sustainableDiet),
             subtitle: Text(s.sustainableDietSub),
             trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => Navigator.of(context).push(
-              AppPageRoute(builder: (_) => const SustainableDietScreen()),
-            ),
+            onTap: () => Navigator.of(context).push(AppPageRoute(builder: (_) => const SustainableDietScreen())),
           ),
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 20),
@@ -403,9 +418,7 @@ class _PaletteSwatch extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-        gradient: c == null
-            ? null
-            : LinearGradient(colors: [c.first, c.second], stops: const [0.5, 0.5]),
+        gradient: c == null ? null : LinearGradient(colors: [c.first, c.second], stops: const [0.5, 0.5]),
         color: c == null ? (dark ? Colors.black : const Color(0xFFF3F5EE)) : null,
       ),
     );
@@ -421,8 +434,19 @@ class _ColorRow extends StatelessWidget {
 
   /// Choices: one colour per hue, the app softens them for the background.
   static const colors = <int>[
-    0xFF66BB6A, 0xFF9CCC65, 0xFF4DB6AC, 0xFF4DD0E1, 0xFF64B5F6, 0xFF7986CB,
-    0xFF9575CD, 0xFFF06292, 0xFFE57373, 0xFFFFB74D, 0xFFFFD54F, 0xFFA1887F, 0xFF90A4AE,
+    0xFF66BB6A,
+    0xFF9CCC65,
+    0xFF4DB6AC,
+    0xFF4DD0E1,
+    0xFF64B5F6,
+    0xFF7986CB,
+    0xFF9575CD,
+    0xFFF06292,
+    0xFFE57373,
+    0xFFFFB74D,
+    0xFFFFD54F,
+    0xFFA1887F,
+    0xFF90A4AE,
   ];
 
   @override

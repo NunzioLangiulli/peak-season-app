@@ -34,7 +34,7 @@ void main() {
     }
     const it = S(AppLanguage.it);
     const en = S(AppLanguage.en);
-    expect(it.shoppingCounter(3, 1), '3 prodotti da comprare · 1 nel carrello');
+    expect(it.shoppingCounter(3, 1), '3 Prodotti da comprare · Già presi: 1');
     expect(en.monthName(10), 'November');
     expect(it.country('Czech Republic'), 'Repubblica Ceca');
     expect(it.country('Atlantis'), 'Atlantis');

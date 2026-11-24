@@ -19,6 +19,7 @@ class SettingsController extends ChangeNotifier {
     _allowApproximate = _prefs.getBool(_kApprox) ?? true;
     _peakNotifMode = PeakNotifMode.fromName(_prefs.getString(_kPeakNotif));
     _shoppingListMode = ShoppingNotifListMode.fromName(_prefs.getString(_kShoppingListMode));
+    _shoppingFullList = _prefs.getBool(_kShoppingFullList) ?? false;
     _storageTipsAfterShopping = _prefs.getBool(PrefKeys.storageTipsAfterShopping) ?? true;
     _storageTipsDelay = _prefs.getInt(PrefKeys.storageTipsDelayMinutes) ?? 0;
     _frost = _prefs.getDouble(_kFrost) ?? 0.6;
@@ -38,6 +39,7 @@ class SettingsController extends ChangeNotifier {
   static const _kApprox = 'allowApproximateSeasonality';
   static const _kPeakNotif = 'peakNotifMode';
   static const _kShoppingListMode = 'shoppingNotifListMode';
+  static const _kShoppingFullList = 'shoppingNotifFullList';
   static const _kFrost = 'frostStrength';
   static const _kPalette = 'backdropPalette';
   static const _kCustomTop = 'backdropCustomTop';
@@ -52,6 +54,7 @@ class SettingsController extends ChangeNotifier {
   late bool _allowApproximate;
   late PeakNotifMode _peakNotifMode;
   late ShoppingNotifListMode _shoppingListMode;
+  late bool _shoppingFullList;
   late bool _storageTipsAfterShopping;
   late int _storageTipsDelay;
   late double _frost;
@@ -66,6 +69,9 @@ class SettingsController extends ChangeNotifier {
   bool get allowApproximate => _allowApproximate;
   PeakNotifMode get peakNotifMode => _peakNotifMode;
   ShoppingNotifListMode get shoppingListMode => _shoppingListMode;
+
+  /// Shopping notification with every product written out (no "+11").
+  bool get shoppingFullList => _shoppingFullList;
   bool get storageTipsAfterShopping => _storageTipsAfterShopping;
   int get storageTipsDelay => _storageTipsDelay;
 
@@ -80,11 +86,8 @@ class SettingsController extends ChangeNotifier {
 
   Locale get locale => Locale(_language.name);
 
-  SeasonalityResolver get resolver => SeasonalityResolver(
-        zone: _zone,
-        area: _area,
-        allowApproximate: _allowApproximate,
-      );
+  SeasonalityResolver get resolver =>
+      SeasonalityResolver(zone: _zone, area: _area, allowApproximate: _allowApproximate);
 
   void setLanguage(AppLanguage v) {
     if (v == _language) return;
@@ -129,6 +132,12 @@ class SettingsController extends ChangeNotifier {
   void setShoppingListMode(ShoppingNotifListMode v) {
     _shoppingListMode = v;
     _prefs.setString(_kShoppingListMode, v.name);
+    notifyListeners();
+  }
+
+  void setShoppingFullList(bool v) {
+    _shoppingFullList = v;
+    _prefs.setBool(_kShoppingFullList, v);
     notifyListeners();
   }
 

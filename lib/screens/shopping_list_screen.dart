@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../data/food_repository.dart';
 import '../l10n/strings.dart';
+import '../models/app_enums.dart';
 import '../models/food_item.dart';
 import '../models/glossary.dart';
 import '../providers/home_controller.dart';
@@ -34,6 +35,12 @@ class ShoppingListScreen extends StatelessWidget {
     // still to buy first, already in the cart at the bottom
     final toBuy = [for (final id in ids) if (!lib.isInCart(id)) id];
     final inCart = [for (final id in ids) if (lib.isInCart(id)) id];
+    // Free-text items: always below fruit and vegetables (the produce
+    // section is where every shopping trip starts).
+    final customToBuy = [for (final c in lib.customItems) if (!c.done) c];
+    final customDone = [for (final c in lib.customItems) if (c.done) c];
+    final isEmpty = ids.isEmpty && lib.customItems.isEmpty;
+    final doneCount = inCart.length + customDone.length;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -42,7 +49,7 @@ class ShoppingListScreen extends StatelessWidget {
         centerTitle: true,
         actions: [
           const Padding(padding: EdgeInsets.symmetric(horizontal: 4), child: ShoppingModeToggle()),
-          if (ids.isNotEmpty)
+          if (!isEmpty)
             PopupMenuButton<String>(
               tooltip: s.clearList,
               icon: const Icon(Icons.more_vert_rounded),
@@ -56,7 +63,7 @@ class ShoppingListScreen extends StatelessWidget {
               itemBuilder: (_) => [
                 PopupMenuItem(
                   value: 'done',
-                  enabled: inCart.isNotEmpty,
+                  enabled: doneCount > 0,
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const SlotIcon('shopping.clear_completed'),
@@ -79,7 +86,7 @@ class ShoppingListScreen extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(16, 0, 16, PillNavBar.overlap(context)),
         children: [
           Text(
-            s.shoppingCounter(toBuy.length, inCart.length),
+            s.shoppingCounter(toBuy.length + customToBuy.length, doneCount),
             textAlign: TextAlign.center,
             style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
@@ -90,7 +97,7 @@ class ShoppingListScreen extends StatelessWidget {
             const _StorageBanner(),
           ],
           const SizedBox(height: 12),
-          if (ids.isEmpty)
+          if (isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 16),
               child: Column(
@@ -115,18 +122,54 @@ class ShoppingListScreen extends StatelessWidget {
               ),
             ),
           for (final id in toBuy) _ShoppingCard(key: ValueKey('shop-$id'), item: db.byId[id]!),
-          if (inCart.isNotEmpty) ...[
+          if (customToBuy.isNotEmpty) ...[
             Padding(
               padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
               child: Row(
                 children: [
-                  SlotIcon('shopping.in_cart', size: 18, color: theme.colorScheme.primary),
+                  Icon(Icons.edit_note_rounded, size: 20, color: theme.colorScheme.primary),
                   const SizedBox(width: 6),
-                  Text(s.inCartHeader(inCart.length), style: theme.textTheme.titleSmall),
+                  Text(s.otherItemsHeader, style: theme.textTheme.titleSmall),
                 ],
               ),
             ),
-            for (final id in inCart) _ShoppingCard(key: ValueKey('shop-$id'), item: db.byId[id]!),
+            for (final c in customToBuy) _CustomItemCard(key: ValueKey('custom-${c.id}'), item: c),
+          ],
+          if (doneCount > 0) ...[
+            // "Already got": folds and unfolds like the other sections of the app.
+            InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: lib.toggleDoneCollapsed,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
+                child: Row(
+                  children: [
+                    SlotIcon('shopping.in_cart', size: 18, color: theme.colorScheme.primary),
+                    const SizedBox(width: 6),
+                    Expanded(child: Text(s.inCartHeader(doneCount), style: theme.textTheme.titleSmall)),
+                    AnimatedRotation(
+                      turns: lib.doneCollapsed ? 0 : 0.5,
+                      duration: const Duration(milliseconds: 200),
+                      child: const Icon(Icons.expand_more_rounded),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutCubic,
+              alignment: Alignment.topCenter,
+              child: lib.doneCollapsed
+                  ? const SizedBox(width: double.infinity)
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final id in inCart) _ShoppingCard(key: ValueKey('shop-$id'), item: db.byId[id]!),
+                        for (final c in customDone) _CustomItemCard(key: ValueKey('custom-${c.id}'), item: c),
+                      ],
+                    ),
+            ),
           ],
         ],
       ),
@@ -176,13 +219,22 @@ class _AddFoodFieldState extends State<_AddFoodField> {
     final q = normalizeForSearch(_q);
     final results = q.isEmpty
         ? const <FoodItem>[]
-        : [for (final i in db.items) if (!lib.isInShoppingList(i.id) && i.matches(q)) i].take(6).toList();
+        : ([for (final i in db.items) if (!lib.isInShoppingList(i.id) && i.matches(q)) i]
+              // best name match first, as in the Home search ("riso" → Riso)
+              ..sort((x, y) {
+                final r = x.searchRank(q).compareTo(y.searchRank(q));
+                return r != 0 ? r : normalizeForSearch(x.name.of(lang)).compareTo(normalizeForSearch(y.name.of(lang)));
+              }))
+            .take(6)
+            .toList();
     return Column(
       children: [
         TextField(
           controller: _c,
           onChanged: (v) => setState(() => _q = v),
-          textInputAction: TextInputAction.search,
+          textInputAction: TextInputAction.done,
+          // Enter adds what was typed as a free item, unless it is exactly a product's name.
+          onSubmitted: (_) => _submit(lib, db, lang),
           decoration: InputDecoration(
             hintText: s.addFoodHint,
             prefixIcon: const Icon(Icons.add_rounded),
@@ -226,7 +278,112 @@ class _AddFoodFieldState extends State<_AddFoodField> {
               ],
             ),
           ),
+        if (_q.trim().isNotEmpty)
+          ListTile(
+            dense: true,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+            leading: SizedBox(
+              width: 36,
+              height: 36,
+              child: Icon(Icons.edit_note_rounded, color: Theme.of(context).colorScheme.primary),
+            ),
+            title: Text(s.addCustomItem(_q.trim())),
+            // "{section}" = the "Other Items" header, in bold.
+            subtitle: Text.rich(TextSpan(children: [
+              for (final (i, part) in s.customItemSub.split('{section}').indexed) ...[
+                if (i > 0) TextSpan(text: s.otherItemsHeader, style: const TextStyle(fontWeight: FontWeight.w700)),
+                TextSpan(text: part),
+              ],
+            ])),
+            onTap: () => _addCustom(lib),
+          ),
       ],
+    );
+  }
+
+  void _clear() => setState(() {
+        _c.clear();
+        _q = '';
+      });
+
+  void _addCustom(LibraryController lib) {
+    HapticFeedback.selectionClick();
+    lib.addCustomItem(_q);
+    _clear();
+  }
+
+  void _submit(LibraryController lib, FoodDatabase db, AppLanguage lang) {
+    final q = normalizeForSearch(_q);
+    if (q.isEmpty) return;
+    final exact = db.items.where((i) => normalizeForSearch(i.name.of(lang)) == q).firstOrNull;
+    if (exact == null) return _addCustom(lib);
+    if (!lib.isInShoppingList(exact.id)) lib.toggleShopping(exact.id);
+    _clear();
+  }
+}
+
+/// Card of a free-text item: tick and text, swipe to delete (with Undo).
+class _CustomItemCard extends StatelessWidget {
+  const _CustomItemCard({super.key, required this.item});
+  final CustomShoppingItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = context.s;
+    final lib = context.read<LibraryController>();
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Dismissible(
+        key: ValueKey('dismiss-${item.id}'),
+        direction: DismissDirection.endToStart,
+        background: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 24),
+          decoration: BoxDecoration(color: cs.errorContainer, borderRadius: BorderRadius.circular(20)),
+          child: Icon(Icons.delete_outline_rounded, color: cs.onErrorContainer),
+        ),
+        onDismissed: (_) {
+          final index = lib.removeCustomItem(item.id);
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(SnackBar(
+              content: Text(s.removedFromList),
+              action: SnackBarAction(label: s.undo, onPressed: () => lib.insertCustomItem(index, item)),
+            ));
+        },
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 200),
+          opacity: item.done ? 0.6 : 1,
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(6, 4, 12, 4),
+              child: Row(
+                children: [
+                  Checkbox(
+                    value: item.done,
+                    shape: const CircleBorder(),
+                    onChanged: (_) {
+                      HapticFeedback.selectionClick();
+                      lib.toggleCustomDone(item.id);
+                    },
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      item.text,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        decoration: item.done ? TextDecoration.lineThrough : null,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

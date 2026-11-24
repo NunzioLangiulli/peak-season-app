@@ -14,10 +14,7 @@ class LocalizedText {
   /// Accepts `{it, en}`, a plain string or null.
   factory LocalizedText.fromJson(Object? json) {
     if (json is Map) {
-      return LocalizedText(
-        it: (json['it'] ?? '').toString(),
-        en: (json['en'] ?? json['it'] ?? '').toString(),
-      );
+      return LocalizedText(it: (json['it'] ?? '').toString(), en: (json['en'] ?? json['it'] ?? '').toString());
     }
     if (json is String) return LocalizedText(it: json, en: json);
     return empty;
@@ -41,10 +38,10 @@ class ImageCredit {
   final String? sourceUrl;
 
   factory ImageCredit.fromJson(Map json) => ImageCredit(
-        author: (json['author'] ?? '').toString(),
-        license: (json['license'] ?? '').toString(),
-        sourceUrl: json['source_url'] as String?,
-      );
+    author: (json['author'] ?? '').toString(),
+    license: (json['license'] ?? '').toString(),
+    sourceUrl: json['source_url'] as String?,
+  );
 }
 
 /// Estimated series (`seasonality.estimates.*.<zone>`): copy of the most
@@ -122,9 +119,7 @@ class FoodSeasonality {
       italyNational: _parseMonths(json?['italy_national']),
       estimatedZones: _parseEstimates(est['eufic_climatic_zones']),
       estimatedAreas: _parseEstimates(est['italy_macro_areas']),
-      notGrownZones: {
-        ...((est['not_grown'] as List?) ?? const []).map((e) => e.toString()),
-      },
+      notGrownZones: {...((est['not_grown'] as List?) ?? const []).map((e) => e.toString())},
     );
   }
 }
@@ -152,13 +147,7 @@ class FoodItem {
     required this.seasonality,
     required this.ripeningType,
     required this.raw,
-  }) : _searchIndex = _buildSearchIndex(
-          name,
-          synonyms,
-          notableVarieties,
-          scientificName,
-          family,
-        );
+  }) : _searchIndex = _buildSearchIndex(name, synonyms, notableVarieties, scientificName, family);
 
   final String id;
   final LocalizedText name;
@@ -231,10 +220,7 @@ class FoodItem {
     return FoodItem(
       id: json['id'].toString(),
       name: LocalizedText.fromJson(names),
-      synonyms: {
-        AppLanguage.it: _strList(syn['it']),
-        AppLanguage.en: _strList(syn['en']),
-      },
+      synonyms: {AppLanguage.it: _strList(syn['it']), AppLanguage.en: _strList(syn['en'])},
       category: FoodCategory.fromCode(json['category']),
       scientificName: _str(botany['scientific_name']),
       family: _str(botany['family']),
@@ -258,9 +244,56 @@ class FoodItem {
   /// Singular and plural are equivalent ("zucchine" finds "zucchina",
   /// "tomatoes" finds "tomato"): every search word also works as a stem.
   bool matches(String normalizedQuery) {
-    if (normalizedQuery.isEmpty || _searchIndex.contains(normalizedQuery)) return true;
+    if (normalizedQuery.isEmpty || _hasWordStartingWith(normalizedQuery)) return true;
     final words = normalizedQuery.split(RegExp(r'\s+')).where((w) => w.isNotEmpty);
-    return words.isNotEmpty && words.every((w) => _searchIndex.contains(searchStem(w)));
+    return words.isNotEmpty && words.every((w) => _hasWordStartingWith(searchStem(w)));
+  }
+
+  /// True if a word of the search index starts with [prefix] ("ris" finds
+  /// "Riso", not a word that only contains it in the middle): that gave
+  /// unrelated results.
+  bool _hasWordStartingWith(String prefix) {
+    var from = 0;
+    while (true) {
+      final at = _searchIndex.indexOf(prefix, from);
+      if (at < 0) return false;
+      if (at == 0 || !RegExp(r'[a-z0-9]').hasMatch(_searchIndex[at - 1])) return true;
+      from = at + 1;
+    }
+  }
+
+  /// Relevance of a match, for ordering search results (lower = better).
+  /// The common name (IT/EN) weighs most: exact name, then name starting with
+  /// the query, then a word of the name starting with it, then the name
+  /// containing it; synonyms come next and the other fields (varieties,
+  /// scientific name, family) last.
+  int searchRank(String normalizedQuery) {
+    if (normalizedQuery.isEmpty) return 0;
+    final q = normalizedQuery;
+    final stems = {q, ...q.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).map(searchStem)};
+    int? best;
+    void consider(int r) => best = best == null || r < best! ? r : best;
+
+    int? rankText(String raw, int base) {
+      final t = normalizeForSearch(raw);
+      final bare = t.replaceAll(RegExp(r'\s*\([^)]*\)'), '').trim(); // "Caco (Kaki)" → "caco"
+      if (t == q || bare == q) return base;
+      if (t.startsWith(q) || bare.startsWith(q)) return base + 1;
+      final words = t.split(RegExp(r'[\s/(),-]+')).where((w) => w.isNotEmpty);
+      if (words.any((w) => w == q || stems.any((s) => s.length > 2 && w.startsWith(s)))) return base + 2;
+      if (t.contains(q)) return base + 3;
+      return null;
+    }
+
+    for (final n in [name.it, name.en]) {
+      final r = rankText(n, 0);
+      if (r != null) consider(r);
+    }
+    for (final syn in synonyms.values.expand((e) => e)) {
+      final r = rankText(syn, 10);
+      if (r != null) consider(r);
+    }
+    return best ?? 20;
   }
 
   /// Word stem for search: strips the plural or singular ending
@@ -283,14 +316,16 @@ class FoodItem {
     String? scientificName,
     String? family,
   ) {
-    return normalizeForSearch([
-      name.it,
-      name.en,
-      ...synonyms.values.expand((e) => e),
-      ...varieties,
-      scientificName ?? '',
-      family ?? '',
-    ].join(' | '));
+    return normalizeForSearch(
+      [
+        name.it,
+        name.en,
+        ...synonyms.values.expand((e) => e),
+        ...varieties,
+        scientificName ?? '',
+        family ?? '',
+      ].join(' | '),
+    );
   }
 }
 

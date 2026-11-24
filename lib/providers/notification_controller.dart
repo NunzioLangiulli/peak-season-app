@@ -24,9 +24,9 @@ class NotificationController extends ChangeNotifier with WidgetsBindingObserver 
     required this.navigation,
     NotificationService? service,
     DateTime Function()? clock,
-  })  : _prefs = prefs, // ignore: prefer_initializing_formals
-        _service = service ?? NotificationService.instance,
-        _clock = clock ?? DateTime.now {
+  }) : _prefs = prefs, // ignore: prefer_initializing_formals
+       _service = service ?? NotificationService.instance,
+       _clock = clock ?? DateTime.now {
     _shoppingActive = _prefs.getBool(PrefKeys.shoppingModeActive) ?? false;
     _service.onResponse = handleResponse;
     settings.addListener(_onDataChanged);
@@ -55,18 +55,19 @@ class NotificationController extends ChangeNotifier with WidgetsBindingObserver 
   S get _s => S(settings.language);
 
   NotificationContentBuilder get _builder => NotificationContentBuilder(
-        db: db,
-        resolver: settings.resolver,
-        language: settings.language,
-        disliked: library.dislikedIds,
-      );
+    db: db,
+    resolver: settings.resolver,
+    language: settings.language,
+    disliked: library.dislikedIds,
+  );
 
   /// Current content of the shopping notification (also used by previews).
   NotificationContent shoppingContent() => _builder.shopping(
-        month: _clock().month - 1,
-        shoppingIds: library.shoppingListIds,
-        listMode: settings.shoppingListMode,
-      );
+    month: _clock().month - 1,
+    shoppingIds: library.shoppingListIds,
+    listMode: settings.shoppingListMode,
+    fullList: settings.shoppingFullList,
+  );
 
   /// Turns shopping mode on/off. Returns false if the notification
   /// permission was denied.
@@ -130,13 +131,7 @@ class NotificationController extends ChangeNotifier with WidgetsBindingObserver 
       await _service.requestPermission();
     }
     _lastMode = mode;
-    await _service.reschedulePeak(
-      builder: _builder,
-      mode: mode,
-      favorites: library.favoriteIds,
-      s: _s,
-      now: _clock(),
-    );
+    await _service.reschedulePeak(builder: _builder, mode: mode, favorites: library.favoriteIds, s: _s, now: _clock());
   }
 
   @override
