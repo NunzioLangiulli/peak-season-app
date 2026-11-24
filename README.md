@@ -2,7 +2,7 @@
 
 **Peak Season** tells you what is in season **in your area, this month**, when a product is at its **peak**, how to choose it, how to store it and what its environmental footprint is. The app works **fully offline**, in **English or Italian**, and is built on the *Peak Season – Seasonal Fruit & Vegetable Database* ([peak-season-database](https://github.com/NunzioLangiulli/peak-season-database)): 152 products, 51 official sources, no invented data.
 
-Flutter app for Android and iPhone (iPhone via sideloading, see below). **Current version: 1.1.5.** Versions follow semantic versioning (MAJOR.MINOR.PATCH).
+Flutter app for Android and iPhone (iPhone via sideloading, see below). **Current version: 1.1.6.** Versions follow semantic versioning (MAJOR.MINOR.PATCH).
 
 ---
 
