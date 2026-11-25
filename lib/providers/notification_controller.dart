@@ -75,7 +75,14 @@ class NotificationController extends ChangeNotifier with WidgetsBindingObserver 
     listMode: settings.shoppingListMode,
     fullList: settings.shoppingFullList,
     inCartIds: library.inCartIds,
-    customItems: settings.shoppingShowOtherItems ? [for (final c in library.customItems) if (!c.done) c.text] : const [],
+    customItems: settings.shoppingShowOtherItems
+        ? [
+            for (final c in library.customItems)
+              if (!c.done) c.text,
+          ]
+        : const [],
+    hiddenOtherItems: settings.shoppingShowOtherItems ? 0 : library.customItems.where((c) => !c.done).length,
+    pickedOtherItems: library.customItems.where((c) => c.done).length,
   );
 
   /// Turns shopping mode on/off. Returns false if the notification

@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:peak_season/data/food_repository.dart';
 import 'package:peak_season/data/seasonality_resolver.dart';
 import 'package:peak_season/l10n/copy_service.dart';
+import 'package:peak_season/l10n/strings.dart';
 import 'package:peak_season/models/app_enums.dart';
 import 'package:peak_season/models/notification_prefs.dart';
 import 'package:peak_season/models/season_state.dart';
@@ -196,5 +197,53 @@ void main() {
       expect(c.lines.join(), isNot(contains('Mela')), reason: mode.name);
       expect(c.lines.join(), contains('Zucca'), reason: mode.name);
     }
+  });
+
+  group('list only with nothing to show: a title and a text that say why, opens the list', () {
+    void expectState(NotificationContent c, String title, String body) {
+      expect(c.title, title);
+      expect(c.body, body);
+      expect(c.lines, [body]);
+      expect(c.payload, NotificationPayload.openShopping);
+    }
+
+    test('empty list', () {
+      final c = builder().shopping(month: 10, shoppingIds: const [], listMode: ShoppingNotifListMode.onlyList);
+      expectState(c, 'La Tua Lista è Vuota', S(AppLanguage.it).notifEmptyListBody);
+    });
+
+    test('every product already picked up (also Other Items)', () {
+      final c = builder().shopping(
+        month: 10,
+        shoppingIds: const ['mela_apple', 'zucca_pumpkin'],
+        listMode: ShoppingNotifListMode.onlyList,
+        inCartIds: const {'mela_apple', 'zucca_pumpkin'},
+      );
+      expectState(c, 'Hai Già Preso Tutto', S(AppLanguage.it).notifAllPickedBody);
+      final onlyOther = builder().shopping(
+        month: 10,
+        shoppingIds: const [],
+        listMode: ShoppingNotifListMode.onlyList,
+        pickedOtherItems: 2,
+      );
+      expect(onlyOther.title, 'Hai Già Preso Tutto');
+    });
+
+    test('only Other Items, with their switch off', () {
+      final c = builder().shopping(
+        month: 10,
+        shoppingIds: const ['mela_apple'],
+        listMode: ShoppingNotifListMode.onlyList,
+        inCartIds: const {'mela_apple'},
+        hiddenOtherItems: 1,
+      );
+      expectState(c, 'La Tua Lista ha Solo Altri Articoli', S(AppLanguage.it).notifOnlyOtherItemsBody);
+    });
+
+    test('highlight mode keeps the season lines', () {
+      final c = builder().shopping(month: 10, shoppingIds: const [], listMode: ShoppingNotifListMode.highlight);
+      expect(c.title, isNull);
+      expect(c.payload, NotificationPayload.openSeason);
+    });
   });
 }

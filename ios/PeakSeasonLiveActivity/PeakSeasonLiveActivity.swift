@@ -53,10 +53,15 @@ struct AppLogo: View {
 }
 
 /// One text per line, with the bold parts (labels, shopping list items).
+/// Usually each line gets at most 2 rows. With only a title and one sentence
+/// (the "nothing to show" states), the sentence may take up to 4 rows so it
+/// is not cut; that still fits the Live Activity height limit.
 struct ShoppingLinesView: View {
   let lines: [[ShoppingRun]]
 
   var body: some View {
+    let maxRows = lines.count <= 2 ? 4 : 2
+
     VStack(alignment: .leading, spacing: 3) {
       ForEach(Array(lines.enumerated()), id: \.offset) { _, runs in
         runs.reduce(Text("")) { text, run in
@@ -64,7 +69,8 @@ struct ShoppingLinesView: View {
         }
         .font(.footnote)
         .foregroundColor(.white)
-        .lineLimit(2)
+        .lineLimit(maxRows)
+        .fixedSize(horizontal: false, vertical: true)
       }
     }
     .frame(maxWidth: .infinity, alignment: .leading)

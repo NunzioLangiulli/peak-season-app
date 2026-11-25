@@ -236,6 +236,12 @@ class S {
   String notifSeasonTitle(String month) => _c('notifications.notif_season_title', {'month': month});
   String notifListTitle(int inSeason, int total) =>
       _c('notifications.notif_list_title', {'inSeason': inSeason, 'total': total});
+  String get notifEmptyListTitle => _c('notifications.notif_empty_list_title');
+  String get notifEmptyListBody => _c('notifications.notif_empty_list_body');
+  String get notifAllPickedTitle => _c('notifications.notif_all_picked_title');
+  String get notifAllPickedBody => _c('notifications.notif_all_picked_body');
+  String get notifOnlyOtherItemsTitle => _c('notifications.notif_only_other_items_title');
+  String get notifOnlyOtherItemsBody => _c('notifications.notif_only_other_items_body');
   String get notifClose => _c('notifications.notif_close');
   String get notifStorageTitle => _c('notifications.notif_storage_title');
   String get notifStorageBody => _c('notifications.notif_storage_body');

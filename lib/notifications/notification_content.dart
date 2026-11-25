@@ -69,6 +69,13 @@ class NotificationContentBuilder {
   /// - [customItems]: free-text "Other Items" of the list still to buy. They
   ///   join the end of the "Shopping List" line.
   /// - [fullList]: every name written out, without the "+N" shortcut.
+  /// - [hiddenOtherItems]: Other Items still to buy that are not shown
+  ///   (their switch is off); [pickedOtherItems]: Other Items already
+  ///   picked up. Both only choose the "nothing to show" text below.
+  ///
+  /// With "list only" and nothing left to show, the notification explains
+  /// why (empty list, everything picked up, only hidden Other Items) and how
+  /// to change it, instead of falling back to the season lines.
   NotificationContent shopping({
     required int month,
     required List<String> shoppingIds,
@@ -76,18 +83,28 @@ class NotificationContentBuilder {
     bool fullList = false,
     Set<String> inCartIds = const {},
     List<String> customItems = const [],
+    int hiddenOtherItems = 0,
+    int pickedOtherItems = 0,
   }) {
+    if (listMode == ShoppingNotifListMode.onlyList) {
+      final empty = _emptyListState(shoppingIds, inCartIds, customItems, hiddenOtherItems, pickedOtherItems);
+      if (empty != null) return empty;
+    }
     final seasonOnly = listMode == ShoppingNotifListMode.onlySeason;
     final list = seasonOnly ? const <String>[] : shoppingIds.where(db.byId.containsKey).toList();
-    final custom = seasonOnly ? const <String>[] : [for (final t in customItems) if (t.trim().isNotEmpty) t.trim()];
+    final custom = seasonOnly
+        ? const <String>[]
+        : [
+            for (final t in customItems)
+              if (t.trim().isNotEmpty) t.trim(),
+          ];
     final inList = list.toSet();
     final hasList = list.isNotEmpty || custom.isNotEmpty;
     final onlyList = hasList && listMode == ShoppingNotifListMode.onlyList;
     final entries = <FoodEntry>[
       for (final item in db.items)
         // With "list only", products already picked up leave the notification.
-        if (!disliked.contains(item.id) &&
-            (!onlyList || (inList.contains(item.id) && !inCartIds.contains(item.id))))
+        if (!disliked.contains(item.id) && (!onlyList || (inList.contains(item.id) && !inCartIds.contains(item.id))))
           FoodEntry(item, resolver.resolve(item)),
     ];
     HomeController.sortBySeason(entries, month, language);
@@ -130,7 +147,10 @@ class NotificationContentBuilder {
     // Collapsed line (what the lock screen shows first): the products of the
     // list that are in season come first and in bold, then the peak ones.
     final String body;
-    final pending = [for (final id in list) if (!inCartIds.contains(id)) id];
+    final pending = [
+      for (final id in list)
+        if (!inCartIds.contains(id)) id,
+    ];
     if (onlyList && pending.isEmpty) {
       body = '${custom.take(3).join(', ')}${custom.length > 3 ? '…' : ''}';
     } else if (onlyList) {
@@ -149,6 +169,27 @@ class NotificationContentBuilder {
           : '${lead.take(3).join(', ')}${lead.length > 3 ? '…' : ''} · ${s.pulse(peakNames.length, available)}';
     }
     return NotificationContent(title: null, body: body, lines: lines, payload: payload);
+  }
+
+  /// "List only" with nothing to show: a title and a text that say why.
+  /// Null when the list has something to show.
+  NotificationContent? _emptyListState(
+    List<String> shoppingIds,
+    Set<String> inCartIds,
+    List<String> customItems,
+    int hiddenOtherItems,
+    int pickedOtherItems,
+  ) {
+    final products = shoppingIds.where(db.byId.containsKey).toList();
+    final pending = products.where((id) => !inCartIds.contains(id));
+    if (pending.isNotEmpty || customItems.any((t) => t.trim().isNotEmpty)) return null;
+    final picked = products.length + pickedOtherItems;
+    final (title, body) = hiddenOtherItems > 0
+        ? (s.notifOnlyOtherItemsTitle, s.notifOnlyOtherItemsBody)
+        : picked > 0
+        ? (s.notifAllPickedTitle, s.notifAllPickedBody)
+        : (s.notifEmptyListTitle, s.notifEmptyListBody);
+    return NotificationContent(title: title, body: body, lines: [body], payload: NotificationPayload.openShopping);
   }
 
   /// Products entering peak season in month [month]

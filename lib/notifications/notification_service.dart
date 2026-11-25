@@ -109,7 +109,9 @@ class NotificationService {
   Future<void> showShopping(NotificationContent c, S s) async {
     if (!isSupported) return;
     if (defaultTargetPlatform == TargetPlatform.iOS && await LiveActivity.instance.isSupported()) {
-      if (await LiveActivity.instance.show(c.lines)) {
+      // The Live Activity shows only lines: a title (the "nothing to show"
+      // texts) becomes a bold first line.
+      if (await LiveActivity.instance.show([if (c.title != null) '<b>${c.title}</b>', ...c.lines])) {
         await _plugin.cancel(id: shoppingId);
         return;
       }
