@@ -578,19 +578,12 @@ class _ShoppingCardState extends State<_ShoppingCard> {
                                       children: [
                                         SlotIcon('shopping.weight_calculator', size: 19, color: cs.primary),
                                         const SizedBox(width: 6),
-                                        TextWithHelp(
-                                          s.grossWeightCalc,
-                                          helpIds: const ['edible_portion'],
-                                          style: theme.textTheme.labelLarge?.copyWith(color: cs.primary),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        // the edible yield next to the title
+                                        // title and edible yield in the same style, one "?" at the end
                                         Expanded(
-                                          child: Text(
-                                            '· ${s.edibleYield(edible.round())}',
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                                          child: TextWithHelp(
+                                            '${s.grossWeightCalc} · ${s.edibleYield(edible.round())}',
+                                            helpIds: const ['edible_portion'],
+                                            style: theme.textTheme.labelLarge?.copyWith(color: cs.primary),
                                           ),
                                         ),
                                         AnimatedRotation(
@@ -659,7 +652,8 @@ class _GrossCalculatorState extends State<_GrossCalculator> {
     _edible.text = e == 0 ? '' : '$e';
   }
 
-  Widget _box(TextEditingController c, String label, ValueChanged<String> onChanged) => Expanded(
+  Widget _box(TextEditingController c, String label, ValueChanged<String> onChanged) => SizedBox(
+        width: 108,
         child: TextField(
           controller: c,
           textAlign: TextAlign.center,
@@ -685,6 +679,7 @@ class _GrossCalculatorState extends State<_GrossCalculator> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 8, 4, 4),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _box(_edible, s.netWeight, _fromEdible),
           Padding(
