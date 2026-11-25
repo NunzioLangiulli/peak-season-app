@@ -18,6 +18,7 @@ import '../widgets/pill_nav_bar.dart';
 import '../widgets/season_legend_sheet.dart';
 import '../widgets/seasonality_three_dots.dart';
 import '../theme/icon_service.dart';
+import '../widgets/app_snack_bar.dart';
 
 /// TAB 1 — "Peak Season".
 class HomeScreen extends StatelessWidget {
@@ -164,11 +165,7 @@ class ShoppingModeToggle extends StatelessWidget {
       final msg = !ok
           ? s.notifPermissionDenied
           : (!notif.isSupported ? s.notifUnsupported : (on ? s.shoppingModeActivated : null));
-      if (msg != null) {
-        messenger
-          ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(content: Text(msg)));
-      }
+      if (msg != null) showAppSnackBar(messenger, msg);
     }
 
     return Tooltip(

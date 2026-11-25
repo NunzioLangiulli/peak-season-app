@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
 import '../data/food_repository.dart';
+import '../data/update_checker.dart';
 import '../l10n/strings.dart';
 import '../models/app_enums.dart';
 import '../models/notification_prefs.dart';
@@ -325,6 +326,7 @@ class SettingsScreen extends StatelessWidget {
             leading: const SlotIcon('settings.app_version'),
             title: Text(s.appVersionLabel(appVersion)),
           ),
+          const _CheckUpdatesTile(),
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 20),
             leading: const SlotIcon('settings.database'),
@@ -487,6 +489,72 @@ class _ColorRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// "Check for Updates": asks GitHub for the latest release and, if it is
+/// newer than this app, offers to open its page (APK and .ipa are there).
+class _CheckUpdatesTile extends StatefulWidget {
+  const _CheckUpdatesTile();
+
+  @override
+  State<_CheckUpdatesTile> createState() => _CheckUpdatesTileState();
+}
+
+class _CheckUpdatesTileState extends State<_CheckUpdatesTile> {
+  bool _checking = false;
+
+  Future<void> _check() async {
+    final s = context.s;
+    setState(() => _checking = true);
+    LatestRelease? latest;
+    try {
+      latest = await fetchLatestRelease();
+    } catch (_) {
+      latest = null;
+    }
+    if (!mounted) return;
+    setState(() => _checking = false);
+    final release = latest;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: release != null && release.isNewer ? Text(s.updateAvailableTitle) : null,
+        content: Text(
+          release == null
+              ? s.updateError
+              : release.isNewer
+                  ? s.updateAvailableBody(release.version, appVersion)
+                  : s.upToDate(appVersion),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(s.close)),
+          if (release != null && release.isNewer)
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                launchUrl(Uri.parse(release.url), mode: LaunchMode.externalApplication);
+              },
+              child: Text(s.updateOpen),
+            ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = context.s;
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+      leading: const SlotIcon('settings.check_updates'),
+      title: Text(s.checkUpdates),
+      subtitle: Text(s.checkUpdatesSub),
+      trailing: _checking
+          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+          : null,
+      onTap: _checking ? null : _check,
     );
   }
 }

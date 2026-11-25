@@ -208,6 +208,14 @@ class S {
   };
   String get shoppingFullList => _c('settings.shopping_full_list');
   String get shoppingFullListSub => _c('settings.shopping_full_list_sub');
+  String get checkUpdates => _c('settings.check_updates');
+  String get checkUpdatesSub => _c('settings.check_updates_sub');
+  String get updateAvailableTitle => _c('settings.update_available_title');
+  String updateAvailableBody(String latest, String current) =>
+      _c('settings.update_available_body', {'latest': latest, 'current': current});
+  String upToDate(String current) => _c('settings.up_to_date', {'current': current});
+  String get updateError => _c('settings.update_error');
+  String get updateOpen => _c('settings.update_open');
   String get storageTipsWhen => _c('settings.storage_tips_when');
   String get storageTipsNow => _c('settings.storage_tips_now');
   String get storageTipsLater => _c('settings.storage_tips_later');

@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Per riprogrammare gli avvisi "picco di stagione" dopo il riavvio -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- Only for "Check for Updates" (Settings): asks GitHub for the latest release. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="Peak Season"
         android:name="${applicationName}"

@@ -147,6 +147,7 @@ class IconService {
     'detail.vitamins_minerals': 'material:science',
     'detail.curiosities': 'material:lightbulb',
     'settings.app_version': 'material:info',
+    'settings.check_updates': 'material:update',
     'settings.license': 'material:policy',
     'detail.section.allergens': 'material:warning',
     'detail.bioactive': 'svg:ui/bioactive',

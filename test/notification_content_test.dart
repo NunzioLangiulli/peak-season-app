@@ -35,8 +35,10 @@ void main() {
       listMode: ShoppingNotifListMode.highlight,
     );
     expect(c.payload, NotificationPayload.openShopping);
-    expect(c.lines.any((l) => l.contains('Lista')), isFalse);
-    expect(c.lines.join(), contains('<b>Mela</b>'));
+    // own first line for the list, products not repeated below
+    expect(c.lines.first, startsWith('<b>Lista della Spesa:</b> '));
+    expect(c.lines.first, contains('<b>Mela</b>'));
+    expect(c.lines.skip(1).join(), isNot(contains('Mela')));
   });
 
   test('order of the lines: peak, in season, end of season', () {
@@ -59,6 +61,21 @@ void main() {
     final c = b.shopping(month: 10, shoppingIds: [notPeak.id], listMode: ShoppingNotifListMode.highlight);
     expect(c.body, startsWith('<b>${notPeak.name.it}</b>'));
     expect(all.body, isNot(contains('<b>')));
+  });
+
+  test('names without brackets, products already picked up left out of the list line', () {
+    final bracketed = db.items.firstWhere((i) => i.name.it.contains('('));
+    final c = builder().shopping(
+      month: 10,
+      shoppingIds: [bracketed.id, 'mela_apple'],
+      listMode: ShoppingNotifListMode.highlight,
+      inCartIds: const {'mela_apple'},
+      fullList: true,
+    );
+    final all = [c.body, ...c.lines].join(' ');
+    expect(all, isNot(contains('(')));
+    expect(c.lines.first, contains(bracketed.name.it.split(' (').first));
+    expect(c.lines.first, isNot(contains('Mela')));
   });
 
   test('full list: no "+N" shortcut', () {

@@ -6,5 +6,6 @@
 /// the saved data compatible, major for breaking changes.
 const appVersion = '1.2.0';
 
-const appRepoUrl = 'https://github.com/NunzioLangiulli/peak-season-app';
+const appRepoSlug = 'NunzioLangiulli/peak-season-app';
+const appRepoUrl = 'https://github.com/$appRepoSlug';
 const databaseRepoUrl = 'https://github.com/NunzioLangiulli/peak-season-database';

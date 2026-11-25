@@ -10,6 +10,7 @@ import '../providers/settings_controller.dart';
 import '../screens/food_detail_screen.dart';
 import '../theme/app_backdrop.dart';
 import '../theme/icon_service.dart';
+import 'app_snack_bar.dart';
 
 /// Pulsante circolare semitrasparente sovrapposto all'immagine (📋 / ❤️).
 class OverlayActionButton extends StatelessWidget {
@@ -179,13 +180,11 @@ class FoodNavigation {
                   lib.toggleDisliked(item.id);
                   if (!wasDisliked) {
                     Navigator.pop(ctx);
-                    messenger.showSnackBar(SnackBar(
-                      content: Text(s.hiddenSnack(current.name.of(lang))),
-                      action: SnackBarAction(
-                        label: s.undo,
-                        onPressed: () => lib.toggleDisliked(item.id),
-                      ),
-                    ));
+                    showAppSnackBar(
+                      messenger,
+                      s.hiddenSnack(current.name.of(lang)),
+                      action: SnackBarAction(label: s.undo, onPressed: () => lib.toggleDisliked(item.id)),
+                    );
                   }
                 },
               ),

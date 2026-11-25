@@ -16,12 +16,14 @@ class AppTheme {
   /// Frosted veil of the dark theme (low-opacity white on black).
   /// Dark theme only: "highlight" pills (EU nutrition claims, PDO/PGI),
   /// green-grey with a green border instead of near-black.
+  /// Kept dim (2026-11-25): with the dark frosted cards a lighter pill
+  /// stood out too much; the green border keeps it recognisable.
   static Color? highlightPill(ColorScheme cs) => cs.brightness == Brightness.dark
-      ? Color.alphaBlend(cs.primary.withValues(alpha: 0.22), const Color(0xFF39413A))
+      ? Color.alphaBlend(cs.primary.withValues(alpha: 0.14), const Color(0xFF222722))
       : null;
 
   static BorderSide? highlightPillSide(ColorScheme cs) =>
-      cs.brightness == Brightness.dark ? BorderSide(color: cs.primary.withValues(alpha: 0.38)) : null;
+      cs.brightness == Brightness.dark ? BorderSide(color: cs.primary.withValues(alpha: 0.30)) : null;
 
   static Color satin(double opacity) => Colors.white.withValues(alpha: opacity);
 

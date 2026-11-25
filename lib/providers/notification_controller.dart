@@ -67,6 +67,7 @@ class NotificationController extends ChangeNotifier with WidgetsBindingObserver 
     shoppingIds: library.shoppingListIds,
     listMode: settings.shoppingListMode,
     fullList: settings.shoppingFullList,
+    inCartIds: library.inCartIds,
   );
 
   /// Turns shopping mode on/off. Returns false if the notification

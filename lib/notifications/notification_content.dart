@@ -50,14 +50,18 @@ class NotificationContentBuilder {
 
   static const _maxNamesPerLine = 6;
 
-  String _name(FoodItem i) => i.name.of(language);
+  /// Name for notifications: without the part in brackets ("Fagiolino
+  /// (Tegolina / Cornetto)" → "Fagiolino"), because space is short here.
+  /// Only in notifications: the app keeps the full name.
+  String _name(FoodItem i) => i.name.of(language).replaceAll(RegExp(r'\s*\([^)]*\)'), '').trim();
 
   /// Persistent "shopping mode" notification for month [month] (0-11).
   ///
-  /// No title (you already know the month) and no separate line for the list:
-  /// one line per season phase, with the label in bold.
-  /// - [ShoppingNotifListMode.highlight]: every in-season product, with
-  ///   those on the list in bold and first;
+  /// No title (you already know the month): one line per season phase, with
+  /// the label in bold.
+  /// - [ShoppingNotifListMode.highlight]: a first "Shopping List:" line with
+  ///   the products still to buy (in bold too, where Android shows it), then
+  ///   every other in-season product, without repeating those of the list;
   /// - [ShoppingNotifListMode.onlyList]: only the products on the list,
   ///   including the "out of season"/"no data" lines when needed.
   /// - [fullList]: every name written out, without the "+N" shortcut.
@@ -66,6 +70,7 @@ class NotificationContentBuilder {
     required List<String> shoppingIds,
     required ShoppingNotifListMode listMode,
     bool fullList = false,
+    Set<String> inCartIds = const {},
   }) {
     final list = shoppingIds.where(db.byId.containsKey).toList();
     final inList = list.toSet();
@@ -88,6 +93,15 @@ class NotificationContentBuilder {
       if (onlyList) ...[SeasonState.outOfSeason, SeasonState.notApplicable, SeasonState.unknown],
     ];
     final lines = <String>[];
+    // Own line for the list, first: the bold alone was not visible on every
+    // phone. Products already picked up are left out.
+    final toBuy = [
+      for (final e in entries)
+        if (inList.contains(e.item.id) && !inCartIds.contains(e.item.id)) e.item,
+    ];
+    if (!onlyList && toBuy.isNotEmpty) {
+      lines.add('<b>${s.lineList}:</b> ${toBuy.map((i) => '<b>${_name(i)}</b>').join(', ')}');
+    }
     final peakNames = <String>[];
     final listAvailable = <FoodItem>[];
     var available = 0;
@@ -98,11 +112,10 @@ class NotificationContentBuilder {
       ];
       if (st.isAvailable) available += items.length;
       if (st == SeasonState.peakSeason) peakNames.addAll(items.map(_name));
-      if (st.isAvailable) listAvailable.addAll(items.where((i) => inList.contains(i.id)));
-      if (items.isEmpty) continue;
-      // Products on the list go first, so they stay visible
-      // (partition, not sort: List.sort is not stable).
-      final ordered = [...items.where((i) => inList.contains(i.id)), ...items.where((i) => !inList.contains(i.id))];
+      if (st.isAvailable) listAvailable.addAll(items.where((i) => inList.contains(i.id) && !inCartIds.contains(i.id)));
+      // The list already has its own line: not repeated here.
+      final ordered = onlyList ? items : [...items.where((i) => !inList.contains(i.id))];
+      if (ordered.isEmpty) continue;
       final max = onlyList || fullList ? ordered.length : _maxNamesPerLine;
       final shown = ordered.take(max).map(fmt).join(', ');
       final more = ordered.length > max ? ' +${ordered.length - max}' : '';

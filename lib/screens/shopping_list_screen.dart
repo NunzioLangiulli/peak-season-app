@@ -19,6 +19,7 @@ import 'storage_tips_screen.dart';
 import '../theme/app_backdrop.dart';
 import '../theme/icon_service.dart';
 import '../widgets/detail_parts.dart';
+import '../widgets/app_snack_bar.dart';
 
 /// TAB 2 — Shopping List, designed for use at the counter/in the supermarket:
 /// "in the cart" tick, what to check, weight to buy, and at the end the
@@ -332,26 +333,27 @@ class _CustomItemCard extends StatelessWidget {
     final s = context.s;
     final lib = context.read<LibraryController>();
     final theme = Theme.of(context);
-    final cs = theme.colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Dismissible(
         key: ValueKey('dismiss-${item.id}'),
-        direction: DismissDirection.endToStart,
-        background: Container(
-          alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(right: 24),
-          decoration: BoxDecoration(color: cs.errorContainer, borderRadius: BorderRadius.circular(20)),
-          child: Icon(Icons.delete_outline_rounded, color: cs.onErrorContainer),
-        ),
+        // right = picked up (or back to buy), left = delete
+        direction: DismissDirection.horizontal,
+        background: SwipeDoneBackground(done: item.done),
+        secondaryBackground: const SwipeDeleteBackground(),
+        confirmDismiss: (dir) async {
+          if (dir == DismissDirection.endToStart) return true;
+          HapticFeedback.selectionClick();
+          lib.toggleCustomDone(item.id);
+          return false;
+        },
         onDismissed: (_) {
           final index = lib.removeCustomItem(item.id);
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(SnackBar(
-              content: Text(s.removedFromList),
-              action: SnackBarAction(label: s.undo, onPressed: () => lib.insertCustomItem(index, item)),
-            ));
+          showAppSnackBar(
+            ScaffoldMessenger.of(context),
+            s.removedFromList,
+            action: SnackBarAction(label: s.undo, onPressed: () => lib.insertCustomItem(index, item)),
+          );
         },
         child: AnimatedOpacity(
           duration: const Duration(milliseconds: 200),
@@ -464,22 +466,24 @@ class _ShoppingCardState extends State<_ShoppingCard> {
       padding: const EdgeInsets.only(bottom: 10),
       child: Dismissible(
         key: ValueKey('dismiss-${item.id}'),
-        direction: DismissDirection.endToStart,
-        background: Container(
-          alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(right: 24),
-          decoration: BoxDecoration(color: cs.errorContainer, borderRadius: BorderRadius.circular(20)),
-          child: Icon(Icons.delete_outline_rounded, color: cs.onErrorContainer),
-        ),
+        // right = picked up (or back to buy), left = delete
+        direction: DismissDirection.horizontal,
+        background: SwipeDoneBackground(done: done),
+        secondaryBackground: const SwipeDeleteBackground(),
+        confirmDismiss: (dir) async {
+          if (dir == DismissDirection.endToStart) return true;
+          HapticFeedback.selectionClick();
+          lib.toggleInCart(item.id);
+          return false; // the card stays, it only moves section
+        },
         onDismissed: (_) {
           final index = lib.shoppingListIds.indexOf(item.id);
           lib.removeFromShopping(item.id);
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(SnackBar(
-              content: Text(s.removedFromList),
-              action: SnackBarAction(label: s.undo, onPressed: () => lib.insertInShopping(index, item.id)),
-            ));
+          showAppSnackBar(
+            ScaffoldMessenger.of(context),
+            s.removedFromList,
+            action: SnackBarAction(label: s.undo, onPressed: () => lib.insertInShopping(index, item.id)),
+          );
         },
         child: AnimatedOpacity(
           duration: const Duration(milliseconds: 200),
@@ -659,4 +663,38 @@ class _GrossCalculatorState extends State<_GrossCalculator> {
 int grossWeight(double netGrams, double ediblePercent) {
   if (netGrams <= 0 || ediblePercent <= 0) return 0;
   return ((netGrams * 100 / ediblePercent) / 10).ceil() * 10;
+}
+
+/// Background shown while swiping a list card to the right: "picked up"
+/// (green tick), or "back to buy" on an item already picked up.
+class SwipeDoneBackground extends StatelessWidget {
+  const SwipeDoneBackground({super.key, required this.done});
+  final bool done;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      alignment: Alignment.centerLeft,
+      padding: const EdgeInsets.only(left: 24),
+      decoration: BoxDecoration(color: cs.primaryContainer, borderRadius: BorderRadius.circular(20)),
+      child: Icon(done ? Icons.remove_done_rounded : Icons.check_rounded, color: cs.onPrimaryContainer),
+    );
+  }
+}
+
+/// Background shown while swiping a list card to the left: delete.
+class SwipeDeleteBackground extends StatelessWidget {
+  const SwipeDeleteBackground({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.only(right: 24),
+      decoration: BoxDecoration(color: cs.errorContainer, borderRadius: BorderRadius.circular(20)),
+      child: Icon(Icons.delete_outline_rounded, color: cs.onErrorContainer),
+    );
+  }
 }
