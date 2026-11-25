@@ -256,6 +256,13 @@ class SettingsScreen extends StatelessWidget {
           ),
           SwitchListTile(
             contentPadding: const EdgeInsets.only(left: 72, right: 20),
+            title: Text(s.shoppingOtherItems),
+            subtitle: Text(s.shoppingOtherItemsSub),
+            value: st.shoppingShowOtherItems,
+            onChanged: st.setShoppingShowOtherItems,
+          ),
+          SwitchListTile(
+            contentPadding: const EdgeInsets.only(left: 72, right: 20),
             title: Text(s.shoppingFullList),
             subtitle: Text(s.shoppingFullListSub),
             value: st.shoppingFullList,

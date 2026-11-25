@@ -62,8 +62,12 @@ class NotificationContentBuilder {
   /// - [ShoppingNotifListMode.highlight]: a first "Shopping List:" line with
   ///   the products still to buy (in bold too, where Android shows it), then
   ///   every other in-season product, without repeating those of the list;
-  /// - [ShoppingNotifListMode.onlyList]: only the products on the list,
-  ///   including the "out of season"/"no data" lines when needed.
+  /// - [ShoppingNotifListMode.onlyList]: a single "Shopping List:" line with
+  ///   every product still to buy, in season or not, without season lines.
+  /// - [ShoppingNotifListMode.onlySeason]: only the in-season products, as
+  ///   if the list were empty.
+  /// - [customItems]: free-text "Other Items" of the list still to buy. They
+  ///   join the end of the "Shopping List" line.
   /// - [fullList]: every name written out, without the "+N" shortcut.
   NotificationContent shopping({
     required int month,
@@ -71,27 +75,26 @@ class NotificationContentBuilder {
     required ShoppingNotifListMode listMode,
     bool fullList = false,
     Set<String> inCartIds = const {},
+    List<String> customItems = const [],
   }) {
-    final list = shoppingIds.where(db.byId.containsKey).toList();
+    final seasonOnly = listMode == ShoppingNotifListMode.onlySeason;
+    final list = seasonOnly ? const <String>[] : shoppingIds.where(db.byId.containsKey).toList();
+    final custom = seasonOnly ? const <String>[] : [for (final t in customItems) if (t.trim().isNotEmpty) t.trim()];
     final inList = list.toSet();
-    final onlyList = list.isNotEmpty && listMode == ShoppingNotifListMode.onlyList;
+    final hasList = list.isNotEmpty || custom.isNotEmpty;
+    final onlyList = hasList && listMode == ShoppingNotifListMode.onlyList;
     final entries = <FoodEntry>[
       for (final item in db.items)
-        if (!disliked.contains(item.id) && (!onlyList || inList.contains(item.id)))
+        // With "list only", products already picked up leave the notification.
+        if (!disliked.contains(item.id) &&
+            (!onlyList || (inList.contains(item.id) && !inCartIds.contains(item.id))))
           FoodEntry(item, resolver.resolve(item)),
     ];
     HomeController.sortBySeason(entries, month, language);
-    final payload = list.isEmpty ? NotificationPayload.openSeason : NotificationPayload.openShopping;
+    final payload = hasList ? NotificationPayload.openShopping : NotificationPayload.openSeason;
 
-    String fmt(FoodItem i) => !onlyList && inList.contains(i.id) ? '<b>${_name(i)}</b>' : _name(i);
     // Order chosen by the owner: peak, in season, (early,) end of season.
-    final groups = [
-      SeasonState.peakSeason,
-      SeasonState.inSeason,
-      SeasonState.primizie,
-      SeasonState.endOfSeason,
-      if (onlyList) ...[SeasonState.outOfSeason, SeasonState.notApplicable, SeasonState.unknown],
-    ];
+    const groups = [SeasonState.peakSeason, SeasonState.inSeason, SeasonState.primizie, SeasonState.endOfSeason];
     final lines = <String>[];
     // Own line for the list, first: the bold alone was not visible on every
     // phone. Products already picked up are left out.
@@ -99,13 +102,16 @@ class NotificationContentBuilder {
       for (final e in entries)
         if (inList.contains(e.item.id) && !inCartIds.contains(e.item.id)) e.item,
     ];
-    if (!onlyList && toBuy.isNotEmpty) {
-      lines.add('<b>${s.lineList}:</b> ${toBuy.map((i) => '<b>${_name(i)}</b>').join(', ')}');
+    final listNames = [...toBuy.map(_name), ...custom];
+    if (listNames.isNotEmpty) {
+      // "List only": the whole notification is the list, so no bold names.
+      final names = onlyList ? listNames : listNames.map((n) => '<b>$n</b>');
+      lines.add('<b>${s.lineList}:</b> ${names.join(', ')}');
     }
     final peakNames = <String>[];
     final listAvailable = <FoodItem>[];
     var available = 0;
-    for (final st in groups) {
+    for (final st in onlyList ? const <SeasonState>[] : groups) {
       final items = [
         for (final e in entries)
           if (e.calendar.at(month) == st) e.item,
@@ -114,24 +120,28 @@ class NotificationContentBuilder {
       if (st == SeasonState.peakSeason) peakNames.addAll(items.map(_name));
       if (st.isAvailable) listAvailable.addAll(items.where((i) => inList.contains(i.id) && !inCartIds.contains(i.id)));
       // The list already has its own line: not repeated here.
-      final ordered = onlyList ? items : [...items.where((i) => !inList.contains(i.id))];
+      final ordered = [...items.where((i) => !inList.contains(i.id))];
       if (ordered.isEmpty) continue;
-      final max = onlyList || fullList ? ordered.length : _maxNamesPerLine;
-      final shown = ordered.take(max).map(fmt).join(', ');
+      final max = fullList ? ordered.length : _maxNamesPerLine;
+      final shown = ordered.take(max).map(_name).join(', ');
       final more = ordered.length > max ? ' +${ordered.length - max}' : '';
       lines.add('<b>${s.state(st)}:</b> $shown$more');
     }
     // Collapsed line (what the lock screen shows first): the products of the
     // list that are in season come first and in bold, then the peak ones.
     final String body;
-    if (onlyList) {
+    final pending = [for (final id in list) if (!inCartIds.contains(id)) id];
+    if (onlyList && pending.isEmpty) {
+      body = '${custom.take(3).join(', ')}${custom.length > 3 ? '…' : ''}';
+    } else if (onlyList) {
       body = s.notifListTitle(
-        list.where((id) => resolver.resolve(db.byId[id]!).at(month).isAvailable).length,
-        list.length,
+        pending.where((id) => resolver.resolve(db.byId[id]!).at(month).isAvailable).length,
+        pending.length,
       );
     } else {
       final lead = [
         ...listAvailable.map((i) => '<b>${_name(i)}</b>'),
+        ...custom.map((t) => '<b>$t</b>'),
         ...peakNames.where((n) => !listAvailable.any((i) => _name(i) == n)),
       ];
       body = lead.isEmpty

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/food_repository.dart';
 import '../l10n/strings.dart';
 import '../models/notification_prefs.dart';
+import '../notifications/live_activity.dart';
 import '../notifications/notification_content.dart';
 import '../notifications/notification_service.dart';
 import 'app_navigation.dart';
@@ -32,6 +34,11 @@ class NotificationController extends ChangeNotifier with WidgetsBindingObserver 
     settings.addListener(_onDataChanged);
     library.addListener(_onDataChanged);
     WidgetsBinding.instance.addObserver(this);
+    // iPhone: a tap on the Live Activity opens the shopping list.
+    LiveActivity.instance.onOpenShopping = () => openPayload(NotificationPayload.openShopping);
+    LiveActivity.instance.takePendingOpen().then((open) {
+      if (open) WidgetsBinding.instance.addPostFrameCallback((_) => openPayload(NotificationPayload.openShopping));
+    });
     _schedulePeakSoon();
     // At startup the saved state may be stale (notification swiped
     // away, app force-closed): the real notification is checked.
@@ -68,6 +75,7 @@ class NotificationController extends ChangeNotifier with WidgetsBindingObserver 
     listMode: settings.shoppingListMode,
     fullList: settings.shoppingFullList,
     inCartIds: library.inCartIds,
+    customItems: settings.shoppingShowOtherItems ? [for (final c in library.customItems) if (!c.done) c.text] : const [],
   );
 
   /// Turns shopping mode on/off. Returns false if the notification
@@ -81,6 +89,11 @@ class NotificationController extends ChangeNotifier with WidgetsBindingObserver 
       await _service.showShopping(shoppingContent(), _s);
     } else {
       await _service.cancelShopping();
+      // iPhone: the Live Activity has no "Close" button, so the storage tips
+      // follow when shopping mode is turned off in the app.
+      if (_service.isSupported && defaultTargetPlatform == TargetPlatform.iOS && settings.storageTipsAfterShopping) {
+        await showStorageTipsNotification(notificationPlugin(), _s, delayMinutes: settings.storageTipsDelay);
+      }
     }
     return true;
   }

@@ -20,6 +20,7 @@ class SettingsController extends ChangeNotifier {
     _peakNotifMode = PeakNotifMode.fromName(_prefs.getString(_kPeakNotif));
     _shoppingListMode = ShoppingNotifListMode.fromName(_prefs.getString(_kShoppingListMode));
     _shoppingFullList = _prefs.getBool(_kShoppingFullList) ?? false;
+    _shoppingShowOtherItems = _prefs.getBool(_kShoppingShowOtherItems) ?? true;
     _storageTipsAfterShopping = _prefs.getBool(PrefKeys.storageTipsAfterShopping) ?? true;
     _storageTipsDelay = _prefs.getInt(PrefKeys.storageTipsDelayMinutes) ?? 0;
     _frost = _prefs.getDouble(_kFrost) ?? 0.6;
@@ -40,6 +41,7 @@ class SettingsController extends ChangeNotifier {
   static const _kPeakNotif = 'peakNotifMode';
   static const _kShoppingListMode = 'shoppingNotifListMode';
   static const _kShoppingFullList = 'shoppingNotifFullList';
+  static const _kShoppingShowOtherItems = 'shoppingNotifOtherItems';
   static const _kFrost = 'frostStrength';
   static const _kPalette = 'backdropPalette';
   static const _kCustomTop = 'backdropCustomTop';
@@ -55,6 +57,9 @@ class SettingsController extends ChangeNotifier {
   late PeakNotifMode _peakNotifMode;
   late ShoppingNotifListMode _shoppingListMode;
   late bool _shoppingFullList;
+
+  /// Free-text "Other Items" of the list shown in the shopping notification.
+  late bool _shoppingShowOtherItems;
   late bool _storageTipsAfterShopping;
   late int _storageTipsDelay;
   late double _frost;
@@ -72,6 +77,7 @@ class SettingsController extends ChangeNotifier {
 
   /// Shopping notification with every product written out (no "+11").
   bool get shoppingFullList => _shoppingFullList;
+  bool get shoppingShowOtherItems => _shoppingShowOtherItems;
   bool get storageTipsAfterShopping => _storageTipsAfterShopping;
   int get storageTipsDelay => _storageTipsDelay;
 
@@ -132,6 +138,12 @@ class SettingsController extends ChangeNotifier {
   void setShoppingListMode(ShoppingNotifListMode v) {
     _shoppingListMode = v;
     _prefs.setString(_kShoppingListMode, v.name);
+    notifyListeners();
+  }
+
+  void setShoppingShowOtherItems(bool v) {
+    _shoppingShowOtherItems = v;
+    _prefs.setBool(_kShoppingShowOtherItems, v);
     notifyListeners();
   }
 

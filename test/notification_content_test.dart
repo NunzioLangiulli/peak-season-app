@@ -90,7 +90,7 @@ void main() {
     expect(full.lines.any((l) => RegExp(r' \+\d+$').hasMatch(l)), isFalse);
   });
 
-  test('list only: one line per product with its state', () {
+  test('list only: every product of the list, out of season too', () {
     final c = builder().shopping(
       month: 10,
       shoppingIds: const ['mela_apple', 'pomodoro_tomato'],
@@ -98,7 +98,7 @@ void main() {
     );
     final all = c.lines.join(' ');
     expect(all, contains('Mela'));
-    expect(all, contains('Pomodoro')); // out of season too, on its own line
+    expect(all, contains('Pomodoro')); // out of season too
     expect(all, isNot(contains('Bietola'))); // no products outside the list
     expect(c.body, startsWith('La Tua Lista:'));
   });
@@ -125,6 +125,76 @@ void main() {
             .every((i) => i.id == 'mela_apple'),
         isTrue,
       );
+    }
+  });
+
+  test('"Other Items" join the shopping list line, after the products', () {
+    final c = builder().shopping(
+      month: 10,
+      shoppingIds: const ['mela_apple'],
+      listMode: ShoppingNotifListMode.highlight,
+      customItems: const ['Latte', 'Pane'],
+    );
+    expect(c.lines.first, startsWith('<b>Lista della Spesa:</b> <b>Mela</b>, <b>Latte</b>, <b>Pane</b>'));
+    expect(c.payload, NotificationPayload.openShopping);
+  });
+
+  test('only "Other Items" on the list: they still get the list line and open the list', () {
+    final c = builder().shopping(
+      month: 10,
+      shoppingIds: const [],
+      listMode: ShoppingNotifListMode.highlight,
+      customItems: const ['Latte'],
+    );
+    expect(c.lines.first, '<b>Lista della Spesa:</b> <b>Latte</b>');
+    expect(c.payload, NotificationPayload.openShopping);
+  });
+
+  test('list only: one "Shopping List" line, no season lines, "Other Items" at the end', () {
+    final c = builder().shopping(
+      month: 10,
+      shoppingIds: const ['mela_apple', 'zucca_pumpkin'],
+      listMode: ShoppingNotifListMode.onlyList,
+      customItems: const ['Latte'],
+    );
+    expect(c.lines, hasLength(1));
+    expect(c.lines.single, startsWith('<b>Lista della Spesa:</b> '));
+    expect(c.lines.single, contains('Mela'));
+    expect(c.lines.single, contains('Zucca'));
+    expect(c.lines.single, endsWith(', Latte'));
+    final onlyCustom = builder().shopping(
+      month: 10,
+      shoppingIds: const [],
+      listMode: ShoppingNotifListMode.onlyList,
+      customItems: const ['Latte'],
+    );
+    expect(onlyCustom.lines, ['<b>Lista della Spesa:</b> Latte']);
+    expect(onlyCustom.body, 'Latte');
+  });
+
+  test('seasonal products only: the shopping list is ignored', () {
+    final c = builder().shopping(
+      month: 10,
+      shoppingIds: const ['mela_apple'],
+      listMode: ShoppingNotifListMode.onlySeason,
+      customItems: const ['Latte'],
+    );
+    final plain = builder().shopping(month: 10, shoppingIds: const [], listMode: ShoppingNotifListMode.highlight);
+    expect(c.lines, plain.lines);
+    expect(c.body, plain.body);
+    expect(c.payload, NotificationPayload.openSeason);
+  });
+
+  test('products picked up leave the notification, in every list mode', () {
+    for (final mode in [ShoppingNotifListMode.highlight, ShoppingNotifListMode.onlyList]) {
+      final c = builder().shopping(
+        month: 10,
+        shoppingIds: const ['mela_apple', 'zucca_pumpkin'],
+        listMode: mode,
+        inCartIds: const {'mela_apple'},
+      );
+      expect(c.lines.join(), isNot(contains('Mela')), reason: mode.name);
+      expect(c.lines.join(), contains('Zucca'), reason: mode.name);
     }
   });
 }

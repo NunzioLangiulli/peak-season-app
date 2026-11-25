@@ -334,7 +334,7 @@ class _CustomItemCard extends StatelessWidget {
     final lib = context.read<LibraryController>();
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 6),
       child: Dismissible(
         key: ValueKey('dismiss-${item.id}'),
         // right = picked up (or back to buy), left = delete
@@ -360,10 +360,11 @@ class _CustomItemCard extends StatelessWidget {
           opacity: item.done ? 0.6 : 1,
           child: Card(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(6, 4, 12, 4),
+              padding: const EdgeInsets.fromLTRB(6, 0, 12, 0),
               child: Row(
                 children: [
                   Checkbox(
+                    visualDensity: VisualDensity.compact,
                     value: item.done,
                     shape: const CircleBorder(),
                     onChanged: (_) {
@@ -441,13 +442,6 @@ class _ShoppingCard extends StatefulWidget {
 
 class _ShoppingCardState extends State<_ShoppingCard> {
   bool _calcOpen = false;
-  final _grams = TextEditingController(text: '500');
-
-  @override
-  void dispose() {
-    _grams.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -556,43 +550,67 @@ class _ShoppingCardState extends State<_ShoppingCard> {
                   if (!done && edible != null)
                     Padding(
                       padding: const EdgeInsets.only(left: 6, top: 6),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          InkWell(
-                            borderRadius: BorderRadius.circular(10),
-                            onTap: () => setState(() => _calcOpen = !_calcOpen),
-                            child: Padding(
+                      child: edible >= 100
+                          // all of it is edible: no calculator, just the yield
+                          ? Padding(
                               padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
                               child: Row(
                                 children: [
                                   SlotIcon('shopping.weight_calculator', size: 19, color: cs.primary),
                                   const SizedBox(width: 6),
-                                  Expanded(
-                                    child: TextWithHelp(
-                                      s.grossWeightCalc,
-                                      helpIds: const ['edible_portion'],
-                                      style: theme.textTheme.labelLarge?.copyWith(color: cs.primary),
-                                    ),
-                                  ),
-                                  AnimatedRotation(
-                                    turns: _calcOpen ? 0.5 : 0,
-                                    duration: const Duration(milliseconds: 200),
-                                    child: Icon(Icons.expand_more_rounded, color: cs.primary),
+                                  TextWithHelp(
+                                    s.edibleYield(100),
+                                    helpIds: const ['edible_portion'],
+                                    style: theme.textTheme.labelLarge?.copyWith(color: cs.primary),
                                   ),
                                 ],
                               ),
+                            )
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(10),
+                                  onTap: () => setState(() => _calcOpen = !_calcOpen),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                                    child: Row(
+                                      children: [
+                                        SlotIcon('shopping.weight_calculator', size: 19, color: cs.primary),
+                                        const SizedBox(width: 6),
+                                        TextWithHelp(
+                                          s.grossWeightCalc,
+                                          helpIds: const ['edible_portion'],
+                                          style: theme.textTheme.labelLarge?.copyWith(color: cs.primary),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        // the edible yield next to the title
+                                        Expanded(
+                                          child: Text(
+                                            '· ${s.edibleYield(edible.round())}',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                                          ),
+                                        ),
+                                        AnimatedRotation(
+                                          turns: _calcOpen ? 0.5 : 0,
+                                          duration: const Duration(milliseconds: 200),
+                                          child: Icon(Icons.expand_more_rounded, color: cs.primary),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                AnimatedSize(
+                                  duration: const Duration(milliseconds: 220),
+                                  alignment: Alignment.topCenter,
+                                  child: !_calcOpen
+                                      ? const SizedBox(width: double.infinity)
+                                      : _GrossCalculator(ediblePercent: edible.toDouble()),
+                                ),
+                              ],
                             ),
-                          ),
-                          AnimatedSize(
-                            duration: const Duration(milliseconds: 220),
-                            alignment: Alignment.topCenter,
-                            child: !_calcOpen
-                                ? const SizedBox(width: double.infinity)
-                                : _GrossCalculator(controller: _grams, ediblePercent: edible.toDouble()),
-                          ),
-                        ],
-                      ),
                     ),
                 ],
               ),
@@ -604,11 +622,12 @@ class _ShoppingCardState extends State<_ShoppingCard> {
   }
 }
 
-/// Desired net weight → gross weight to buy, with the edible yield
-/// (`nutrition_and_sustainability.edible_portion_percentage`).
+/// Edible part <-> weight to buy, with the edible yield
+/// (`nutrition_and_sustainability.edible_portion_percentage`). Both boxes can
+/// be edited: from what a recipe needs to what to buy or, with the product
+/// already bought, from its weight to the edible part.
 class _GrossCalculator extends StatefulWidget {
-  const _GrossCalculator({required this.controller, required this.ediblePercent});
-  final TextEditingController controller;
+  const _GrossCalculator({required this.ediblePercent});
   final double ediblePercent;
 
   @override
@@ -616,43 +635,63 @@ class _GrossCalculator extends StatefulWidget {
 }
 
 class _GrossCalculatorState extends State<_GrossCalculator> {
+  late final _edible = TextEditingController(text: '500');
+  late final _buy = TextEditingController(text: '${grossWeight(500, _pct)}');
+
+  double get _pct => widget.ediblePercent.clamp(1, 100).toDouble();
+
+  static double _num(String t) => double.tryParse(t.replaceAll(',', '.')) ?? 0;
+
+  @override
+  void dispose() {
+    _edible.dispose();
+    _buy.dispose();
+    super.dispose();
+  }
+
+  void _fromEdible(String t) {
+    final g = grossWeight(_num(t), _pct);
+    _buy.text = g == 0 ? '' : '$g';
+  }
+
+  void _fromBuy(String t) {
+    final e = edibleWeight(_num(t), _pct);
+    _edible.text = e == 0 ? '' : '$e';
+  }
+
+  Widget _box(TextEditingController c, String label, ValueChanged<String> onChanged) => Expanded(
+        child: TextField(
+          controller: c,
+          textAlign: TextAlign.center,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
+          onChanged: onChanged,
+          style: const TextStyle(fontWeight: FontWeight.w700),
+          decoration: InputDecoration(
+            // label on one line, centred over the value
+            label: Text(label, maxLines: 1, softWrap: false),
+            floatingLabelAlignment: FloatingLabelAlignment.center,
+            suffixText: 'g',
+            isDense: true,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     final s = context.s;
-    final theme = Theme.of(context);
-    final net = double.tryParse(widget.controller.text.replaceAll(',', '.')) ?? 0;
-    final pct = widget.ediblePercent.clamp(1, 100);
-    final gross = grossWeight(net, pct.toDouble());
+    final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.fromLTRB(4, 8, 4, 4),
       child: Row(
         children: [
-          SizedBox(
-            width: 110,
-            child: TextField(
-              controller: widget.controller,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
-              onChanged: (_) => setState(() {}),
-              decoration: InputDecoration(
-                labelText: s.netWeight,
-                suffixText: 'g',
-                isDense: true,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
+          _box(_edible, s.netWeight, _fromEdible),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Icon(Icons.swap_horiz_rounded, color: cs.primary),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text.rich(
-              TextSpan(children: [
-                TextSpan(text: '${s.grossToBuy} '),
-                TextSpan(text: '~$gross g', style: const TextStyle(fontWeight: FontWeight.w800)),
-                TextSpan(text: '\n${s.edibleYield(pct.round())}'),
-              ]),
-              style: theme.textTheme.bodyMedium,
-            ),
-          ),
+          _box(_buy, s.grossToBuy, _fromBuy),
         ],
       ),
     );
@@ -663,6 +702,12 @@ class _GrossCalculatorState extends State<_GrossCalculator> {
 int grossWeight(double netGrams, double ediblePercent) {
   if (netGrams <= 0 || ediblePercent <= 0) return 0;
   return ((netGrams * 100 / ediblePercent) / 10).ceil() * 10;
+}
+
+/// Edible part of a weight already bought (rounded to the gram).
+int edibleWeight(double grossGrams, double ediblePercent) {
+  if (grossGrams <= 0 || ediblePercent <= 0) return 0;
+  return (grossGrams * ediblePercent / 100).round();
 }
 
 /// Background shown while swiping a list card to the right: "picked up"

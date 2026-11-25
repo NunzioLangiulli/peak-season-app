@@ -53,8 +53,18 @@ jobs:
       - name: Run the tests
         run: flutter test
 
+      # The Live Activity widget extension is added to the Xcode project here,
+      # because without a Mac it cannot be added with Xcode (see the script).
+      - name: Add the Live Activity extension to the Xcode project
+        run: |
+          gem install xcodeproj --no-document
+          ruby ios/scripts/add_live_activity_target.rb
+
       - name: Build the iOS app (unsigned)
         run: flutter build ios --release --no-codesign
+
+      - name: Check that the Live Activity extension is inside the app
+        run: test -d build/ios/iphoneos/Runner.app/PlugIns/PeakSeasonLiveActivity.appex
 
       - name: Package the .ipa
         id: package

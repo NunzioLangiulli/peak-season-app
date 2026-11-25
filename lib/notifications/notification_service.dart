@@ -12,6 +12,7 @@ import '../l10n/copy_service.dart';
 import '../l10n/strings.dart';
 import '../models/app_enums.dart';
 import '../models/notification_prefs.dart';
+import 'live_activity.dart';
 import 'notification_content.dart';
 
 /// Local notifications (no server, they work offline):
@@ -102,10 +103,17 @@ class NotificationService {
   /// Shows or updates the persistent notification. On Android it is "ongoing": up to
   /// Android 13 it can be removed only with "Close", from Android 14 also with a swipe
   /// (the app notices through [isShoppingVisible]). iOS has no persistent
-  /// notifications: there it is a normal notification (a truly persistent one
-  /// would need a Live Activity, to be evaluated).
+  /// notifications: there it is a Live Activity (lock screen and Dynamic
+  /// Island, iOS 16.1+), or a normal notification where Live Activities are
+  /// not available or turned off.
   Future<void> showShopping(NotificationContent c, S s) async {
     if (!isSupported) return;
+    if (defaultTargetPlatform == TargetPlatform.iOS && await LiveActivity.instance.isSupported()) {
+      if (await LiveActivity.instance.show(c.lines)) {
+        await _plugin.cancel(id: shoppingId);
+        return;
+      }
+    }
     await _plugin.show(
       id: shoppingId,
       title: c.title,
@@ -147,13 +155,18 @@ class NotificationService {
 
   Future<void> cancelShopping() async {
     if (!isSupported) return;
+    await LiveActivity.instance.end();
     await _plugin.cancel(id: shoppingId);
   }
 
-  /// True if the persistent notification is still visible (Android). On iOS it
-  /// cannot be known: the saved state is used.
+  /// True if the persistent notification is still visible (Android) or the
+  /// Live Activity still running (iOS: the user can remove it from the lock
+  /// screen). Null when it cannot be known: the saved state is used.
   Future<bool?> isShoppingVisible() async {
-    if (!isSupported || defaultTargetPlatform != TargetPlatform.android) return null;
+    if (!isSupported) return null;
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      return await LiveActivity.instance.isSupported() ? LiveActivity.instance.isActive() : null;
+    }
     final active = await _plugin.getActiveNotifications();
     return active.any((n) => n.id == shoppingId);
   }

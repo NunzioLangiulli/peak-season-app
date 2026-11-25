@@ -67,9 +67,10 @@ A complete product page, split into blocks that you can **reorder, collapse or h
 - **Favourites**, **I Don't Eat It** (hidden from Home, but recoverable) and **Shopping list**.
 - The **Shopping list** shows whether each product is in season this month, and also takes free-text items (milk, bread…), listed below fruit and vegetables. Items already picked up go in a section that can be folded.
 
-### Notifications (Android; on iPhone, alerts only)
+### Notifications
 
-- **Shopping mode:** a persistent notification, visible on the lock screen too, with what is in season. If you have a shopping list, the notification highlights your items (in bold and first) or shows only those; a setting writes out the full list instead of "+N".
+- **Shopping mode:** a persistent notification, visible on the lock screen too, with your shopping list and what is in season. Choose between your list at the top followed by the seasonal produce, your list only, or the seasonal produce only. The list includes the *Other Items* you typed yourself (a setting hides them), and it updates by itself: items you add appear, items you tick as already picked disappear. A setting writes out the full list instead of "+N".
+- **On iPhone** (iOS 16.1 or later), shopping mode is a **Live Activity**: the list on the lock screen, only the app logo in the Dynamic Island (touch and hold it to see the list). A tap opens the shopping list. iOS has no "Close" button there: turning shopping mode off in the app ends it and sends the storage tips.
 - **After-shopping tips:** when you close shopping mode, a notification arrives, immediately or after a 0–60 minute delay, and opens **storage tips** for what you bought.
 - **"Peak Season" alerts:** on the first of every month at 9 a.m., what is entering its peak. Choose between no alerts, favourites only, or everything except what you don't eat.
 
@@ -113,7 +114,7 @@ The app is not on the App Store. Each release also includes an **unsigned** `.ip
 - the app **expires after 7 days** and must be signed again. AltStore and SideStore can refresh it automatically; with Sideloadly, install it again. Your favourites, lists and settings are kept;
 - at most **3 sideloaded apps** can be active at the same time.
 
-On iPhone, the persistent shopping-mode notification is not available, because iOS does not support it. Peak Season alerts and storage tips work as normal notifications.
+On iPhone, shopping mode is a Live Activity (iOS 16.1 or later; it can be turned off in *Settings → Peak Season → Live Activities*). iOS ends a Live Activity after at most 8 hours. Peak Season alerts and storage tips are normal notifications.
 
 ---
 
@@ -134,7 +135,7 @@ flutter run -d chrome     # quick browser preview (no notifications)
 flutter build apk --release
 ```
 
-The iOS build needs macOS and Xcode. The `.github/workflows/ios.yml` workflow builds it on a free GitHub macOS runner with `flutter build ios --release --no-codesign`, then packages it as an unsigned `.ipa`. It runs by hand from the **Actions** tab, where the `.ipa` is kept as a workflow artifact, and every time a release is published, when the `.ipa` is attached to the release.
+The iOS build needs macOS and Xcode. The `.github/workflows/ios.yml` workflow builds it on a free GitHub macOS runner with `flutter build ios --release --no-codesign`, then packages it as an unsigned `.ipa`. Before building, `ios/scripts/add_live_activity_target.rb` adds the Live Activity widget extension (`ios/PeakSeasonLiveActivity/`) to the Xcode project, because without a Mac it cannot be added with Xcode. The workflow runs by hand from the **Actions** tab, where the `.ipa` is kept as a workflow artifact, and every time a release is published, when the `.ipa` is attached to the release.
 
 ### Architecture
 

@@ -205,7 +205,10 @@ class S {
   String shoppingModeListMode(ShoppingNotifListMode m) => switch (m) {
     ShoppingNotifListMode.highlight => _c('settings.shopping_mode_list_mode.highlight'),
     ShoppingNotifListMode.onlyList => _c('settings.shopping_mode_list_mode.only_list'),
+    ShoppingNotifListMode.onlySeason => _c('settings.shopping_mode_list_mode.only_season'),
   };
+  String get shoppingOtherItems => _c('settings.shopping_other_items');
+  String get shoppingOtherItemsSub => _c('settings.shopping_other_items_sub');
   String get shoppingFullList => _c('settings.shopping_full_list');
   String get shoppingFullListSub => _c('settings.shopping_full_list_sub');
   String get checkUpdates => _c('settings.check_updates');

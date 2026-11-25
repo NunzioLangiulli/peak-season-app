@@ -15,11 +15,15 @@ enum PeakNotifMode {
 
 /// How to show the shopping list in the persistent "shopping mode" notification.
 enum ShoppingNotifListMode {
-  /// All in-season products, with those on the list highlighted.
+  /// The shopping list first, on its own line, then the other in-season
+  /// products. Stored name kept as "highlight" for saved settings.
   highlight,
 
   /// Only the products on the list, with their state.
-  onlyList;
+  onlyList,
+
+  /// Only the in-season products: the shopping list is ignored.
+  onlySeason;
 
   static ShoppingNotifListMode fromName(String? n) =>
       values.firstWhere((v) => v.name == n, orElse: () => ShoppingNotifListMode.highlight);
