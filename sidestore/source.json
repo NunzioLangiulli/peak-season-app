@@ -18,6 +18,14 @@
       "category": "lifestyle",
       "versions": [
         {
+          "version": "1.3.1",
+          "date": "2026-11-25T16:02:38Z",
+          "localizedDescription": "What's new in Peak Season 1.3.1: https://github.com/NunzioLangiulli/peak-season-app/releases/tag/v1.3.1",
+          "downloadURL": "https://github.com/NunzioLangiulli/peak-season-app/releases/download/v1.3.1/PeakSeason-1.3.1-unsigned.ipa",
+          "size": 108276931,
+          "minOSVersion": "15.0"
+        },
+        {
           "version": "1.3.0",
           "date": "2026-11-25T15:21:54Z",
           "localizedDescription": "What's new in Peak Season 1.3.0: https://github.com/NunzioLangiulli/peak-season-app/releases/tag/v1.3.0",
