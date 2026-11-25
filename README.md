@@ -2,7 +2,7 @@
 
 **Peak Season** tells you what is in season **in your area, this month**, when a product is at its **peak**, how to choose it, how to store it and what its environmental footprint is. The app works **fully offline** (only "Check for Updates" in Settings goes online, to ask GitHub for the latest release), in **English or Italian**, and is built on the *Peak Season – Seasonal Fruit & Vegetable Database* ([peak-season-database](https://github.com/NunzioLangiulli/peak-season-database)): 152 products, 51 official sources, no invented data.
 
-Flutter app for Android and iPhone (iPhone via sideloading, see below). **Current version: 1.3.0.** Versions follow semantic versioning (MAJOR.MINOR.PATCH).
+Flutter app for Android and iPhone (iPhone via sideloading, see below). **Current version: 1.3.1.** Versions follow semantic versioning (MAJOR.MINOR.PATCH).
 
 ---
 
@@ -99,20 +99,16 @@ The app does not need an internet connection, except to open the source links.
 
 ## Installing on iPhone (sideloading, free)
 
-The app is not on the App Store. Each release also includes an **unsigned** `.ipa` file, built automatically by GitHub Actions. You sign it with **your own free Apple ID** while installing it.
+The app is not on the App Store. You install it for free with **[SideStore](https://sidestore.io/)** and your own Apple Account: each release includes an **unsigned** `.ipa`, built automatically by GitHub Actions, that SideStore signs for you.
 
-1. Download `PeakSeason-<version>-unsigned.ipa` from the latest version in the **Releases** section.
-2. Install it with one of these tools:
-   - **[Sideloadly](https://sideloadly.io/)** (Windows or macOS): connect the iPhone with a cable, drag the `.ipa` into Sideloadly, enter your Apple ID and press *Start*.
-   - **[AltStore](https://altstore.io/)** or **[SideStore](https://sidestore.io/)**: install it once, then open the `.ipa` from the iPhone.
-3. On the iPhone:
-   - trust your Apple ID under *Settings → General → VPN & Device Management*;
-   - turn on *Settings → Privacy & Security → Developer Mode* (iOS 16 and later) and restart.
+- A computer (Windows or Mac) is needed **only once**, for the first setup.
+- You add the **Peak Season source** to SideStore once: new versions then appear by themselves in *SideStore → My Apps → Updates*, with no computer.
+- With a free Apple Account the app must be **refreshed once a week** in SideStore (one tap). Favourites, lists and settings are always kept.
 
-**Limits of a free Apple ID** (Apple rules, not app rules):
+👉 **[Step-by-step guide for iPhone](docs/install-iphone.md)** (what each piece does, what stays installed, updates, troubleshooting).
 
-- the app **expires after 7 days** and must be signed again. AltStore and SideStore can refresh it automatically; with Sideloadly, install it again. Your favourites, lists and settings are kept;
-- at most **3 sideloaded apps** can be active at the same time.
+Peak Season source for SideStore or AltStore:
+`https://raw.githubusercontent.com/NunzioLangiulli/peak-season-app/main/sidestore/source.json`
 
 On iPhone, shopping mode is a Live Activity (iOS 16.1 or later; it can be turned off in *Settings → Peak Season → Live Activities*). iOS ends a Live Activity after at most 8 hours. Peak Season alerts and storage tips are normal notifications.
 

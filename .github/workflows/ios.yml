@@ -4,7 +4,9 @@
 #
 # Runs:
 # - manually (Actions tab -> "iOS build" -> Run workflow): the .ipa is kept as a workflow artifact;
-# - when a release is published: the .ipa is also attached to that release, next to the APK.
+# - when a release is published: the .ipa is also attached to that release, next to the APK,
+#   and the SideStore source (sidestore/source.json on main) gets the new version, so
+#   SideStore users see it in My Apps -> Updates.
 name: iOS build
 
 on:
@@ -23,6 +25,10 @@ jobs:
   build-ios:
     runs-on: macos-latest
     timeout-minutes: 60
+    outputs:
+      ipa: ${{ steps.package.outputs.ipa }}
+      version: ${{ steps.package.outputs.version }}
+      size: ${{ steps.package.outputs.size }}
     defaults:
       run:
         working-directory: app
@@ -76,6 +82,8 @@ jobs:
           cp -R build/ios/iphoneos/Runner.app Payload/
           zip -qry "$IPA" Payload
           echo "ipa=$IPA" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "size=$(stat -f%z "$IPA")" >> "$GITHUB_OUTPUT"
           ls -lh "$IPA"
 
       - name: Keep the .ipa as a workflow artifact
@@ -90,3 +98,36 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload "${{ github.event.release.tag_name }}" "${{ steps.package.outputs.ipa }}" --clobber
+
+  # Adds the released version to the SideStore/AltStore source on main.
+  update-sidestore-source:
+    needs: build-ios
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - name: Add the new version to sidestore/source.json
+        run: >
+          python3 sidestore/update_source.py
+          --version "${{ needs.build-ios.outputs.version }}"
+          --tag "${{ github.event.release.tag_name }}"
+          --ipa "${{ needs.build-ios.outputs.ipa }}"
+          --size "${{ needs.build-ios.outputs.size }}"
+          --date "${{ github.event.release.published_at }}"
+
+      - name: Commit and push
+        run: |
+          if git diff --quiet; then
+            echo "The source already lists this version."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sidestore/source.json
+          git commit -m "SideStore source: Peak Season ${{ needs.build-ios.outputs.version }}"
+          git push origin HEAD:main

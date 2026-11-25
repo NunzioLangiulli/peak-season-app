@@ -34,12 +34,24 @@ class ShoppingListScreen extends StatelessWidget {
     final lib = context.watch<LibraryController>();
     final ids = lib.shoppingListIds.where(db.byId.containsKey).toList();
     // still to buy first, already in the cart at the bottom
-    final toBuy = [for (final id in ids) if (!lib.isInCart(id)) id];
-    final inCart = [for (final id in ids) if (lib.isInCart(id)) id];
+    final toBuy = [
+      for (final id in ids)
+        if (!lib.isInCart(id)) id,
+    ];
+    final inCart = [
+      for (final id in ids)
+        if (lib.isInCart(id)) id,
+    ];
     // Free-text items: always below fruit and vegetables (the produce
     // section is where every shopping trip starts).
-    final customToBuy = [for (final c in lib.customItems) if (!c.done) c];
-    final customDone = [for (final c in lib.customItems) if (c.done) c];
+    final customToBuy = [
+      for (final c in lib.customItems)
+        if (!c.done) c,
+    ];
+    final customDone = [
+      for (final c in lib.customItems)
+        if (c.done) c,
+    ];
     final isEmpty = ids.isEmpty && lib.customItems.isEmpty;
     final doneCount = inCart.length + customDone.length;
     final theme = Theme.of(context);
@@ -93,10 +105,7 @@ class ShoppingListScreen extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           const _AddFoodField(),
-          if (ids.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            const _StorageBanner(),
-          ],
+          if (ids.isNotEmpty) ...[const SizedBox(height: 12), const _StorageBanner()],
           const SizedBox(height: 12),
           if (isEmpty)
             Padding(
@@ -107,16 +116,18 @@ class ShoppingListScreen extends StatelessWidget {
                   const SizedBox(height: 4),
                   // The icon in the text is the same as on the cards ("add to list").
                   Text.rich(
-                    TextSpan(children: [
-                      for (final (i, part) in s.shoppingEmptyHint.split('{icon}').indexed) ...[
-                        if (i > 0)
-                          WidgetSpan(
-                            alignment: PlaceholderAlignment.middle,
-                            child: SlotIcon(FoodActionStyle.shoppingIcon, size: 18, color: theme.colorScheme.primary),
-                          ),
-                        TextSpan(text: part),
+                    TextSpan(
+                      children: [
+                        for (final (i, part) in s.shoppingEmptyHint.split('{icon}').indexed) ...[
+                          if (i > 0)
+                            WidgetSpan(
+                              alignment: PlaceholderAlignment.middle,
+                              child: SlotIcon(FoodActionStyle.shoppingIcon, size: 18, color: theme.colorScheme.primary),
+                            ),
+                          TextSpan(text: part),
+                        ],
                       ],
-                    ]),
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -220,14 +231,19 @@ class _AddFoodFieldState extends State<_AddFoodField> {
     final q = normalizeForSearch(_q);
     final results = q.isEmpty
         ? const <FoodItem>[]
-        : ([for (final i in db.items) if (!lib.isInShoppingList(i.id) && i.matches(q)) i]
-              // best name match first, as in the Home search ("riso" → Riso)
-              ..sort((x, y) {
-                final r = x.searchRank(q).compareTo(y.searchRank(q));
-                return r != 0 ? r : normalizeForSearch(x.name.of(lang)).compareTo(normalizeForSearch(y.name.of(lang)));
-              }))
-            .take(6)
-            .toList();
+        : ([
+                  for (final i in db.items)
+                    if (!lib.isInShoppingList(i.id) && i.matches(q)) i,
+                ]
+                // best name match first, as in the Home search ("riso" → Riso)
+                ..sort((x, y) {
+                  final r = x.searchRank(q).compareTo(y.searchRank(q));
+                  return r != 0
+                      ? r
+                      : normalizeForSearch(x.name.of(lang)).compareTo(normalizeForSearch(y.name.of(lang)));
+                }))
+              .take(6)
+              .toList();
     return Column(
       children: [
         TextField(
@@ -290,12 +306,20 @@ class _AddFoodFieldState extends State<_AddFoodField> {
             ),
             title: Text(s.addCustomItem(_q.trim())),
             // "{section}" = the "Other Items" header, in bold.
-            subtitle: Text.rich(TextSpan(children: [
-              for (final (i, part) in s.customItemSub.split('{section}').indexed) ...[
-                if (i > 0) TextSpan(text: s.otherItemsHeader, style: const TextStyle(fontWeight: FontWeight.w700)),
-                TextSpan(text: part),
-              ],
-            ])),
+            subtitle: Text.rich(
+              TextSpan(
+                children: [
+                  for (final (i, part) in s.customItemSub.split('{section}').indexed) ...[
+                    if (i > 0)
+                      TextSpan(
+                        text: s.otherItemsHeader,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                    TextSpan(text: part),
+                  ],
+                ],
+              ),
+            ),
             onTap: () => _addCustom(lib),
           ),
       ],
@@ -303,9 +327,9 @@ class _AddFoodFieldState extends State<_AddFoodField> {
   }
 
   void _clear() => setState(() {
-        _c.clear();
-        _q = '';
-      });
+    _c.clear();
+    _q = '';
+  });
 
   void _addCustom(LibraryController lib) {
     HapticFeedback.selectionClick();
@@ -415,10 +439,14 @@ class _StorageBanner extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(s.doneShoppingTitle,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(color: cs.onPrimaryContainer)),
-                    Text(s.doneShoppingSub,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.onPrimaryContainer)),
+                    Text(
+                      s.doneShoppingTitle,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(color: cs.onPrimaryContainer),
+                    ),
+                    Text(
+                      s.doneShoppingSub,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.onPrimaryContainer),
+                    ),
                   ],
                 ),
               ),
@@ -536,20 +564,23 @@ class _ShoppingCardState extends State<_ShoppingCard> {
                             children: [
                               SlotIcon('shopping.how_to_choose', size: 17, color: cs.onSecondaryContainer),
                               const SizedBox(width: 6),
-                              Text(s.whatToLookFor,
-                                  style: theme.textTheme.labelLarge?.copyWith(color: cs.onSecondaryContainer)),
+                              Text(
+                                s.whatToLookFor,
+                                style: theme.textTheme.labelLarge?.copyWith(color: cs.onSecondaryContainer),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 4),
-                          Text(item.shoppingListPreview.of(lang),
-                              style:
-                                  theme.textTheme.bodyMedium?.copyWith(color: cs.onSecondaryContainer, height: 1.35)),
+                          Text(
+                            item.shoppingListPreview.of(lang),
+                            style: theme.textTheme.bodyMedium?.copyWith(color: cs.onSecondaryContainer, height: 1.35),
+                          ),
                         ],
                       ),
                     ),
                   if (!done && edible != null)
                     Padding(
-                      padding: const EdgeInsets.only(left: 6, top: 6),
+                      padding: const EdgeInsets.only(left: 6, top: 12),
                       child: edible >= 100
                           // all of it is edible: no calculator, just the yield
                           ? Padding(
@@ -566,43 +597,53 @@ class _ShoppingCardState extends State<_ShoppingCard> {
                                 ],
                               ),
                             )
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                InkWell(
-                                  borderRadius: BorderRadius.circular(10),
-                                  onTap: () => setState(() => _calcOpen = !_calcOpen),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-                                    child: Row(
-                                      children: [
-                                        SlotIcon('shopping.weight_calculator', size: 19, color: cs.primary),
-                                        const SizedBox(width: 6),
-                                        // title and edible yield in the same style, one "?" at the end
-                                        Expanded(
-                                          child: TextWithHelp(
-                                            '${s.grossWeightCalc} · ${s.edibleYield(edible.round())}',
-                                            helpIds: const ['edible_portion'],
-                                            style: theme.textTheme.labelLarge?.copyWith(color: cs.primary),
+                          // open: title and boxes in one callout, since the
+                          // boxes belong to the title they expand from
+                          : AnimatedContainer(
+                              duration: const Duration(milliseconds: 220),
+                              padding: EdgeInsets.only(bottom: _calcOpen ? 8 : 0),
+                              decoration: BoxDecoration(
+                                color: _calcOpen ? cs.onSurface.withValues(alpha: 0.05) : Colors.transparent,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  InkWell(
+                                    borderRadius: BorderRadius.circular(10),
+                                    onTap: () => setState(() => _calcOpen = !_calcOpen),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                                      child: Row(
+                                        children: [
+                                          SlotIcon('shopping.weight_calculator', size: 19, color: cs.primary),
+                                          const SizedBox(width: 6),
+                                          // title and edible yield in the same style, one "?" at the end
+                                          Expanded(
+                                            child: TextWithHelp(
+                                              '${s.grossWeightCalc} · ${s.edibleYield(edible.round())}',
+                                              helpIds: const ['edible_portion'],
+                                              style: theme.textTheme.labelLarge?.copyWith(color: cs.primary),
+                                            ),
                                           ),
-                                        ),
-                                        AnimatedRotation(
-                                          turns: _calcOpen ? 0.5 : 0,
-                                          duration: const Duration(milliseconds: 200),
-                                          child: Icon(Icons.expand_more_rounded, color: cs.primary),
-                                        ),
-                                      ],
+                                          AnimatedRotation(
+                                            turns: _calcOpen ? 0.5 : 0,
+                                            duration: const Duration(milliseconds: 200),
+                                            child: Icon(Icons.expand_more_rounded, color: cs.primary),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                AnimatedSize(
-                                  duration: const Duration(milliseconds: 220),
-                                  alignment: Alignment.topCenter,
-                                  child: !_calcOpen
-                                      ? const SizedBox(width: double.infinity)
-                                      : _GrossCalculator(ediblePercent: edible.toDouble()),
-                                ),
-                              ],
+                                  AnimatedSize(
+                                    duration: const Duration(milliseconds: 220),
+                                    alignment: Alignment.topCenter,
+                                    child: !_calcOpen
+                                        ? const SizedBox(width: double.infinity)
+                                        : _GrossCalculator(ediblePercent: edible.toDouble()),
+                                  ),
+                                ],
+                              ),
                             ),
                     ),
                 ],
@@ -653,31 +694,31 @@ class _GrossCalculatorState extends State<_GrossCalculator> {
   }
 
   Widget _box(TextEditingController c, String label, ValueChanged<String> onChanged) => SizedBox(
-        width: 108,
-        child: TextField(
-          controller: c,
-          textAlign: TextAlign.center,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
-          onChanged: onChanged,
-          style: const TextStyle(fontWeight: FontWeight.w700),
-          decoration: InputDecoration(
-            // label on one line, centred over the value
-            label: Text(label, maxLines: 1, softWrap: false),
-            floatingLabelAlignment: FloatingLabelAlignment.center,
-            suffixText: 'g',
-            isDense: true,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        ),
-      );
+    width: 108,
+    child: TextField(
+      controller: c,
+      textAlign: TextAlign.center,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
+      onChanged: onChanged,
+      style: const TextStyle(fontWeight: FontWeight.w700),
+      decoration: InputDecoration(
+        // label on one line, centred over the value
+        label: Text(label, maxLines: 1, softWrap: false),
+        floatingLabelAlignment: FloatingLabelAlignment.center,
+        suffixText: 'g',
+        isDense: true,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
     final s = context.s;
     final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 8, 4, 4),
+      padding: const EdgeInsets.fromLTRB(4, 12, 4, 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
